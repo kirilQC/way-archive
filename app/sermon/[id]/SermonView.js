@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 
 function formatDate(d) {
@@ -16,6 +16,47 @@ function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function Verse({ reference, quote }) {
+  const [open, setOpen] = useState(false);
+  const [passage, setPassage] = useState(null); // { text, translation } | { error }
+
+  const toggle = async () => {
+    setOpen(!open);
+    if (passage || open) return;
+    try {
+      const res = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setPassage({
+        text: data.text?.trim().replace(/\s+/g, ' '),
+        translation: data.translation_name,
+      });
+    } catch {
+      setPassage({ error: true });
+    }
+  };
+
+  return (
+    <div className={`verse verse-click ${open ? 'open' : ''}`} onClick={toggle}>
+      <b>
+        {reference}
+        <span className="verse-caret">{open ? '−' : '+'}</span>
+      </b>
+      {open && passage?.text ? (
+        <span>
+          “{passage.text}” <i className="verse-trans">— {passage.translation}</i>
+        </span>
+      ) : open && passage?.error ? (
+        <span>{quote}</span>
+      ) : open ? (
+        <span>Loading passage…</span>
+      ) : (
+        <span>{quote}</span>
+      )}
+    </div>
+  );
 }
 
 export default function SermonView({ sermon: s }) {
@@ -39,7 +80,23 @@ export default function SermonView({ sermon: s }) {
       <div className="kicker">{formatDate(s.date)}</div>
       <h1>{s.title}</h1>
       <div className="meta">
-        {[s.speaker, minutes, (s.verses || [])[0]?.reference].filter(Boolean).join(' · ')}
+        {s.speaker && (
+          <>
+            <Link href={`/speakers/${encodeURIComponent(s.speaker)}`} className="meta-link">
+              {s.speaker}
+            </Link>
+            {' · '}
+          </>
+        )}
+        {[minutes, (s.verses || [])[0]?.reference].filter(Boolean).join(' · ')}
+        {s.series && (
+          <>
+            {' · '}
+            <Link href={`/series/${encodeURIComponent(s.series)}`} className="meta-link">
+              {s.series} series
+            </Link>
+          </>
+        )}
       </div>
 
       <div className="video-wrap">
@@ -88,10 +145,7 @@ export default function SermonView({ sermon: s }) {
             <>
               <h4>Key Scriptures</h4>
               {s.verses.map((v, i) => (
-                <div key={i} className="verse">
-                  <b>{v.reference}</b>
-                  <span>{v.quote}</span>
-                </div>
+                <Verse key={i} reference={v.reference} quote={v.quote} />
               ))}
             </>
           )}

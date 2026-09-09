@@ -1,5 +1,6 @@
 import { Fraunces, Inter } from 'next/font/google';
 import Link from 'next/link';
+import NavTabs from './components/NavTabs.js';
 import './globals.css';
 
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-serif', weight: ['500', '600'] });
@@ -18,11 +19,7 @@ export default function RootLayout({ children }) {
           <Link href="/" className="logo">
             way<span>.</span> <em>archive</em>
           </Link>
-          <nav>
-            <a href="https://www.youtube.com/@waynashville" target="_blank" rel="noreferrer">
-              YouTube ↗
-            </a>
-          </nav>
+          <NavTabs />
         </header>
         {children}
         <footer className="site-footer">Way Church, Nashville · auto-synced from YouTube daily</footer>
