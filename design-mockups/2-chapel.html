@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 2 — Chapel (Clean Minimal)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --white: #ffffff;
+    --ink: #17181c;
+    --gray: #6f7280;
+    --line: #e8e8ec;
+    --blue: #2f5fde;
+    --blue-soft: #eef2fd;
+    --green-soft: #e9f6ef;
+    --green: #1d7a4f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
+
+  header {
+    background: var(--white); border-bottom: 1px solid var(--line);
+    padding: 18px 40px; display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0;
+  }
+  .logo { font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  nav { display: flex; gap: 6px; }
+  nav a { color: var(--gray); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; }
+  nav a.active { background: var(--blue-soft); color: var(--blue); }
+
+  .hero { max-width: 1080px; margin: 0 auto; padding: 56px 24px 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; background: var(--green-soft); color: var(--green); font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 20px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .hero h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  .hero p { color: var(--gray); margin-top: 12px; font-size: 16px; max-width: 520px; line-height: 1.6; }
+
+  .toolbar { max-width: 1080px; margin: 32px auto 0; padding: 0 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 280px; background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; color: var(--gray); font-size: 14px; }
+  .select { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--ink); }
+  .select span { color: var(--gray); font-weight: 400; }
+
+  .chips { max-width: 1080px; margin: 16px auto 0; padding: 0 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; background: var(--white); border: 1px solid var(--line); color: var(--gray); cursor: pointer; }
+  .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  .grid { max-width: 1080px; margin: 32px auto 72px; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; cursor: pointer; transition: box-shadow .15s; }
+  .card:hover { box-shadow: 0 10px 30px rgba(23,24,28,0.08); }
+  .thumb { height: 150px; position: relative; background: linear-gradient(120deg,#3b6be0,#7fa3f2); display: flex; align-items: center; justify-content: center; }
+  .thumb.t2 { background: linear-gradient(120deg,#1d7a4f,#63c795); }
+  .thumb.t3 { background: linear-gradient(120deg,#8a4fd0,#c39bf0); }
+  .play { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; color: var(--ink); font-size: 14px; }
+  .duration { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.72); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+  .card-body { padding: 18px; }
+  .date { font-size: 12px; color: var(--gray); font-weight: 500; }
+  .card h3 { font-size: 17px; font-weight: 700; margin: 6px 0 8px; letter-spacing: -0.3px; }
+  .card p { font-size: 13.5px; color: var(--gray); line-height: 1.55; margin-bottom: 14px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+  .tag.book { background: var(--blue-soft); color: var(--blue); }
+  .tag.topic { background: #f3f3f6; color: var(--gray); }
+
+  .detail { background: var(--white); border-top: 1px solid var(--line); padding: 56px 24px 72px; }
+  .detail-inner { max-width: 980px; margin: 0 auto; }
+  .detail-label { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
+  .detail h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.7px; }
+  .meta { color: var(--gray); font-size: 14px; margin: 8px 0 28px; }
+  .video { height: 400px; background: var(--ink); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #9aa0ae; font-size: 14px; margin-bottom: 28px; }
+  .cols { display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; }
+  .panel { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .panel h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray); margin-bottom: 14px; }
+  .panel p { font-size: 15px; line-height: 1.7; color: #33353d; }
+  .verse { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .verse b { font-size: 13px; color: var(--blue); display: block; margin-bottom: 3px; }
+  .verse span { font-size: 13px; color: var(--gray); line-height: 1.5; }
+  .hl { display: flex; gap: 10px; font-size: 13.5px; color: #33353d; line-height: 1.55; margin-bottom: 10px; }
+  .hl-num { min-width: 20px; height: 20px; border-radius: 6px; background: var(--blue-soft); color: var(--blue); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  footer { text-align: center; padding: 32px; color: var(--gray); font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-mark">✝</div> Sermon Archive</div>
+  <nav>
+    <a class="active" href="#">All Sermons</a>
+    <a href="#">By Book</a>
+    <a href="#">By Topic</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="badge"><span class="dot"></span> Synced with YouTube · Last checked Sun 8:14 PM</div>
+  <h1>Every sermon.<br>Searchable forever.</h1>
+  <p>Automatically pulled from the church's YouTube channel every Sunday — transcribed, summarized, and tagged by scripture and topic.</p>
+</section>
+
+<div class="toolbar">
+  <div class="search">⌕ &nbsp;Search titles, verses, topics, or transcript…</div>
+  <div class="select">Book: <span>All ▾</span></div>
+  <div class="select">Year: <span>2026 ▾</span></div>
+</div>
+
+<div class="chips">
+  <button class="chip on">All</button>
+  <button class="chip">Faith</button>
+  <button class="chip">Money</button>
+  <button class="chip">Marriage</button>
+  <button class="chip">Relationships</button>
+  <button class="chip">Prayer</button>
+  <button class="chip">Forgiveness</button>
+  <button class="chip">Suffering</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="thumb"><div class="play">▶</div><div class="duration">42:18</div></div>
+    <div class="card-body">
+      <div class="date">Sun, Sep 6 2026 · Pastor D. Reyes</div>
+      <h3>The Cost of Following</h3>
+      <p>What Jesus meant when He said to count the cost — and why half-hearted discipleship costs more.</p>
+      <div class="tags"><span class="tag book">Luke 14</span><span class="tag topic">Discipleship</span><span class="tag topic">Sacrifice</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t2"><div class="play">▶</div><div class="duration">38:05</div></div>
+    <div class="card-body">
+      <div class="date">Sun, Aug 30 2026 · Pastor D. Reyes</div>
+      <h3>Two Masters</h3>
+      <p>A sermon on money, generosity, and why your budget is a theological document.</p>
+      <div class="tags"><span class="tag book">Matthew 6</span><span class="tag topic">Money</span><span class="tag topic">Generosity</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t3"><div class="play">▶</div><div class="duration">45:51</div></div>
+    <div class="card-body">
+      <div class="date">Sun, Aug 23 2026 · Pastor D. Reyes</div>
+      <h3>As Christ Loved the Church</h3>
+      <p>Marriage as a living picture of covenant — submission, sacrifice, and mutual honor.</p>
+      <div class="tags"><span class="tag book">Ephesians 5</span><span class="tag topic">Marriage</span><span class="tag topic">Relationships</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="detail">
+  <div class="detail-inner">
+    <div class="detail-label">Sermon Detail Page</div>
+    <h2>The Cost of Following</h2>
+    <div class="meta">Sunday, September 6, 2026 · 42 min · Luke 14:25–33</div>
+    <div class="video">▶ &nbsp;Embedded YouTube player</div>
+    <div class="cols">
+      <div class="panel">
+        <h4>AI Summary</h4>
+        <p>Jesus turns to the large crowds following Him and delivers one of His hardest teachings: no one builds a tower without first counting the cost. This sermon walks through Luke 14, arguing that casual Christianity is a contradiction — following Christ reorders our loyalties to family, possessions, and even our own lives. The message closes with three practical costs the congregation is invited to count this week: time, treasure, and reputation.</p>
+        <h4 style="margin-top:24px;">Highlights & Notes</h4>
+        <div class="hl"><div class="hl-num">1</div> Discipleship is not an add-on to life — it is a reordering of it.</div>
+        <div class="hl"><div class="hl-num">2</div> "The tower half-built is the testimony half-told."</div>
+        <div class="hl"><div class="hl-num">3</div> Three costs to count this week: time, treasure, reputation.</div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom: 16px;">
+          <h4>Scriptures Referenced</h4>
+          <div class="verse"><b>Luke 14:28</b><span>"For which of you, desiring to build a tower, does not first sit down and count the cost…"</span></div>
+          <div class="verse"><b>Luke 9:23</b><span>"If anyone would come after me, let him deny himself…"</span></div>
+          <div class="verse"><b>Philippians 3:8</b><span>"I count everything as loss because of the surpassing worth…"</span></div>
+        </div>
+        <div class="panel">
+          <h4>Topics</h4>
+          <div class="tags"><span class="tag book">Discipleship</span><span class="tag book">Sacrifice</span><span class="tag topic">Commitment</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>Auto-updated every Sunday evening · Built for the archive, not the algorithm</footer>
+
+</body>
+</html>

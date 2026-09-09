@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 3 — Vesper (Dark Modern)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --panel: #16181f;
+    --panel-2: #1c1f28;
+    --line: #262a35;
+    --text: #eceef2;
+    --muted: #8b90a0;
+    --amber: #e8b04b;
+    --amber-dim: rgba(232,176,75,0.14);
+    --violet: #8f7df0;
+    --violet-dim: rgba(143,125,240,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  header {
+    padding: 20px 44px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .logo { font-family: 'Fraunces', serif; font-size: 21px; font-weight: 600; }
+  .logo span { color: var(--amber); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 500; margin-left: 28px; }
+  nav a.active { color: var(--text); }
+
+  .hero { max-width: 1100px; margin: 0 auto; padding: 68px 24px 20px; position: relative; }
+  .glow { position: absolute; top: -60px; left: 20%; width: 480px; height: 280px; background: radial-gradient(ellipse, rgba(232,176,75,0.13), transparent 70%); pointer-events: none; }
+  .kicker { color: var(--amber); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 2.5px; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 500; margin: 14px 0 10px; line-height: 1.08; }
+  .hero h1 em { color: var(--amber); font-style: italic; }
+  .hero p { color: var(--muted); font-size: 15.5px; max-width: 500px; line-height: 1.65; }
+  .stats { display: flex; gap: 40px; margin-top: 32px; }
+  .stat b { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; display: block; }
+  .stat span { color: var(--muted); font-size: 12.5px; }
+
+  .toolbar { max-width: 1100px; margin: 36px auto 0; padding: 0 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 260px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 13px 18px; color: var(--muted); font-size: 14px; }
+  .chip { background: var(--panel); border: 1px solid var(--line); color: var(--muted); border-radius: 12px; padding: 13px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+  .chip.on { background: var(--amber-dim); border-color: rgba(232,176,75,0.4); color: var(--amber); }
+
+  .grid { max-width: 1100px; margin: 36px auto 72px; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s; }
+  .card:hover { border-color: rgba(232,176,75,0.45); transform: translateY(-2px); }
+  .thumb { height: 152px; position: relative; background: linear-gradient(135deg,#2a2416,#4d3c15); display: flex; align-items: center; justify-content: center; }
+  .thumb.t2 { background: linear-gradient(135deg,#1a2530,#1e4a5f); }
+  .thumb.t3 { background: linear-gradient(135deg,#241a30,#45306b); }
+  .play { width: 44px; height: 44px; border-radius: 50%; background: rgba(14,15,19,0.75); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 14px; backdrop-filter: blur(4px); }
+  .duration { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); font-size: 11px; padding: 3px 8px; border-radius: 6px; color: #cfd2da; }
+  .card-body { padding: 18px 20px 20px; }
+  .date { font-size: 12px; color: var(--muted); }
+  .card h3 { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; margin: 7px 0 9px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+  .tag.book { background: var(--amber-dim); color: var(--amber); }
+  .tag.topic { background: var(--violet-dim); color: var(--violet); }
+
+  .detail { border-top: 1px solid var(--line); background: linear-gradient(180deg, #101218, var(--bg)); padding: 60px 24px 80px; }
+  .detail-inner { max-width: 960px; margin: 0 auto; }
+  .detail h2 { font-family: 'Fraunces', serif; font-size: 38px; font-weight: 500; margin: 12px 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .video { height: 400px; background: #000; border: 1px solid var(--line); border-radius: 18px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13.5px; margin-bottom: 24px; }
+  .cols { display: grid; grid-template-columns: 1.8fr 1fr; gap: 18px; }
+  .panel-box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+  .panel-box h4 { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--amber); margin-bottom: 14px; }
+  .panel-box p { font-size: 14.5px; line-height: 1.75; color: #c6c9d2; }
+  .verse { background: var(--panel-2); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; border-left: 2px solid var(--amber); }
+  .verse b { font-size: 12.5px; color: var(--amber); display: block; margin-bottom: 3px; }
+  .verse span { font-size: 12.5px; color: var(--muted); line-height: 1.5; font-style: italic; }
+  .hl { display: flex; gap: 10px; font-size: 13.5px; color: #c6c9d2; line-height: 1.6; margin-bottom: 11px; }
+  .hl::before { content: "—"; color: var(--amber); }
+  footer { text-align: center; padding: 34px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">vesper<span>.</span></div>
+  <nav>
+    <a class="active" href="#">Archive</a>
+    <a href="#">Scripture Index</a>
+    <a href="#">Topics</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="glow"></div>
+  <div class="kicker">Sermon Archive · Auto-synced</div>
+  <h1>Sunday's word,<br><em>every day after.</em></h1>
+  <p>Each week's sermon is pulled from YouTube, transcribed, and distilled into summaries, scripture references, and topics you can actually search.</p>
+  <div class="stats">
+    <div class="stat"><b>142</b><span>sermons archived</span></div>
+    <div class="stat"><b>38</b><span>books of the Bible covered</span></div>
+    <div class="stat"><b>24</b><span>topics tagged</span></div>
+  </div>
+</section>
+
+<div class="toolbar">
+  <div class="search">⌕ &nbsp;Search sermons, verses, topics…</div>
+  <button class="chip on">All</button>
+  <button class="chip">Money</button>
+  <button class="chip">Marriage</button>
+  <button class="chip">Faith</button>
+  <button class="chip">Forgiveness</button>
+  <button class="chip">Book ▾</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="thumb"><div class="play">▶</div><div class="duration">42:18</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Sep 6, 2026</div>
+      <h3>The Cost of Following</h3>
+      <p>What Jesus meant when He said to count the cost — and why half-hearted discipleship costs more.</p>
+      <div class="tags"><span class="tag book">Luke 14:25–33</span><span class="tag topic">Discipleship</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t2"><div class="play">▶</div><div class="duration">38:05</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Aug 30, 2026</div>
+      <h3>Two Masters</h3>
+      <p>A sermon on money, generosity, and why your budget is a theological document.</p>
+      <div class="tags"><span class="tag book">Matthew 6:19–24</span><span class="tag topic">Money</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t3"><div class="play">▶</div><div class="duration">45:51</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Aug 23, 2026</div>
+      <h3>As Christ Loved the Church</h3>
+      <p>Marriage as a living picture of covenant — submission, sacrifice, and mutual honor.</p>
+      <div class="tags"><span class="tag book">Ephesians 5:21–33</span><span class="tag topic">Marriage</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="detail">
+  <div class="detail-inner">
+    <div class="kicker">Sermon Detail Page</div>
+    <h2>The Cost of Following</h2>
+    <div class="meta">Sunday, September 6, 2026 · Pastor Daniel Reyes · 42 min</div>
+    <div class="video">▶ &nbsp;Embedded YouTube player</div>
+    <div class="cols">
+      <div class="panel-box">
+        <h4>Summary</h4>
+        <p>Jesus turns to the large crowds following Him and delivers one of His hardest teachings: no one builds a tower without first counting the cost. This sermon walks through Luke 14, arguing that casual Christianity is a contradiction — following Christ reorders our loyalties to family, possessions, and even our own lives. The message closes with three practical costs to count this week: time, treasure, and reputation.</p>
+        <h4 style="margin-top:26px;">Highlights</h4>
+        <div class="hl">Discipleship is not an add-on to life — it is a reordering of it.</div>
+        <div class="hl">"The tower half-built is the testimony half-told."</div>
+        <div class="hl">Three costs to count: time, treasure, reputation.</div>
+      </div>
+      <div class="panel-box">
+        <h4>Key Scriptures</h4>
+        <div class="verse"><b>Luke 14:28</b><span>"For which of you, desiring to build a tower, does not first sit down and count the cost…"</span></div>
+        <div class="verse"><b>Luke 9:23</b><span>"If anyone would come after me, let him deny himself…"</span></div>
+        <div class="verse"><b>Philippians 3:8</b><span>"I count everything as loss because of the surpassing worth…"</span></div>
+        <h4 style="margin-top:24px;">Topics</h4>
+        <div class="tags"><span class="tag topic">Discipleship</span><span class="tag topic">Sacrifice</span><span class="tag topic">Commitment</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>vesper · checked YouTube 14 minutes ago · next check Sunday 6:00 PM</footer>
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 1 — Manuscript (Warm Editorial)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6ee;
+    --paper: #f3ecdd;
+    --ink: #2b2419;
+    --ink-soft: #6b6152;
+    --gold: #b08d3e;
+    --gold-soft: #e8dcc0;
+    --rust: #9a4a2e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; }
+  .serif { font-family: 'Cormorant Garamond', serif; }
+
+  header {
+    border-bottom: 1px solid var(--gold-soft);
+    padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--cream);
+  }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; letter-spacing: 0.5px; }
+  .logo span { color: var(--gold); font-style: italic; }
+  nav a { color: var(--ink-soft); text-decoration: none; font-size: 14px; margin-left: 32px; letter-spacing: 0.3px; }
+  nav a.active { color: var(--ink); border-bottom: 2px solid var(--gold); padding-bottom: 4px; }
+
+  .hero { text-align: center; padding: 72px 24px 48px; }
+  .hero .eyebrow { text-transform: uppercase; letter-spacing: 3px; font-size: 12px; color: var(--gold); font-weight: 600; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 500; margin: 16px 0 12px; }
+  .hero h1 em { color: var(--rust); }
+  .hero p { color: var(--ink-soft); font-size: 16px; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+  .search-row { display: flex; justify-content: center; margin: 36px 0 12px; }
+  .search {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--gold-soft); border-radius: 999px;
+    padding: 14px 24px; width: 520px; color: var(--ink-soft); font-size: 15px;
+    box-shadow: 0 2px 12px rgba(176,141,62,0.08);
+  }
+
+  .filters { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 20px 48px 8px; }
+  .chip {
+    border: 1px solid var(--gold-soft); background: transparent; border-radius: 999px;
+    padding: 8px 18px; font-size: 13px; color: var(--ink-soft); cursor: pointer;
+  }
+  .chip.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  .section-label {
+    max-width: 1120px; margin: 48px auto 20px; padding: 0 24px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .section-label h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; }
+  .section-label span { color: var(--ink-soft); font-size: 13px; }
+
+  .grid { max-width: 1120px; margin: 0 auto 80px; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .card {
+    background: #fff; border: 1px solid var(--gold-soft); border-radius: 6px; overflow: hidden;
+    transition: transform .15s ease; cursor: pointer;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(43,36,25,0.1); }
+  .thumb { height: 160px; position: relative; background: linear-gradient(135deg, #d8c9a8, #b08d3e); display:flex; align-items:center; justify-content:center; }
+  .thumb.t2 { background: linear-gradient(135deg, #c9b8a0, #9a4a2e); }
+  .thumb.t3 { background: linear-gradient(135deg, #b8bfa8, #5e6b4a); }
+  .play { width: 46px; height: 46px; border-radius: 50%; background: rgba(250,246,238,0.92); display:flex; align-items:center; justify-content:center; font-size: 15px; color: var(--ink); }
+  .duration { position:absolute; bottom:10px; right:10px; background: rgba(43,36,25,0.8); color:#fff; font-size:11px; padding:3px 8px; border-radius:4px; }
+  .card-body { padding: 20px 22px 22px; }
+  .date { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); font-weight: 600; }
+  .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 600; margin: 8px 0 10px; line-height: 1.2; }
+  .card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 14px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; padding: 4px 10px; border-radius: 3px; background: var(--paper); color: var(--ink-soft); }
+  .tag.book { background: #f0e4e0; color: var(--rust); font-weight: 600; }
+
+  .detail-preview { background: var(--paper); border-top: 1px solid var(--gold-soft); padding: 64px 24px; }
+  .detail-inner { max-width: 880px; margin: 0 auto; }
+  .detail-inner .eyebrow { text-transform: uppercase; letter-spacing: 3px; font-size: 11px; color: var(--gold); font-weight: 600; }
+  .detail-inner h2 { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 500; margin: 12px 0 8px; }
+  .meta { color: var(--ink-soft); font-size: 14px; margin-bottom: 28px; }
+  .video-placeholder { height: 380px; background: #2b2419; border-radius: 8px; display:flex; align-items:center; justify-content:center; color:#faf6ee; margin-bottom: 36px; font-size: 14px; letter-spacing: 1px; }
+  .two-col { display: grid; grid-template-columns: 1.7fr 1fr; gap: 40px; }
+  .summary h4, .side h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 12px; font-weight: 600; }
+  .summary p { font-family: 'Cormorant Garamond', serif; font-size: 19px; line-height: 1.65; color: var(--ink); }
+  .verse-card { background: #fff; border-left: 3px solid var(--gold); padding: 14px 18px; margin-bottom: 10px; border-radius: 0 6px 6px 0; }
+  .verse-card b { display: block; font-size: 13px; color: var(--rust); margin-bottom: 4px; }
+  .verse-card span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: var(--ink-soft); }
+  .hl { display: flex; gap: 10px; margin-bottom: 12px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .hl::before { content: "✦"; color: var(--gold); }
+  footer { text-align: center; padding: 36px; color: var(--ink-soft); font-size: 12px; letter-spacing: 1px; border-top: 1px solid var(--gold-soft); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Grace <span>Archive</span></div>
+  <nav>
+    <a class="active" href="#">Sermons</a>
+    <a href="#">Books of the Bible</a>
+    <a href="#">Topics</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Every Sunday · Automatically Archived</div>
+  <h1>The Word, <em>kept</em>.</h1>
+  <p>Every sermon transcribed, summarized, and tagged by scripture and topic — so nothing preached is ever lost.</p>
+</section>
+
+<div class="search-row">
+  <div class="search">⌕&nbsp; Search sermons, verses, or topics…</div>
+</div>
+
+<div class="filters">
+  <button class="chip on">All</button>
+  <button class="chip">Romans</button>
+  <button class="chip">Psalms</button>
+  <button class="chip">Matthew</button>
+  <button class="chip">Marriage</button>
+  <button class="chip">Money</button>
+  <button class="chip">Forgiveness</button>
+  <button class="chip">Faith</button>
+</div>
+
+<div class="section-label">
+  <h2>Recent Sermons</h2>
+  <span>142 sermons archived</span>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="thumb"><div class="play">▶</div><div class="duration">42:18</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Sep 6, 2026</div>
+      <h3>The Cost of Following</h3>
+      <p>What Jesus meant when He said to count the cost — and why half-hearted discipleship costs more.</p>
+      <div class="tags"><span class="tag book">Luke 14:25–33</span><span class="tag">Discipleship</span><span class="tag">Sacrifice</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t2"><div class="play">▶</div><div class="duration">38:05</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Aug 30, 2026</div>
+      <h3>Two Masters</h3>
+      <p>A sermon on money, generosity, and why your budget is a theological document.</p>
+      <div class="tags"><span class="tag book">Matthew 6:19–24</span><span class="tag">Money</span><span class="tag">Generosity</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="thumb t3"><div class="play">▶</div><div class="duration">45:51</div></div>
+    <div class="card-body">
+      <div class="date">Sunday · Aug 23, 2026</div>
+      <h3>As Christ Loved the Church</h3>
+      <p>Marriage as a living picture of covenant — submission, sacrifice, and mutual honor.</p>
+      <div class="tags"><span class="tag book">Ephesians 5:21–33</span><span class="tag">Marriage</span><span class="tag">Relationships</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="detail-preview">
+  <div class="detail-inner">
+    <div class="eyebrow">Sermon Detail Page</div>
+    <h2>The Cost of Following</h2>
+    <div class="meta">Sunday, September 6, 2026 · Pastor Daniel Reyes · 42 min</div>
+    <div class="video-placeholder">▶ &nbsp;EMBEDDED YOUTUBE PLAYER</div>
+    <div class="two-col">
+      <div class="summary">
+        <h4>Summary</h4>
+        <p>Jesus turns to the large crowds following Him and delivers one of His hardest teachings: no one builds a tower without first counting the cost. This sermon walks through Luke 14, arguing that casual Christianity is a contradiction — that following Christ reorders our loyalties to family, possessions, and even our own lives. The pastor closes with three practical costs the congregation is invited to count this week.</p>
+      </div>
+      <div class="side">
+        <h4>Key Scriptures</h4>
+        <div class="verse-card"><b>Luke 14:28</b><span>"For which of you, desiring to build a tower, does not first sit down and count the cost…"</span></div>
+        <div class="verse-card"><b>Luke 9:23</b><span>"If anyone would come after me, let him deny himself…"</span></div>
+        <h4 style="margin-top:24px;">Highlights</h4>
+        <div class="hl">Discipleship is not a add-on to life — it is a reordering of it.</div>
+        <div class="hl">"The tower half-built is the testimony half-told."</div>
+        <div class="hl">Three costs to count: time, treasure, reputation.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>GRACE ARCHIVE · AUTOMATICALLY UPDATED EVERY SUNDAY EVENING</footer>
+
+</body>
+</html>
