@@ -114,6 +114,29 @@ select.chip { appearance: none; }
 
 .empty { max-width: 1100px; margin: 60px auto; padding: 0 24px; color: var(--muted); text-align: center; }
 
+/* Search snippet with highlighted matches */
+.snippet mark { background: var(--amber-dim); color: var(--amber); border-radius: 3px; padding: 0 2px; }
+
+/* Featured (latest) sermon */
+.featured-wrap { max-width: 1100px; margin: 32px auto 0; padding: 0 24px; }
+.featured {
+  display: grid; grid-template-columns: 1.15fr 1fr; overflow: hidden;
+  background: var(--panel); border: 1px solid rgba(232, 176, 75, 0.35); border-radius: 20px;
+  transition: border-color 0.15s, transform 0.15s;
+  box-shadow: 0 0 60px rgba(232, 176, 75, 0.06);
+}
+.featured:hover { border-color: rgba(232, 176, 75, 0.6); transform: translateY(-2px); }
+.featured-thumb { position: relative; min-height: 280px; }
+.featured-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.featured-body { padding: 30px 32px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.featured-body .date { font-size: 12.5px; }
+.featured-body h3 { font-family: var(--font-serif), serif; font-size: 28px; font-weight: 600; line-height: 1.15; }
+.featured-body p {
+  font-size: 13.5px; color: var(--muted); line-height: 1.65;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+@media (max-width: 760px) { .featured { grid-template-columns: 1fr; } .featured-thumb { min-height: 200px; } }
+
 /* Detail page */
 .detail { max-width: 960px; margin: 0 auto; padding: 48px 24px 0; }
 .back { color: var(--muted); font-size: 13.5px; display: inline-block; margin-bottom: 24px; }
@@ -147,3 +170,15 @@ select.chip { appearance: none; }
 .verse span { font-size: 12.5px; color: var(--muted); line-height: 1.5; font-style: italic; }
 .hl { display: flex; gap: 10px; font-size: 13.5px; color: #c6c9d2; line-height: 1.6; margin-bottom: 11px; }
 .hl::before { content: '—'; color: var(--amber); }
+
+/* Clickable timestamped highlights */
+button.hl-jump {
+  background: none; border: none; padding: 0; font-family: inherit; text-align: left;
+  cursor: pointer; width: 100%; align-items: baseline;
+}
+.hl-jump::before { content: '▶'; font-size: 10px; }
+.hl-jump .hl-time {
+  flex-shrink: 0; font-size: 11.5px; font-weight: 600; color: var(--amber);
+  background: var(--amber-dim); border-radius: 6px; padding: 2px 7px;
+}
+.hl-jump:hover span:last-child { color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(232, 176, 75, 0.5); }

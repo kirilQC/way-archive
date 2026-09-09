@@ -1,6 +1,6 @@
-// One-time backfill of the channel's entire back catalog.
+// Backfill / repair the archive from the channel's entire upload history.
+// Processes videos that are new, previously failed, or missing timestamp data.
 // Run locally (residential IP = reliable transcript fetch):  npm run backfill
-// Reads env from .env.local
 
 import { readFileSync } from 'node:fs';
 
@@ -16,7 +16,7 @@ try {
 }
 
 const { getUploadsPlaylistId, listUploads, getDurations } = await import('../lib/youtube.js');
-const { ingestVideo } = await import('../lib/ingest.js');
+const { ingestVideo, getExistingMap, needsProcessing } = await import('../lib/ingest.js');
 const { db } = await import('../lib/supabase.js');
 
 const MIN_DURATION_SECONDS = 15 * 60;
@@ -38,23 +38,36 @@ do {
   console.log(`\nPage ${page}: ${videos.length} videos`);
 
   const ids = videos.map((v) => v.youtubeId);
-  const { data: existing } = await supabase.from('sermons').select('youtube_id,status').in('youtube_id', ids);
-  const done = new Map((existing || []).map((r) => [r.youtube_id, r.status]));
+  const existing = await getExistingMap(ids);
   const durations = await getDurations(ids);
 
   for (const video of videos) {
-    const status = done.get(video.youtubeId);
-    if (status && status !== 'transcript_failed') {
-      console.log(`  = already ${status}: ${video.title}`);
+    const row = existing.get(video.youtubeId) || null;
+    if (!needsProcessing(row)) {
+      console.log(`  = already ${row.status}: ${video.title}`);
       continue;
     }
     const duration = durations.get(video.youtubeId) || 0;
     if (duration < MIN_DURATION_SECONDS) {
       console.log(`  - too short (${Math.round(duration / 60)}m), skipping: ${video.title}`);
+      if (!row) {
+        await supabase.from('sermons').upsert(
+          {
+            youtube_id: video.youtubeId,
+            title: video.title,
+            date: video.publishedAt.slice(0, 10),
+            thumbnail: video.thumbnail,
+            duration_seconds: duration,
+            status: 'skipped',
+          },
+          { onConflict: 'youtube_id' }
+        );
+      }
       skipped++;
       continue;
     }
-    process.stdout.write(`  > ingesting: ${video.title} ... `);
+    const reason = !row ? 'new' : row.status === 'transcript_failed' ? 'retry' : 'add timestamps';
+    process.stdout.write(`  > ingesting (${reason}): ${video.title} ... `);
     const result = await ingestVideo(video, duration);
     console.log(result.status + (result.error ? ` (${result.error})` : ''));
     if (result.status === 'published') ingested++;
