@@ -198,7 +198,7 @@ body:has(.sermon-cinema) .tab.active { color: #fff; background: rgba(255, 255, 2
 }
 
 /* Sermon detail: cinema hero + tabs */
-.sd-hero { position: relative; padding: 110px 24px 64px; overflow: hidden; text-align: center; }
+.sd-hero { position: relative; padding: 150px 24px 64px; overflow: hidden; text-align: center; }
 .sd-bg {
   position: absolute; inset: -40px;
   background-size: cover; background-position: center;
@@ -206,7 +206,7 @@ body:has(.sermon-cinema) .tab.active { color: #fff; background: rgba(255, 255, 2
 }
 .sd-hero > :not(.sd-bg) { position: relative; }
 .sd-hero .sd-back {
-  position: absolute; left: 28px; top: 82px;
+  position: absolute; left: 28px; top: 96px;
   display: inline-flex; align-items: center; gap: 7px;
   color: #c3c9dd; font-size: 13px; font-weight: 600;
   background: rgba(10, 14, 28, 0.45); border: 1px solid rgba(255, 255, 255, 0.14);
