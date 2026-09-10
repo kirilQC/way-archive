@@ -25,7 +25,6 @@ export default async function TopicsPage() {
     <main>
       <section className="hero">
         <div className="glow" />
-        <div className="kicker">Way Church · Topics</div>
         <h1>
           What&apos;s been <em>preached on.</em>
         </h1>

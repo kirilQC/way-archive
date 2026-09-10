@@ -26,7 +26,6 @@ export default async function SpeakersPage() {
     <main>
       <section className="hero">
         <div className="glow" />
-        <div className="kicker">Way Church · Speakers</div>
         <h1>
           Who&apos;s <em>preaching.</em>
         </h1>

@@ -469,10 +469,6 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
 @keyframes dots {
   0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; }
 }
-.chat-disclaimer {
-  margin-top: 14px; text-align: center;
-  font-size: 11.5px; color: var(--muted); opacity: 0.8;
-}
 
 /* Clickable timestamped highlights */
 button.hl-jump {

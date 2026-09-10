@@ -69,7 +69,6 @@ export default async function BooksPage() {
     <main>
       <section className="hero">
         <div className="glow" />
-        <div className="kicker">Way Church · Books</div>
         <h1>
           {top}, preached <em><span data-countup>{max}</span> times.</em>
         </h1>

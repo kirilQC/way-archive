@@ -156,7 +156,6 @@ export default function AskClient({ recent = [] }) {
             ))}
           </div>
         )}
-        <div className="kicker">Way Church · Ask</div>
         <h1>
           Bring the question <em>you actually have.</em>
         </h1>
@@ -235,11 +234,6 @@ export default function AskClient({ recent = [] }) {
       {error && <div className="empty">{error}</div>}
 
       {started && <div className="ac-follow">{bar}</div>}
-
-      <p className="chat-disclaimer">
-        AI assistant, not a pastor. Verses shown are real NLT text. For anything serious, talk to
-        your church community.
-      </p>
     </main>
   );
 }

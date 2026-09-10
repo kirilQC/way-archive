@@ -28,7 +28,6 @@ export default async function SeriesPage() {
     <main>
       <section className="hero">
         <div className="glow" />
-        <div className="kicker">Way Church · Series</div>
         <h1>
           Sermon <em>series.</em>
         </h1>
