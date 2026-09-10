@@ -30,20 +30,25 @@ export default async function TopicsPage() {
         </h1>
       </section>
 
-      <div className="grid" style={{ marginTop: 40 }}>
-        {topics.map(([name, { count, thumbnail }]) => (
-          <Link key={name} href={`/topics/${encodeURIComponent(name)}`} className="card">
-            <div className="thumb">
+      <div className="topic-bento">
+        {topics.map(([name, { count, thumbnail }], i) => {
+          const size = i === 0 ? ' big' : i === 3 || i === 6 ? ' wide' : '';
+          return (
+            <Link
+              key={name}
+              href={`/topics/${encodeURIComponent(name)}`}
+              className={`topic-cell reveal${size}`}
+            >
               {thumbnail && <img src={thumbnail} alt="" loading="lazy" />}
-              <div className="duration">
-                {count} sermon{count === 1 ? '' : 's'}
-              </div>
-            </div>
-            <div className="card-body">
-              <h3>{name}</h3>
-            </div>
-          </Link>
-        ))}
+              <span className="lab">
+                <b>{name}</b>
+                <span>
+                  {count} sermon{count === 1 ? '' : 's'}
+                </span>
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </main>
   );
