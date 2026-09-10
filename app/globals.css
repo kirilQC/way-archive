@@ -106,7 +106,7 @@ select.chip { appearance: none; }
 }
 .card {
   background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
-  overflow: hidden; display: block;
+  overflow: hidden; display: flex; flex-direction: column;
   transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
 }
 .card:hover {
@@ -138,7 +138,8 @@ select.chip { appearance: none; }
   font-size: 11px; font-weight: 600; padding: 4px 9px;
   border-radius: 7px; color: #d2d7e4;
 }
-.card-body { padding: 0 22px 22px; margin-top: -6px; position: relative; }
+.card-body { padding: 0 22px 22px; margin-top: -6px; position: relative; flex: 1; display: flex; flex-direction: column; }
+.card-meta { margin-top: auto; }
 .date {
   font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
   color: #c3c9dd; font-weight: 700;
