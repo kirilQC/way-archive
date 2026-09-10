@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sermon Page Redesigns</title>
+<style>
+  :root {
+    --bg: #0b101e; --panel: #111830; --panel2: #172038; --line: #232d4c;
+    --text: #eef1f7; --muted: #8d96b0; --navy: #1c3061;
+    --blue: #8caef2; --blue-dim: rgba(140,174,242,0.14);
+    --violet: #8f7df0; --violet-dim: rgba(143,125,240,0.14);
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); padding-bottom: 90px; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .switch {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 99;
+    background: rgba(11,16,30,0.92); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); padding: 14px 18px;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+  .switch button {
+    background: var(--panel); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 15px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .switch button.on { background: var(--blue-dim); color: var(--blue); border-color: rgba(140,174,242,0.5); }
+
+  /* shared bits */
+  .kick { color: var(--blue); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.2px; }
+  .pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+  .pill.b { background: var(--blue-dim); color: var(--blue); }
+  .pill.v { background: var(--violet-dim); color: var(--violet); }
+  .tstamp {
+    font-size: 11.5px; font-weight: 700; color: var(--blue); background: var(--blue-dim);
+    border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  .vid { position: relative; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; background: #000; }
+  .vid img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+  .vid .play {
+    position: absolute; inset: 0; margin: auto; width: 74px; height: 52px; border-radius: 14px;
+    background: rgba(255,255,255,0.95); color: #0b101e; display: grid; place-items: center;
+    font-size: 20px; text-indent: 3px;
+  }
+
+  /* ============ V1 Split Studio ============ */
+  .v1-wrap { display: grid; grid-template-columns: 56% 1fr; min-height: 100vh; }
+  .v1-left { padding: 40px 40px 40px 48px; position: sticky; top: 0; align-self: start; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  .v1-left h1 { font-family: var(--serif); font-size: 40px; font-weight: 500; line-height: 1.1; margin: 14px 0 8px; }
+  .v1-meta { color: var(--muted); font-size: 13.5px; margin-bottom: 22px; }
+  .v1-tags { display: flex; gap: 6px; margin-top: 18px; }
+  .v1-right { border-left: 1px solid var(--line); padding: 44px 42px; }
+  .v1-right section { margin-bottom: 38px; }
+  .v1-right h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; font-weight: 700; }
+  .v1-right p { font-size: 14.5px; line-height: 1.75; color: #c8cdda; }
+  .v1-hl { display: flex; gap: 12px; margin-bottom: 13px; font-size: 13.5px; line-height: 1.6; color: #c8cdda; align-items: baseline; }
+  .v1-verse { background: var(--panel); border-left: 2px solid var(--blue); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .v1-verse b { color: var(--blue); font-size: 12.5px; display: block; margin-bottom: 4px; }
+  .v1-verse span { font-size: 12.5px; color: var(--muted); font-style: italic; line-height: 1.55; }
+  .v1-q { font-size: 13.5px; color: #c8cdda; line-height: 1.6; margin: 0 0 12px 18px; }
+
+  /* ============ V2 Cinema Reader ============ */
+  .v2-hero { position: relative; padding: 90px 24px 60px; overflow: hidden; text-align: center; }
+  .v2-hero .bg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(46px) brightness(0.35) saturate(1.2); }
+  .v2-hero > * { position: relative; }
+  .v2-hero h1 { font-family: var(--serif); font-size: 54px; font-weight: 500; line-height: 1.06; max-width: 820px; margin: 16px auto 10px; }
+  .v2-hero .m { color: #c3c9dd; font-size: 14px; }
+  .v2-hero .vid { max-width: 880px; margin: 34px auto 0; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+  .v2-body { max-width: 660px; margin: 54px auto 0; padding: 0 24px; }
+  .v2-body p.lead { font-size: 17px; line-height: 1.85; color: #d7dbe6; }
+  .v2-body p.lead::first-letter { font-family: var(--serif); font-size: 52px; float: left; line-height: 0.9; padding: 6px 10px 0 0; color: var(--blue); }
+  .v2-quote { font-family: var(--serif); font-size: 24px; line-height: 1.45; color: var(--text); border-left: 3px solid var(--blue); padding: 4px 0 4px 24px; margin: 40px 0; font-style: italic; }
+  .v2-quote small { display: block; margin-top: 10px; font-family: var(--sans); font-style: normal; font-size: 12px; color: var(--blue); font-weight: 700; }
+  .v2-verse { margin: 26px 0; }
+  .v2-verse b { font-size: 13px; color: var(--blue); }
+  .v2-verse p { font-size: 14.5px; color: var(--muted); font-style: italic; line-height: 1.7; margin-top: 4px; }
+  .v2-h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin: 44px 0 16px; font-weight: 700; }
+  .v2-q { font-size: 14.5px; color: #c8cdda; line-height: 1.7; margin: 0 0 14px 20px; }
+
+  /* ============ V3 Tabs ============ */
+  .v3-wrap { max-width: 1000px; margin: 0 auto; padding: 44px 24px; }
+  .v3-wrap h1 { font-family: var(--serif); font-size: 36px; font-weight: 500; margin: 10px 0 6px; }
+  .v3-meta { color: var(--muted); font-size: 13.5px; margin-bottom: 24px; }
+  .v3-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 30px 0 26px; }
+  .v3-tab { padding: 11px 18px; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .v3-tab.on { color: var(--blue); border-bottom-color: var(--blue); }
+  .v3-pane { display: none; }
+  .v3-pane.on { display: block; }
+  .v3-pane p { font-size: 15px; line-height: 1.8; color: #c8cdda; max-width: 760px; }
+  .v3-hl { display: flex; gap: 14px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: #c8cdda; line-height: 1.6; }
+  .v3-verse { background: var(--panel); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; }
+  .v3-verse b { color: var(--blue); font-size: 13px; }
+  .v3-verse p { font-size: 13.5px; color: var(--muted); font-style: italic; margin-top: 5px; }
+  .v3-q { font-size: 14.5px; color: #c8cdda; line-height: 1.7; margin: 0 0 16px 20px; }
+
+  /* ============ V4 Timeline ============ */
+  .v4-wrap { max-width: 1180px; margin: 0 auto; padding: 44px 24px; display: grid; grid-template-columns: 1fr 420px; gap: 44px; }
+  .v4-main h1 { font-family: var(--serif); font-size: 38px; font-weight: 500; margin: 12px 0 6px; }
+  .v4-meta { color: var(--muted); font-size: 13.5px; margin-bottom: 30px; }
+  .v4-line { position: relative; margin-top: 34px; padding-left: 34px; }
+  .v4-line::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(180deg, var(--blue), var(--violet)); opacity: 0.4; }
+  .v4-node { position: relative; margin-bottom: 30px; }
+  .v4-node::before { content: ''; position: absolute; left: -31px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px var(--blue-dim); }
+  .v4-node .t { font-size: 11.5px; font-weight: 700; color: var(--blue); margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+  .v4-node p { font-size: 14.5px; line-height: 1.65; color: #d0d5e2; max-width: 560px; }
+  .v4-side { position: sticky; top: 24px; align-self: start; }
+  .v4-side .box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin-top: 16px; }
+  .v4-side h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; font-weight: 700; }
+  .v4-side p { font-size: 13px; line-height: 1.7; color: var(--muted); }
+  .v4-vchip { display: inline-block; margin: 0 6px 6px 0; }
+
+  /* ============ V5 Study Notebook ============ */
+  .v5-wrap { max-width: 900px; margin: 0 auto; padding: 50px 24px; }
+  .v5-head { text-align: center; border-bottom: 1px solid var(--line); padding-bottom: 30px; }
+  .v5-head h1 { font-family: var(--serif); font-size: 42px; font-weight: 500; margin: 12px 0 8px; }
+  .v5-head .m { color: var(--muted); font-size: 13.5px; }
+  .v5-sheet { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; margin-top: 30px; padding: 38px 44px; }
+  .v5-sheet h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--blue); margin-bottom: 16px; }
+  .v5-sheet p { font-size: 14.5px; line-height: 1.85; color: #c8cdda; }
+  .v5-rule { border: none; border-top: 1px dashed var(--line); margin: 30px 0; }
+  .v5-point { display: flex; gap: 14px; margin-bottom: 16px; }
+  .v5-point .n { font-family: var(--serif); font-size: 20px; color: var(--blue); flex-shrink: 0; width: 26px; }
+  .v5-point p { font-size: 14px; line-height: 1.65; }
+  .v5-verse { font-style: italic; color: var(--muted); font-size: 13.5px; line-height: 1.7; margin: 12px 0 18px; padding-left: 18px; border-left: 2px solid var(--line); }
+  .v5-verse b { color: var(--blue); font-style: normal; font-size: 12.5px; display: block; }
+  .v5-check { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; font-size: 14px; line-height: 1.65; color: #c8cdda; }
+  .v5-check .box { width: 16px; height: 16px; border: 1.5px solid var(--blue); border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+
+  /* ============ V6 Chapters Rail ============ */
+  .v6-wrap { max-width: 1280px; margin: 0 auto; padding: 36px 24px; }
+  .v6-top { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+  .v6-rail { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; overflow-y: auto; }
+  .v6-rail h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; font-weight: 700; }
+  .v6-ch { display: flex; gap: 12px; padding: 12px 10px; border-radius: 10px; font-size: 13px; line-height: 1.55; color: #c8cdda; cursor: pointer; align-items: baseline; }
+  .v6-ch:hover { background: var(--panel2); }
+  .v6-ch.now { background: var(--blue-dim); }
+  .v6-title { margin-top: 24px; }
+  .v6-title h1 { font-family: var(--serif); font-size: 34px; font-weight: 500; margin: 8px 0 6px; }
+  .v6-title .m { color: var(--muted); font-size: 13.5px; }
+  .v6-cols { display: grid; grid-template-columns: 1.7fr 1fr; gap: 18px; margin-top: 26px; }
+  .v6-box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+  .v6-box h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; font-weight: 700; }
+  .v6-box p { font-size: 14px; line-height: 1.75; color: #c8cdda; }
+  .v6-verse { background: var(--panel2); border-left: 2px solid var(--blue); border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; }
+  .v6-verse b { color: var(--blue); font-size: 12.5px; display: block; margin-bottom: 3px; }
+  .v6-verse span { font-size: 12.5px; color: var(--muted); font-style: italic; line-height: 1.5; }
+
+  /* ============ V7 Editorial ============ */
+  .v7-wrap { max-width: 1080px; margin: 0 auto; padding: 60px 24px; }
+  .v7-rule { height: 3px; background: var(--text); margin-bottom: 18px; }
+  .v7-top { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 30px; }
+  .v7-wrap h1 { font-family: var(--serif); font-size: 74px; font-weight: 500; line-height: 1.0; letter-spacing: -0.01em; max-width: 950px; }
+  .v7-by { margin: 22px 0 34px; font-size: 13px; color: var(--muted); }
+  .v7-by b { color: var(--text); }
+  .v7-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 44px; margin-top: 40px; }
+  .v7-grid .lead { font-size: 16px; line-height: 1.9; color: #d0d5e2; }
+  .v7-pull { font-family: var(--serif); font-size: 30px; line-height: 1.35; font-style: italic; color: var(--blue); margin: 34px 0; }
+  .v7-notes { border-top: 1px solid var(--line); margin-top: 34px; padding-top: 22px; font-size: 13.5px; line-height: 1.75; color: var(--muted); }
+  .v7-fnotes { border-left: 1px solid var(--line); padding-left: 32px; }
+  .v7-fn { margin-bottom: 22px; }
+  .v7-fn b { font-size: 12.5px; color: var(--blue); letter-spacing: 0.05em; }
+  .v7-fn p { font-size: 13px; color: var(--muted); font-style: italic; line-height: 1.65; margin-top: 4px; }
+  .v7-qs { margin-top: 50px; border-top: 3px solid var(--text); padding-top: 24px; column-count: 2; column-gap: 44px; }
+  .v7-qs h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 16px; column-span: all; }
+  .v7-qs p { font-size: 13.5px; line-height: 1.7; color: #c8cdda; margin-bottom: 16px; break-inside: avoid; }
+  .v7-qs p b { color: var(--blue); font-family: var(--serif); font-size: 17px; margin-right: 8px; }
+
+  /* ============ V8 Command Deck ============ */
+  .v8-wrap { max-width: 1340px; margin: 0 auto; padding: 36px 24px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .v8-card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
+  .v8-card h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; font-weight: 700; }
+  .v8-vid { grid-column: span 8; padding: 0; overflow: hidden; }
+  .v8-vid .vid { border-radius: 0; height: 100%; }
+  .v8-meta { grid-column: span 4; display: flex; flex-direction: column; justify-content: center; }
+  .v8-meta h1 { font-family: var(--serif); font-size: 30px; font-weight: 500; line-height: 1.15; margin: 12px 0 10px; }
+  .v8-meta .m { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .v8-sum { grid-column: span 7; }
+  .v8-sum p { font-size: 14.5px; line-height: 1.8; color: #c8cdda; }
+  .v8-hls { grid-column: span 5; }
+  .v8-hl { display: flex; gap: 11px; margin-bottom: 12px; font-size: 13px; color: #c8cdda; line-height: 1.55; align-items: baseline; }
+  .v8-vs { grid-column: span 5; }
+  .v8-verse { background: var(--panel2); border-radius: 10px; padding: 10px 13px; margin-bottom: 8px; }
+  .v8-verse b { color: var(--blue); font-size: 12px; display: block; }
+  .v8-verse span { font-size: 12px; color: var(--muted); font-style: italic; }
+  .v8-qs { grid-column: span 7; }
+  .v8-q { font-size: 13.5px; color: #c8cdda; line-height: 1.65; margin: 0 0 12px 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="switch" id="switch"></div>
+<script>
+const S = {
+  title: 'How to Overcome Anxious Thoughts',
+  speaker: 'Noah Herrin',
+  date: 'Monday, Aug 31, 2026',
+  dur: '30 min',
+  thumb: 'https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg',
+  topics: ['Fear & Anxiety', 'Grace', 'Hope'],
+  summary: "Noah Herrin preaches from Hebrews 13:7-9 to show that anxious, negative thoughts can be changed by reorienting our thinking toward the consistent, gracious character of God. He argues that Christians often fill unknowns with worst-case scenarios, consume content that trains cynicism, and let inconsistent human leaders or past experiences dictate their view of God. Instead, we should remember Jesus is the same yesterday, today, and forever, draw strength from God's grace, and let that steady truth retrain our minds.",
+  notes: "When anxious or negative thoughts arise, intentionally redirect your mind to truths about God's character: his consistency and grace. Limit cynical or fleshly content and instead feed on Scripture and faithful local church teaching. Pray for your leaders and practice receiving God's approval as a reality, not something you must earn.",
+  hls: [
+    { t: 276, x: "Here's the truth of the whole message: bad thoughts can ruin your life, but you can change your life by changing your mind." },
+    { t: 338, x: 'Stop thinking like that.' },
+    { t: 429, x: "Your strength comes from God's grace, not from rules about food, which don't help those who follow them." },
+    { t: 917, x: 'Jesus Christ is the same yesterday, today, and forever.' },
+    { t: 1656, x: 'God is looking down waiting for another opportunity to be delighted in you again.' },
+  ],
+  verses: [
+    { r: 'Hebrews 13:7-9', q: 'Remember your leaders who taught you the word of God... Jesus Christ is the same yesterday, today, and forever. Your strength comes from God\'s grace...' },
+    { r: 'Romans 12:2', q: 'Don\'t copy the behavior and customs of this world, but let God transform you into a new person by changing the way that you think.' },
+    { r: 'Proverbs 23:7', q: 'As a man thinks, as a woman thinks, so is he. So is she.' },
+    { r: 'Hebrews 13:8', q: 'Jesus Christ is the same yesterday, today, and forever.' },
+    { r: 'Ephesians 3:20', q: 'He can do more than we ask, think, or imagine.' },
+    { r: 'Psalm 139:17-18', q: 'How precious are your thoughts about me, O God? They cannot be numbered.' },
+  ],
+  qs: [
+    'When have you filled silence or an ambiguous message with a worst-case scenario, and what did you imagine before you got the facts?',
+    'When anxiety hits, what would change if you intentionally reminded yourself "Jesus is the same yesterday, today, and forever"? Name one practical habit you\'ll try this week.',
+    'What content in your feed trains cynicism instead of trust? What would curating it actually look like?',
+    'Where are you still trying to earn God\'s approval instead of receiving his delight? What would resting in grace change this week?',
+  ],
+};
+const mmss = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+const vid = () => `<div class="vid"><img src="${S.thumb}" alt=""><div class="play">&#9654;</div></div>`;
+
+const VARIANTS = [
+{ name: '1 · Split Studio', html: () => `
+  <div class="v1-wrap">
+    <div class="v1-left">
+      <div class="kick">Latest Sermon · ${S.date}</div>
+      <h1>${S.title}</h1>
+      <div class="v1-meta">${S.speaker} · ${S.dur} · Hebrews 13:7-9</div>
+      ${vid()}
+      <div class="v1-tags">${S.topics.map((t) => `<span class="pill v">${t}</span>`).join('')}<span class="pill b">Hebrews</span></div>
+    </div>
+    <div class="v1-right">
+      <section><h4>Summary</h4><p>${S.summary}</p></section>
+      <section><h4>Highlights</h4>${S.hls.map((h) => `<div class="v1-hl"><span class="tstamp">${mmss(h.t)}</span><span>${h.x}</span></div>`).join('')}</section>
+      <section><h4>Key Scriptures</h4>${S.verses.slice(0, 4).map((v) => `<div class="v1-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}</section>
+      <section><h4>Notes &amp; Takeaways</h4><p>${S.notes}</p></section>
+      <section><h4>Discussion Questions</h4><ol>${S.qs.map((q) => `<li class="v1-q">${q}</li>`).join('')}</ol></section>
+    </div>
+  </div>` },
+
+{ name: '2 · Cinema Reader', html: () => `
+  <div class="v2-hero">
+    <div class="bg" style="background-image:url('${S.thumb}')"></div>
+    <div class="kick">${S.date} · ${S.dur}</div>
+    <h1>${S.title}</h1>
+    <div class="m">${S.speaker} · Hebrews 13:7-9</div>
+    ${vid()}
+  </div>
+  <div class="v2-body">
+    <p class="lead">${S.summary}</p>
+    <div class="v2-quote">"God is looking down waiting for another opportunity to be delighted in you again."<small>27:36 · ${S.speaker}</small></div>
+    <div class="v2-h4">Scriptures, as preached</div>
+    ${S.verses.slice(0, 4).map((v) => `<div class="v2-verse"><b>${v.r}</b><p>"${v.q}" (NLT)</p></div>`).join('')}
+    <div class="v2-h4">Take it with you</div>
+    <p class="lead" style="font-size:15px">${S.notes}</p>
+    <div class="v2-h4">For your group</div>
+    <ol>${S.qs.map((q) => `<li class="v2-q">${q}</li>`).join('')}</ol>
+  </div>` },
+
+{ name: '3 · Tabbed Player', html: () => `
+  <div class="v3-wrap">
+    <div class="kick">${S.date}</div>
+    <h1>${S.title}</h1>
+    <div class="v3-meta">${S.speaker} · ${S.dur} · Hebrews 13:7-9</div>
+    ${vid()}
+    <div class="v3-tabs">
+      ${['Summary', 'Highlights', 'Scriptures', 'Questions'].map((t, i) => `<div class="v3-tab${i === 0 ? ' on' : ''}" onclick="v3tab(this,${i})">${t}</div>`).join('')}
+    </div>
+    <div class="v3-pane on"><p>${S.summary}</p><p style="margin-top:18px;color:var(--muted)">${S.notes}</p></div>
+    <div class="v3-pane">${S.hls.map((h) => `<div class="v3-hl"><span class="tstamp">${mmss(h.t)}</span><span>${h.x}</span></div>`).join('')}</div>
+    <div class="v3-pane">${S.verses.map((v) => `<div class="v3-verse"><b>${v.r}</b><p>"${v.q}" (NLT)</p></div>`).join('')}</div>
+    <div class="v3-pane"><ol>${S.qs.map((q) => `<li class="v3-q">${q}</li>`).join('')}</ol></div>
+  </div>` },
+
+{ name: '4 · Timeline', html: () => `
+  <div class="v4-wrap">
+    <div class="v4-main">
+      <div class="kick">${S.date}</div>
+      <h1>${S.title}</h1>
+      <div class="v4-meta">${S.speaker} · ${S.dur}</div>
+      <div class="kick" style="color:var(--muted)">The message, minute by minute</div>
+      <div class="v4-line">
+        ${S.hls.map((h) => `<div class="v4-node"><div class="t">${mmss(h.t)}</div><p>${h.x}</p></div>`).join('')}
+        <div class="v4-node"><div class="t">30:20</div><p style="color:var(--muted)">End of message. Jump back to any moment above.</p></div>
+      </div>
+    </div>
+    <div class="v4-side">
+      ${vid()}
+      <div class="box"><h4>Summary</h4><p>${S.summary.split('. ').slice(0, 3).join('. ')}.</p></div>
+      <div class="box"><h4>Scriptures</h4>${S.verses.slice(0, 5).map((v) => `<span class="pill b v4-vchip">${v.r}</span>`).join('')}</div>
+      <div class="box"><h4>Topics</h4>${S.topics.map((t) => `<span class="pill v v4-vchip">${t}</span>`).join('')}</div>
+    </div>
+  </div>` },
+
+{ name: '5 · Study Notebook', html: () => `
+  <div class="v5-wrap">
+    <div class="v5-head">
+      <div class="kick">Sermon Study · ${S.date}</div>
+      <h1>${S.title}</h1>
+      <div class="m">${S.speaker} · ${S.dur} · Hebrews 13:7-9</div>
+    </div>
+    <div style="margin-top:30px">${vid()}</div>
+    <div class="v5-sheet">
+      <h3>What was preached</h3>
+      <p>${S.summary}</p>
+      <hr class="v5-rule" />
+      <h3>Key moments</h3>
+      ${S.hls.slice(0, 4).map((h, i) => `<div class="v5-point"><div class="n">${String(i + 1).padStart(2, '0')}</div><p>${h.x} <span style="color:var(--blue);font-size:12px;font-weight:700">· ${mmss(h.t)}</span></p></div>`).join('')}
+      <hr class="v5-rule" />
+      <h3>Open your Bible</h3>
+      ${S.verses.slice(0, 4).map((v) => `<div class="v5-verse"><b>${v.r}</b>"${v.q}" (NLT)</div>`).join('')}
+      <hr class="v5-rule" />
+      <h3>This week</h3>
+      ${S.qs.map((q) => `<div class="v5-check"><div class="box"></div><span>${q}</span></div>`).join('')}
+    </div>
+  </div>` },
+
+{ name: '6 · Chapters Rail', html: () => `
+  <div class="v6-wrap">
+    <div class="v6-top">
+      ${vid()}
+      <div class="v6-rail">
+        <h4>Jump to a moment</h4>
+        ${S.hls.map((h, i) => `<div class="v6-ch${i === 0 ? ' now' : ''}"><span class="tstamp">${mmss(h.t)}</span><span>${h.x}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="v6-title">
+      <div class="kick">${S.date}</div>
+      <h1>${S.title}</h1>
+      <div class="m">${S.speaker} · ${S.dur} · ${S.topics.join(' · ')}</div>
+    </div>
+    <div class="v6-cols">
+      <div>
+        <div class="v6-box"><h4>Summary</h4><p>${S.summary}</p></div>
+        <div class="v6-box" style="margin-top:18px"><h4>Discussion Questions</h4><ol style="margin-left:18px">${S.qs.map((q) => `<li style="font-size:13.5px;line-height:1.65;color:#c8cdda;margin-bottom:12px">${q}</li>`).join('')}</ol></div>
+      </div>
+      <div>
+        <div class="v6-box"><h4>Key Scriptures</h4>${S.verses.map((v) => `<div class="v6-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}</div>
+        <div class="v6-box" style="margin-top:18px"><h4>Notes</h4><p style="font-size:13px;color:var(--muted)">${S.notes}</p></div>
+      </div>
+    </div>
+  </div>` },
+
+{ name: '7 · Editorial', html: () => `
+  <div class="v7-wrap">
+    <div class="v7-rule"></div>
+    <div class="v7-top"><span>Way Archive</span><span>${S.date}</span><span>${S.dur}</span></div>
+    <h1>${S.title}</h1>
+    <div class="v7-by">Preached by <b>${S.speaker}</b> from <b>Hebrews 13:7-9</b></div>
+    ${vid()}
+    <div class="v7-grid">
+      <div>
+        <p class="lead">${S.summary}</p>
+        <div class="v7-pull">"Bad thoughts can ruin your life, but you can change your life by changing your mind."</div>
+        <p class="lead" style="font-size:14.5px">${S.notes}</p>
+        <div class="v7-notes">Timestamps: ${S.hls.map((h) => mmss(h.t)).join(' · ')}</div>
+      </div>
+      <div class="v7-fnotes">
+        ${S.verses.map((v, i) => `<div class="v7-fn"><b>${i + 1}. ${v.r}</b><p>"${v.q}" (NLT)</p></div>`).join('')}
+      </div>
+    </div>
+    <div class="v7-qs">
+      <h4>For discussion</h4>
+      ${S.qs.map((q, i) => `<p><b>${i + 1}</b>${q}</p>`).join('')}
+    </div>
+  </div>` },
+
+{ name: '8 · Command Deck', html: () => `
+  <div class="v8-wrap">
+    <div class="v8-card v8-vid">${vid()}</div>
+    <div class="v8-card v8-meta">
+      <div class="kick">${S.date}</div>
+      <h1>${S.title}</h1>
+      <div class="m">${S.speaker} · ${S.dur}</div>
+      <div>${S.topics.map((t) => `<span class="pill v" style="margin:0 6px 6px 0">${t}</span>`).join('')}</div>
+      <div style="margin-top:6px">${S.verses.slice(0, 3).map((v) => `<span class="pill b" style="margin:0 6px 6px 0">${v.r}</span>`).join('')}</div>
+    </div>
+    <div class="v8-card v8-sum"><h4>Summary</h4><p>${S.summary}</p></div>
+    <div class="v8-card v8-hls"><h4>Highlights</h4>${S.hls.map((h) => `<div class="v8-hl"><span class="tstamp">${mmss(h.t)}</span><span>${h.x}</span></div>`).join('')}</div>
+    <div class="v8-card v8-vs"><h4>Key Scriptures</h4>${S.verses.slice(0, 4).map((v) => `<div class="v8-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}</div>
+    <div class="v8-card v8-qs"><h4>Discussion Questions</h4><ol>${S.qs.map((q) => `<li class="v8-q">${q}</li>`).join('')}</ol></div>
+  </div>` },
+];
+
+function v3tab(el, i) {
+  const wrap = el.closest('.v3-wrap');
+  wrap.querySelectorAll('.v3-tab').forEach((t, j) => t.classList.toggle('on', j === i));
+  wrap.querySelectorAll('.v3-pane').forEach((p, j) => p.classList.toggle('on', j === i));
+}
+
+const root = document.getElementById('root');
+const bar = document.getElementById('switch');
+VARIANTS.forEach((v, i) => {
+  const d = document.createElement('div');
+  d.className = `variant v${i + 1}` + (i === 0 ? ' on' : '');
+  d.innerHTML = v.html();
+  root.appendChild(d);
+  const b = document.createElement('button');
+  b.textContent = v.name;
+  if (i === 0) b.className = 'on';
+  b.onclick = () => {
+    document.querySelectorAll('.variant').forEach((x, j) => x.classList.toggle('on', j === i));
+    bar.querySelectorAll('button').forEach((x, j) => x.classList.toggle('on', j === i));
+    window.scrollTo(0, 0);
+  };
+  bar.appendChild(b);
+});
+</script>
+</body>
+</html>
