@@ -178,12 +178,24 @@ select.chip { appearance: none; }
 .verse b { font-size: 12.5px; color: var(--amber); display: block; margin-bottom: 3px; }
 .verse span { font-size: 12.5px; color: var(--muted); line-height: 1.5; font-style: italic; }
 
-/* Expandable scripture */
-.verse-click { cursor: pointer; transition: background 0.15s; }
-.verse-click:hover { background: #222633; }
-.verse-caret { float: right; color: var(--muted); font-style: normal; font-weight: 400; }
+/* Scripture passages */
 .verse.open span { color: #c6c9d2; }
 .verse-trans { color: var(--muted); font-size: 11.5px; }
+
+/* Full transcript */
+.transcript-toggle { padding: 10px 16px; font-size: 13px; }
+.transcript { margin-top: 16px; max-height: 520px; overflow-y: auto; padding-right: 6px; }
+.transcript-block { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.transcript-block .hl-time {
+  border: none; cursor: pointer; flex-shrink: 0; margin-top: 2px;
+  font-size: 11.5px; font-weight: 600; color: var(--amber);
+  background: var(--amber-dim); border-radius: 6px; padding: 2px 7px;
+  font-family: inherit;
+}
+.transcript-block .hl-time:hover { background: rgba(232, 176, 75, 0.28); }
+.transcript-block p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+.site-footer .synced { margin-top: 6px; font-size: 11px; opacity: 0.7; }
 
 /* Ask the archive */
 .ask-result { max-width: 1100px; margin: 28px auto 0; padding: 0 24px; }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 function formatDate(d) {
@@ -19,43 +19,90 @@ function formatTime(seconds) {
 }
 
 function Verse({ reference, quote }) {
-  const [open, setOpen] = useState(false);
   const [passage, setPassage] = useState(null); // { text, translation } | { error }
 
-  const toggle = async () => {
-    setOpen(!open);
-    if (passage || open) return;
-    try {
-      const res = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setPassage({
-        text: data.text?.trim().replace(/\s+/g, ' '),
-        translation: data.translation_name,
-      });
-    } catch {
-      setPassage({ error: true });
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/passage?ref=${encodeURIComponent(reference)}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => !cancelled && setPassage(data))
+      .catch(() => !cancelled && setPassage({ error: true }));
+    return () => {
+      cancelled = true;
+    };
+  }, [reference]);
 
   return (
-    <div className={`verse verse-click ${open ? 'open' : ''}`} onClick={toggle}>
-      <b>
-        {reference}
-        <span className="verse-caret">{open ? '−' : '+'}</span>
-      </b>
-      {open && passage?.text ? (
+    <div className="verse open">
+      <b>{reference}</b>
+      {passage?.text ? (
         <span>
-          “{passage.text}” <i className="verse-trans">— {passage.translation}</i>
+          “{passage.text}
+          {passage.truncated ? '…' : '”'} <i className="verse-trans">— {passage.translation}</i>
         </span>
-      ) : open && passage?.error ? (
-        <span>{quote}</span>
-      ) : open ? (
-        <span>Loading passage…</span>
       ) : (
         <span>{quote}</span>
       )}
     </div>
+  );
+}
+
+// Group raw caption segments into ~45-second paragraphs
+function groupSegments(segments, windowSeconds = 45) {
+  const blocks = [];
+  let current = null;
+  for (const seg of segments) {
+    if (!current || seg.start - current.start >= windowSeconds) {
+      current = { start: seg.start, text: seg.text };
+      blocks.push(current);
+    } else {
+      current.text += ' ' + seg.text;
+    }
+  }
+  return blocks;
+}
+
+function Transcript({ sermonId, onSeek }) {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState(null); // { segments } | { text } | { error }
+
+  const toggle = async () => {
+    setOpen(!open);
+    if (data || open) return;
+    try {
+      const res = await fetch(`/api/transcript?id=${sermonId}`);
+      if (!res.ok) throw new Error();
+      setData(await res.json());
+    } catch {
+      setData({ error: true });
+    }
+  };
+
+  return (
+    <>
+      <button className="chip transcript-toggle" onClick={toggle}>
+        {open ? 'Hide full transcript' : 'Show full transcript'}
+      </button>
+      {open && !data && <p className="panel-text">Loading transcript…</p>}
+      {open && data?.error && <p className="panel-text">Transcript unavailable.</p>}
+      {open && data?.segments && (
+        <div className="transcript">
+          {groupSegments(data.segments).map((b, i) => (
+            <div key={i} className="transcript-block">
+              <button className="hl-time" onClick={() => onSeek(b.start)}>
+                {formatTime(b.start)}
+              </button>
+              <p>{b.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      {open && data && !data.segments && data.text && (
+        <div className="transcript">
+          <p className="panel-text">{data.text}</p>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -138,6 +185,9 @@ export default function SermonView({ sermon: s }) {
               <p className="panel-text">{s.notes}</p>
             </>
           )}
+
+          <h4 className="mt">Transcript</h4>
+          <Transcript sermonId={s.id} onSeek={seekTo} />
         </div>
 
         <div className="panel-box">
