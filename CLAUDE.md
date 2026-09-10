@@ -43,6 +43,10 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
 - `/speakers`, `/speakers/[name]`
 - `/topics`, `/topics/[name]` (topic hubs with key-scripture chips)
 - `/ask`: RAG Q&A (`/api/ask`: keyword extraction -> FTS -> excerpt windows -> cited answer)
+- `/bible`: multi-turn scripture chat (`/api/bible`). System prompt adapted from Cameron Pak's
+  open-sourced Bible Bot prompt (MIT-0). The model NEVER writes verse text; it returns
+  verse_references and the client renders real NLT text via `/api/passage` (no hallucinated
+  quotes possible). Also returns sermon_search_query -> FTS -> up to 3 related sermon links.
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript
