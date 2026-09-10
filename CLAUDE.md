@@ -63,6 +63,10 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
 - ~28 of the channel's uploads are <15 min shorts/promos, intentionally skipped, so published
   count will never equal the channel's total video count.
 - Layout widths: main containers 1340px, detail page 1140px.
+- Design follows the Way Church logo: navy (#1c3061) wordmark chip, navy-tinted dark palette,
+  light-blue accent (the CSS var is still named --amber for historical reasons).
+- `bible_books` must hold exact canonical names from `lib/books.js`; ingest normalizes via
+  `canonicalBooks()` (aliases like "Psalm"/"Song of Songs" mapped, junk like "Corinthians" dropped).
 - Footer shows "last synced @ ..." from newest `created_at` (America/Chicago).
 
 ## State / recurring tasks

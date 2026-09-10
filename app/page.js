@@ -16,7 +16,6 @@ export default async function Home() {
 
   const list = sermons || [];
   const books = new Set(list.flatMap((s) => s.bible_books || []));
-  const topics = new Set(list.flatMap((s) => s.topics || []));
 
   return (
     <main>
@@ -28,10 +27,6 @@ export default async function Home() {
           <br />
           <em>from any Sunday.</em>
         </h1>
-        <p>
-          Each week&apos;s sermon is pulled from YouTube, transcribed, and distilled into summaries,
-          scripture references, and topics you can actually search.
-        </p>
         <div className="stats">
           <div className="stat">
             <b>{list.length}</b>
@@ -40,10 +35,6 @@ export default async function Home() {
           <div className="stat">
             <b>{books.size}</b>
             <span>books of the Bible</span>
-          </div>
-          <div className="stat">
-            <b>{topics.size}</b>
-            <span>topics tagged</span>
           </div>
         </div>
       </section>
