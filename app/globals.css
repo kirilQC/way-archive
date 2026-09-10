@@ -105,21 +105,23 @@ select.chip { appearance: none; }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px;
 }
 .card {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
   overflow: hidden; display: block;
   transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
 }
 .card:hover {
-  border-color: rgba(140, 174, 242, 0.45);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  border-color: rgba(140, 174, 242, 0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
-.thumb { position: relative; aspect-ratio: 16/9; background: var(--panel-2); overflow: hidden; }
+.thumb { position: relative; aspect-ratio: 16/9; background: var(--panel-2); }
 .thumb img {
   width: 100%; height: 100%; object-fit: cover; display: block;
+  -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
   transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-.card:hover .thumb img { transform: scale(1.06); }
+.card:hover .thumb img { transform: scale(1.03); }
 .thumb::after {
   content: '▶';
   position: absolute; inset: 0; margin: auto;
@@ -131,14 +133,31 @@ select.chip { appearance: none; }
 }
 .card:hover .thumb::after { opacity: 1; transform: scale(1); }
 .duration {
-  position: absolute; bottom: 10px; right: 10px;
-  background: rgba(0, 0, 0, 0.7); font-size: 11px; padding: 3px 8px;
-  border-radius: 6px; color: #d2d7e4;
+  position: absolute; top: 10px; right: 10px; z-index: 3;
+  background: rgba(11, 16, 30, 0.8); backdrop-filter: blur(6px);
+  font-size: 11px; font-weight: 600; padding: 4px 9px;
+  border-radius: 7px; color: #d2d7e4;
 }
-.card-body { padding: 18px 20px 20px; }
-.date { font-size: 12px; color: var(--muted); }
-.card h3 { font-family: var(--font-serif), serif; font-size: 19px; font-weight: 600; margin: 7px 0 9px; }
-.card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.card-body { padding: 0 22px 22px; margin-top: -6px; position: relative; }
+.date {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #c3c9dd; font-weight: 700;
+}
+.card h3 { font-family: var(--font-serif), serif; font-size: 22px; font-weight: 500; line-height: 1.16; margin: 7px 0 9px; transition: color 0.2s; }
+.card:hover h3 { color: var(--amber); }
+.card p {
+  font-size: 13.5px; color: #aab2c8; line-height: 1.65; margin-bottom: 14px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.verse-line {
+  font-family: var(--font-serif), serif; font-style: italic;
+  font-size: 15px; color: var(--amber); margin-bottom: 7px;
+}
+.topic-line {
+  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+}
+.topic-line i { font-style: normal; color: #3d4a70; margin: 0 6px; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
 .tag.book { background: var(--amber-dim); color: var(--amber); }
@@ -427,8 +446,8 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
   position: absolute; inset: -60px;
   display: grid; grid-template-columns: 1fr 1fr 1fr;
   filter: blur(52px) brightness(0.3) saturate(1.3);
-  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 96%);
-  mask-image: linear-gradient(180deg, #000 30%, transparent 96%);
+  -webkit-mask-image: linear-gradient(180deg, #000 20%, transparent calc(100% - 70px));
+  mask-image: linear-gradient(180deg, #000 20%, transparent calc(100% - 70px));
 }
 .ac-bgs div { background-size: cover; background-position: center; }
 .ac-hero > :not(.ac-bgs) { position: relative; }

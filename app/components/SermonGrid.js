@@ -25,18 +25,21 @@ export default function SermonGrid({ sermons }) {
             <div className="date">{formatDate(s.date)}</div>
             <h3>{s.title}</h3>
             <p>{noDashes(s.summary?.split('. ').slice(0, 2).join('. '))}.</p>
-            <div className="tags">
-              {(s.verses || []).slice(0, 1).map((v) => (
-                <span key={v.reference} className="tag book">
-                  {v.reference}
-                </span>
-              ))}
-              {(s.topics || []).slice(0, 2).map((t) => (
-                <span key={t} className="tag topic">
-                  {t}
-                </span>
-              ))}
-            </div>
+            {(s.verses || []).slice(0, 1).map((v) => (
+              <div key={v.reference} className="verse-line">
+                {v.reference}
+              </div>
+            ))}
+            {(s.topics || []).length > 0 && (
+              <div className="topic-line">
+                {(s.topics || []).slice(0, 2).map((t, i) => (
+                  <span key={t}>
+                    {i > 0 && <i>·</i>}
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </Link>
       ))}
