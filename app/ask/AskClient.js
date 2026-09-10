@@ -18,7 +18,7 @@ function formatDate(d) {
   });
 }
 
-function VerseCard({ reference }) {
+function VerseCard({ reference, delay = 0 }) {
   const [passage, setPassage] = useState(null);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ function VerseCard({ reference }) {
 
   if (passage?.error) return null;
   return (
-    <div className="verse open">
+    <div className="verse open pop-in" style={{ animationDelay: `${delay}ms` }}>
       <b>{reference}</b>
       {passage?.text ? (
         <span>
@@ -146,16 +146,21 @@ export default function AskClient() {
                 )}
                 {(m.verses || []).length > 0 && (
                   <div style={{ marginTop: 14 }}>
-                    {m.verses.map((v) => (
-                      <VerseCard key={v} reference={v} />
+                    {m.verses.map((v, k) => (
+                      <VerseCard key={v} reference={v} delay={k * 80} />
                     ))}
                   </div>
                 )}
                 {(m.sources || []).length > 0 && (
                   <>
                     <h4 className="mt">Way Church has preached on this</h4>
-                    {m.sources.map((s) => (
-                      <Link key={s.id} href={`/sermon/${s.id}`} className="ask-source">
+                    {m.sources.map((s, k) => (
+                      <Link
+                        key={s.id}
+                        href={`/sermon/${s.id}`}
+                        className="ask-source pop-in"
+                        style={{ animationDelay: `${k * 80}ms` }}
+                      >
                         {s.thumbnail && (
                           <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />
                         )}

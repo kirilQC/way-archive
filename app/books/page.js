@@ -20,20 +20,28 @@ function BookMap({ books, counts, max }) {
         const inner = (
           <>
             <b>{name}</b>
-            <span>{count > 0 ? `${count} ${count === 1 ? 'sermon' : 'sermons'}` : ''}</span>
+            <span>
+              {count > 0 ? (
+                <>
+                  <span data-countup>{count}</span> {count === 1 ? 'sermon' : 'sermons'}
+                </>
+              ) : (
+                ''
+              )}
+            </span>
           </>
         );
         return count > 0 ? (
           <Link
             key={name}
             href={`/books/${encodeURIComponent(name)}`}
-            className="book-cell"
+            className="book-cell reveal"
             style={{ background: heat(count, max) }}
           >
             {inner}
           </Link>
         ) : (
-          <div key={name} className="book-cell off">
+          <div key={name} className="book-cell off reveal">
             {inner}
           </div>
         );
@@ -63,7 +71,7 @@ export default async function BooksPage() {
         <div className="glow" />
         <div className="kicker">Way Church · Books</div>
         <h1>
-          {top}, preached <em>{max} times.</em>
+          {top}, preached <em><span data-countup>{max}</span> times.</em>
         </h1>
       </section>
 

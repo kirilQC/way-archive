@@ -14,7 +14,7 @@ export default function SermonGrid({ sermons }) {
   return (
     <div className="grid">
       {sermons.map((s) => (
-        <Link key={s.id} href={`/sermon/${s.id}`} className="card">
+        <Link key={s.id} href={`/sermon/${s.id}`} className="card reveal">
           <div className="thumb">
             {s.thumbnail && <img src={s.thumbnail} alt="" loading="lazy" />}
             {s.duration_seconds ? (

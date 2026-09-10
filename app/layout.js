@@ -1,6 +1,7 @@
 import { Fraunces, Inter } from 'next/font/google';
 import Link from 'next/link';
 import NavTabs from './components/NavTabs.js';
+import Motion from './components/Motion.js';
 import { db } from '../lib/supabase.js';
 import './globals.css';
 
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }) {
           <NavTabs />
         </header>
         {children}
+        <Motion />
         <footer className="site-footer">
           <a href="https://www.waychurch.com/" target="_blank" rel="noreferrer" className="footer-link">
             waychurch.com
