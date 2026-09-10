@@ -62,6 +62,37 @@ function groupSegments(segments, windowSeconds = 45) {
   return blocks;
 }
 
+function DiscussionQuestions({ sermonId }) {
+  const [questions, setQuestions] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/questions?id=${sermonId}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => !cancelled && setQuestions(data.questions || []))
+      .catch(() => !cancelled && setQuestions([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [sermonId]);
+
+  if (questions && questions.length === 0) return null;
+  return (
+    <>
+      <h4 className="mt">Discussion Questions</h4>
+      {!questions ? (
+        <p className="panel-text">Writing questions from the transcript…</p>
+      ) : (
+        <ol className="dq">
+          {questions.map((q, i) => (
+            <li key={i}>{q}</li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
+}
+
 function Transcript({ sermonId, onSeek }) {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState(null); // { segments } | { text } | { error }
@@ -186,6 +217,8 @@ export default function SermonView({ sermon: s }) {
             </>
           )}
 
+          <DiscussionQuestions sermonId={s.id} />
+
           <h4 className="mt">Transcript</h4>
           <Transcript sermonId={s.id} onSeek={seekTo} />
         </div>
@@ -205,9 +238,9 @@ export default function SermonView({ sermon: s }) {
               <h4 className="mt">Topics</h4>
               <div className="tags">
                 {s.topics.map((t) => (
-                  <span key={t} className="tag topic">
+                  <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="tag topic">
                     {t}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </>
