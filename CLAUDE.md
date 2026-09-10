@@ -37,8 +37,9 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   `ts_headline` snippets with `<mark>`.
 
 ## Site map (tabs in app/components/NavTabs.js)
-- `/` Sermons: hero + stats, search (server FTS w/ snippets, local fallback), book/topic filters,
-  featured latest card, grid
+- `/` Sermons: hero (headline + stats left, featured latest card right), then the sermon grid.
+  No search bar or filter chips by design; discovery happens via the other tabs and /ask.
+  (The old search UI + /api/search route were removed; FTS still powers /ask retrieval.)
 - `/series`, `/series/[name]` (empty until detect-series has run)
 - `/speakers`, `/speakers/[name]`
 - `/topics`, `/topics/[name]` (topic hubs with key-scripture chips)

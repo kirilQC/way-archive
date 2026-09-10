@@ -31,15 +31,11 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   border-bottom: 1px solid var(--line);
 }
-.logo { display: flex; align-items: center; gap: 11px; }
+.logo { display: flex; align-items: center; }
 .logo-mark {
   background: var(--navy); color: #fff;
-  font-weight: 800; font-size: 17px; letter-spacing: 0.06em;
-  padding: 7px 13px 8px; border-radius: 6px; line-height: 1;
-}
-.logo-sub {
-  text-transform: uppercase; letter-spacing: 0.3em;
-  font-size: 11px; font-weight: 600; color: var(--muted);
+  font-weight: 800; font-size: 22px; letter-spacing: 0.06em;
+  padding: 9px 16px 10px; border-radius: 7px; line-height: 1;
 }
 .site-header nav a { color: var(--muted); font-size: 13.5px; font-weight: 500; }
 .site-header nav a:hover { color: var(--text); }
@@ -153,6 +149,19 @@ select.chip { appearance: none; }
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 @media (max-width: 760px) { .featured { grid-template-columns: 1fr; } .featured-thumb { min-height: 200px; } }
+
+/* Home hero: headline left, latest sermon right */
+.hero-row { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+.hero-left { flex: 1; min-width: 0; }
+.hero-featured { display: block; width: 470px; flex-shrink: 0; }
+.hero-featured .featured-thumb { min-height: 0; aspect-ratio: 16 / 9; }
+.hero-featured .featured-body { padding: 20px 24px 24px; }
+.hero-featured .featured-body h3 { font-size: 21px; }
+.hero-featured .featured-body p { -webkit-line-clamp: 3; font-size: 13px; }
+@media (max-width: 1020px) {
+  .hero-row { flex-direction: column; align-items: stretch; gap: 32px; }
+  .hero-featured { width: 100%; }
+}
 
 /* Detail page */
 .detail { max-width: 1140px; margin: 0 auto; padding: 48px 24px 0; }

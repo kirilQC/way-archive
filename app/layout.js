@@ -42,7 +42,6 @@ export default async function RootLayout({ children }) {
         <header className="site-header">
           <Link href="/" className="logo">
             <span className="logo-mark">WAY</span>
-            <span className="logo-sub">archive</span>
           </Link>
           <NavTabs />
         </header>
