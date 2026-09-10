@@ -204,7 +204,16 @@ body:has(.sermon-cinema) .tab.active { color: #fff; background: rgba(255, 255, 2
   background-size: cover; background-position: center;
   filter: blur(46px) brightness(0.35) saturate(1.2);
 }
-.sd-hero > * { position: relative; }
+.sd-hero > :not(.sd-bg) { position: relative; }
+.sd-hero .sd-back {
+  position: absolute; left: 28px; top: 82px;
+  display: inline-flex; align-items: center; gap: 7px;
+  color: #c3c9dd; font-size: 13px; font-weight: 600;
+  background: rgba(10, 14, 28, 0.45); border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px; padding: 7px 14px; backdrop-filter: blur(8px);
+  transition: color 0.2s, border-color 0.2s;
+}
+.sd-back:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.3); }
 .sd-hero h1 {
   font-family: var(--font-serif), serif;
   font-size: 54px; font-weight: 500; line-height: 1.06;
@@ -268,10 +277,13 @@ body:has(.sermon-cinema) .tab.active { color: #fff; background: rgba(255, 255, 2
 .sd-qcard b { font-family: var(--font-serif), serif; font-size: 22px; color: var(--amber); display: block; margin-bottom: 10px; }
 .sd-qcard p { font-size: 14px; line-height: 1.7; color: #c8cdda; }
 .sd-transcript { max-height: none; }
+.sd-related { max-width: 1200px; margin: 70px auto 0; padding: 0 32px; }
+.sd-related .grid { max-width: none; padding: 0; margin-top: 18px; }
 @media (max-width: 900px) {
   .sd-hero h1 { font-size: 34px; }
   .sd-ov, .sd-vgrid, .sd-qgrid { grid-template-columns: 1fr; }
   .sd-body { padding: 0 24px; }
+  .sd-related { padding: 0 24px; }
 }
 
 /* Detail page */

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { noDashes } from '../../../lib/text.js';
+import SermonGrid from '../../components/SermonGrid.js';
 
 function formatDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
@@ -130,7 +131,7 @@ function Transcript({ sermonId, onSeek }) {
 
 const TABS = ['Overview', 'Timeline', 'Scriptures', 'Discussion', 'Transcript'];
 
-export default function SermonView({ sermon: s }) {
+export default function SermonView({ sermon: s, related = [] }) {
   const iframeRef = useRef(null);
   const [tab, setTab] = useState(0);
   const [openedTabs, setOpenedTabs] = useState([true, false, false, false, false]);
@@ -159,6 +160,9 @@ export default function SermonView({ sermon: s }) {
     <main className="sermon-cinema">
       <div className="sd-hero">
         {s.thumbnail && <div className="sd-bg" style={{ backgroundImage: `url(${s.thumbnail})` }} />}
+        <Link href="/" className="sd-back">
+          ← All sermons
+        </Link>
         <div className="kicker">
           {formatDate(s.date)}
           {minutes ? ` · ${minutes}` : ''}
@@ -309,6 +313,13 @@ export default function SermonView({ sermon: s }) {
           {openedTabs[4] && <Transcript sermonId={s.id} onSeek={seekTo} />}
         </div>
       </div>
+
+      {related.length > 0 && (
+        <div className="sd-related">
+          <h4 className="sd-h4">More like this</h4>
+          <SermonGrid sermons={related} />
+        </div>
+      )}
     </main>
   );
 }
