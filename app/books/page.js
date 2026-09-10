@@ -54,8 +54,8 @@ export default async function BooksPage() {
       counts.set(b, (counts.get(b) || 0) + 1);
     }
   }
-  const covered = BOOKS.filter((b) => counts.get(b)).length;
   const max = Math.max(1, ...counts.values());
+  const top = BOOKS.find((b) => counts.get(b) === max) || 'John';
 
   return (
     <main>
@@ -63,7 +63,7 @@ export default async function BooksPage() {
         <div className="glow" />
         <div className="kicker">Way Church · Books</div>
         <h1>
-          {covered} of 66 books, <em>preached.</em>
+          {top}, preached <em>{max} times.</em>
         </h1>
       </section>
 
