@@ -49,132 +49,95 @@
   .switch button.on { background: var(--amber); color: #0b101e; }
 
   .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 1000px) { .g3 { grid-template-columns: 1fr 1fr; } .g2 { grid-template-columns: 1fr; } }
+  @media (max-width: 1000px) { .g3 { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 640px) { .g3 { grid-template-columns: 1fr; } }
 
   /* Shared bits */
-  .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
+  .dur { position: absolute; right: 10px; top: 10px; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; z-index: 3; }
   .chip-v { font-size: 11.5px; font-weight: 700; color: var(--amber); background: var(--amber-dim); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
   .chip-t { font-size: 11.5px; font-weight: 600; color: #b9a8ff; background: var(--violet-dim); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
-  .sum { font-size: 13.5px; line-height: 1.65; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .date { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; margin-bottom: 7px; }
+  h3 { font-family: Fraunces, serif; font-size: 22px; font-weight: 500; line-height: 1.16; margin-bottom: 9px; }
+  .sum { font-size: 13.5px; line-height: 1.65; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 14px; }
 
-  /* ===== V1 Elevated Classic ===== */
-  .c1 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
-  .c1:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
-  .c1 .th { position: relative; aspect-ratio: 16/9; overflow: hidden; }
-  .c1 .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-  .c1:hover .th img { transform: scale(1.04); }
-  .c1 .body { padding: 20px; }
-  .c1 .date { font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
-  .c1 h3 { font-family: Fraunces, serif; font-size: 22px; font-weight: 500; line-height: 1.18; margin-bottom: 10px; }
-  .c1:hover h3 { color: var(--amber); }
-  .c1 .sum { margin-bottom: 16px; }
-  .c1 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-
-  /* ===== V2 Footer Bar ===== */
-  .c2 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.25s, border-color 0.2s; }
-  .c2:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
-  .c2 .th { position: relative; aspect-ratio: 16/9; }
-  .c2 .th img { width: 100%; height: 100%; object-fit: cover; }
-  .c2 .body { padding: 18px 20px; flex: 1; }
-  .c2 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
-  .c2 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
-  .c2:hover h3 { color: var(--amber); }
-  .c2 .foot {
-    border-top: 1px solid var(--line); padding: 12px 20px;
-    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  /* ===== V1 Seamless Fade: full 16:9 image melts into the content, one continuous poster ===== */
+  .n1 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
+  .n1:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .n1 .th { position: relative; aspect-ratio: 16/9; }
+  .n1 .th img {
+    width: 100%; height: 100%; object-fit: cover;
+    -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    transition: transform 0.5s;
   }
-  .c2 .foot b { font-size: 12px; font-weight: 700; color: var(--amber); white-space: nowrap; }
-  .c2 .foot .tps { display: flex; gap: 10px; font-size: 12px; color: var(--muted); font-weight: 600; overflow: hidden; }
-  .c2 .foot .tps span { white-space: nowrap; }
+  .n1:hover .th img { transform: scale(1.03); }
+  .n1 .body { padding: 0 22px 22px; margin-top: -6px; }
+  .n1:hover h3 { color: var(--amber); }
+  .n1 .sum { color: #aab2c8; }
 
-  /* ===== V3 Split Panel ===== */
-  .c3 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; grid-template-columns: 46% 1fr; transition: transform 0.25s, border-color 0.2s; }
-  .c3:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .c3 .th { position: relative; min-height: 100%; }
-  .c3 .th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .c3 .body { padding: 20px 22px; display: flex; flex-direction: column; }
-  .c3 .date { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
-  .c3 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 10px; }
-  .c3:hover h3 { color: var(--amber); }
-  .c3 .sum { flex: 1; margin-bottom: 14px; }
-  .c3 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  @media (max-width: 640px) { .c3 { grid-template-columns: 1fr; } .c3 .th { aspect-ratio: 16/9; } }
+  /* ===== V2 Ambient Glow: blurred thumbnail lights the whole card, sharp full image inset ===== */
+  .n2 { position: relative; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .n2:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.55); }
+  .n2 .glow { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(42px) saturate(1.25) brightness(0.5); transform: scale(1.35); }
+  .n2 .scrim { position: absolute; inset: 0; background: rgba(11,16,30,0.52); }
+  .n2 .in { position: relative; z-index: 1; }
+  .n2 .th { position: relative; margin: 12px 12px 0; border-radius: 11px; overflow: hidden; aspect-ratio: 16/9; box-shadow: 0 14px 34px rgba(0,0,0,0.5); }
+  .n2 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .n2 .body { padding: 17px 20px 20px; }
+  .n2:hover h3 { color: var(--amber); }
+  .n2 .sum { color: #b9c0d4; }
+  .n2 .chip-v, .n2 .chip-t { backdrop-filter: blur(8px); }
 
-  /* ===== V4 Scripture Ribbon ===== */
-  .c4 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
-  .c4:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
-  .c4 .th { position: relative; aspect-ratio: 16/9; }
-  .c4 .th img { width: 100%; height: 100%; object-fit: cover; }
-  .c4 .ribbon {
-    position: absolute; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(90deg, rgba(11,16,30,0.92), rgba(11,16,30,0.55));
-    backdrop-filter: blur(6px); padding: 8px 14px;
-    font-family: Fraunces, serif; font-style: italic; font-size: 13.5px; color: var(--amber);
+  /* ===== V3 Glass Overlap: full image, frosted panel floats over the bottom edge ===== */
+  .n3 { padding-bottom: 4px; transition: transform 0.25s; }
+  .n3:hover { transform: translateY(-6px); }
+  .n3 .th { position: relative; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); }
+  .n3 .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .n3:hover .th img { transform: scale(1.03); }
+  .n3 .panel {
+    position: relative; margin: -26px 14px 0; border-radius: 14px; padding: 16px 18px 18px;
+    background: rgba(13,18,34,0.78); backdrop-filter: blur(16px);
+    border: 1px solid rgba(140,174,242,0.22); transition: border-color 0.2s;
   }
-  .c4 .body { padding: 18px 20px 20px; }
-  .c4 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
-  .c4 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
-  .c4:hover h3 { color: var(--amber); }
-  .c4 .sum { margin-bottom: 14px; }
-  .c4 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .n3:hover .panel { border-color: rgba(140,174,242,0.5); }
+  .n3:hover h3 { color: var(--amber); }
+  .n3 h3 { font-size: 20px; }
+  .n3 .sum { -webkit-line-clamp: 2; }
 
-  /* ===== V5 Overlay Editorial ===== */
-  .c5 { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 3/3.5; transition: transform 0.25s, border-color 0.2s; }
-  .c5:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
-  .c5 img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-  .c5:hover img.bg { transform: scale(1.05); }
-  .c5 .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0.05) 20%, rgba(11,16,30,0.72) 55%, rgba(11,16,30,0.97) 100%); }
-  .c5 .body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; }
-  .c5 .date { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; margin-bottom: 7px; }
-  .c5 h3 { font-family: Fraunces, serif; font-size: 22px; font-weight: 500; line-height: 1.16; margin-bottom: 9px; }
-  .c5 .sum { color: #b9c0d4; margin-bottom: 14px; -webkit-line-clamp: 2; }
-  .c5 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  /* ===== V4 Letterboxed Poster: variant 5's poster, full thumbnail over its own blurred fill ===== */
+  .n4 { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 3/3.5; transition: transform 0.25s, border-color 0.2s; }
+  .n4:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .n4 .fill { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(34px) brightness(0.42) saturate(1.2); transform: scale(1.3); }
+  .n4 .main { position: absolute; top: 0; left: 0; width: 100%; aspect-ratio: 16/9; object-fit: cover; transition: transform 0.6s; }
+  .n4 .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0) 34%, rgba(11,16,30,0.55) 58%, rgba(11,16,30,0.96) 100%); }
+  .n4 .body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; }
+  .n4:hover h3 { color: var(--amber); }
+  .n4 .sum { color: #b9c0d4; -webkit-line-clamp: 2; }
 
-  /* ===== V6 Left Ruler ===== */
-  .c6 { position: relative; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 16px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
-  .c6:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); border-left-color: var(--amber); }
-  .c6 .th { position: relative; aspect-ratio: 16/8.5; }
-  .c6 .th img { width: 100%; height: 100%; object-fit: cover; }
-  .c6 .body { padding: 18px 20px 20px; }
-  .c6 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
-  .c6 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
-  .c6:hover h3 { color: var(--amber); }
-  .c6 .sum { margin-bottom: 14px; }
-  .c6 .vq {
-    font-family: Fraunces, serif; font-style: italic; font-size: 14px; color: var(--amber);
-    margin-bottom: 12px; display: block;
-  }
-  .c6 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  /* ===== V5 Backlit Panel: full image flush on top, content sits on its own blurred echo ===== */
+  .n5 { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .n5:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .n5 .th { position: relative; aspect-ratio: 16/9; }
+  .n5 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .n5 .body { position: relative; overflow: hidden; }
+  .n5 .echo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(52px) brightness(0.32) saturate(1.3); transform: scale(1.6); }
+  .n5 .in { position: relative; padding: 18px 20px 20px; }
+  .n5:hover h3 { color: var(--amber); }
+  .n5 .sum { color: #b3bacd; }
+  .n5 .chip-v, .n5 .chip-t { backdrop-filter: blur(8px); }
 
-  /* ===== V7 Tags on Frame ===== */
-  .c7 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
-  .c7:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
-  .c7 .th { position: relative; aspect-ratio: 16/9; }
-  .c7 .th img { width: 100%; height: 100%; object-fit: cover; }
-  .c7 .th .chips { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; right: 70px; }
-  .c7 .th .chip-v, .c7 .th .chip-t { backdrop-filter: blur(8px); background: rgba(11,16,30,0.72); border: 1px solid rgba(140,174,242,0.35); }
-  .c7 .th .chip-t { border-color: rgba(143,125,240,0.4); }
-  .c7 .body { padding: 18px 20px 20px; }
-  .c7 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
-  .c7 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
-  .c7:hover h3 { color: var(--amber); }
-
-  /* ===== V8 Journal ===== */
-  .c8 { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
-  .c8:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
-  .c8 .th { position: relative; aspect-ratio: 16/9; margin: 12px 12px 0; border-radius: 12px; overflow: hidden; }
-  .c8 .th img { width: 100%; height: 100%; object-fit: cover; }
-  .c8 .body { padding: 16px 20px 20px; }
-  .c8 .toprow { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-  .c8 .date { font-size: 12px; color: var(--muted); }
-  .c8 .vref { font-size: 12px; font-weight: 700; color: var(--amber); }
-  .c8 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
-  .c8:hover h3 { color: var(--amber); }
-  .c8 .sum { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px dotted var(--line); }
-  .c8 .tps { display: flex; gap: 14px; font-size: 12px; font-weight: 600; color: #b9a8ff; }
-  .c8 .tps span::before { content: '#'; opacity: 0.6; margin-right: 1px; }
+  /* ===== V6 Editorial Below: borderless magazine listing, image untouched ===== */
+  .n6 { transition: transform 0.25s; }
+  .n6:hover { transform: translateY(-5px); }
+  .n6 .th { position: relative; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; box-shadow: 0 18px 44px rgba(0,0,0,0.45); transition: box-shadow 0.25s; }
+  .n6:hover .th { box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(140,174,242,0.4); }
+  .n6 .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .n6:hover .th img { transform: scale(1.04); }
+  .n6 .body { padding: 16px 4px 0; }
+  .n6 h3 { font-size: 23px; }
+  .n6:hover h3 { color: var(--amber); }
+  .n6 .sum { border-bottom: 1px solid var(--line); padding-bottom: 14px; }
 </style>
 </head>
 <body>
@@ -186,14 +149,12 @@
   </div>
 </div>
 
-<section class="variant" id="v1"><div class="vtag">1 · Elevated Classic</div><div class="wrap g3" id="g1"></div></section>
-<section class="variant" id="v2"><div class="vtag">2 · Footer Bar</div><div class="wrap g3" id="g2"></div></section>
-<section class="variant" id="v3"><div class="vtag">3 · Split Panel</div><div class="wrap g2" id="g3"></div></section>
-<section class="variant" id="v4"><div class="vtag">4 · Scripture Ribbon</div><div class="wrap g3" id="g4"></div></section>
-<section class="variant" id="v5"><div class="vtag">5 · Overlay Editorial</div><div class="wrap g3" id="g5"></div></section>
-<section class="variant" id="v6"><div class="vtag">6 · Left Ruler</div><div class="wrap g3" id="g6"></div></section>
-<section class="variant" id="v7"><div class="vtag">7 · Tags on Frame</div><div class="wrap g3" id="g7"></div></section>
-<section class="variant" id="v8"><div class="vtag">8 · Journal</div><div class="wrap g3" id="g8"></div></section>
+<section class="variant" id="v1"><div class="vtag">1 · Seamless Fade</div><div class="wrap g3" id="g1"></div></section>
+<section class="variant" id="v2"><div class="vtag">2 · Ambient Glow</div><div class="wrap g3" id="g2"></div></section>
+<section class="variant" id="v3"><div class="vtag">3 · Glass Overlap</div><div class="wrap g3" id="g3"></div></section>
+<section class="variant" id="v4"><div class="vtag">4 · Letterboxed Poster</div><div class="wrap g3" id="g4"></div></section>
+<section class="variant" id="v5"><div class="vtag">5 · Backlit Panel</div><div class="wrap g3" id="g5"></div></section>
+<section class="variant" id="v6"><div class="vtag">6 · Editorial Below</div><div class="wrap g3" id="g6"></div></section>
 
 <div class="switch" id="switch"></div>
 
@@ -209,83 +170,53 @@
   ];
   const img = (id) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
   const chips = (s) => `<span class="chip-v">${s.v}</span>${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}`;
+  const bodyBlock = (s) => `
+    <div class="date">${s.d}</div><h3>${s.t}</h3>
+    <p class="sum">${s.sum}</p>
+    <div class="chips">${chips(s)}</div>`;
 
   document.getElementById('g1').innerHTML = D.map((s) => `
-    <a class="c1">
+    <a class="n1">
       <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="body">
-        <div class="date">${s.d}</div><h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <div class="chips">${chips(s)}</div>
-      </div>
+      <div class="body">${bodyBlock(s)}</div>
     </a>`).join('');
 
   document.getElementById('g2').innerHTML = D.map((s) => `
-    <a class="c2">
-      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="body"><div class="date">${s.d}</div><h3>${s.t}</h3><p class="sum">${s.sum}</p></div>
-      <div class="foot"><b>${s.v}</b><div class="tps">${s.tp.map((t) => `<span>${t}</span>`).join('')}</div></div>
+    <a class="n2">
+      <img class="glow" src="${img(s.th)}" /><div class="scrim"></div>
+      <div class="in">
+        <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+        <div class="body">${bodyBlock(s)}</div>
+      </div>
     </a>`).join('');
 
   document.getElementById('g3').innerHTML = D.map((s) => `
-    <a class="c3">
+    <a class="n3">
       <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="body">
-        <div class="date">${s.d}</div><h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <div class="chips">${chips(s)}</div>
-      </div>
+      <div class="panel">${bodyBlock(s)}</div>
     </a>`).join('');
 
   document.getElementById('g4').innerHTML = D.map((s) => `
-    <a class="c4">
-      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span><div class="ribbon">${s.v}</div></div>
-      <div class="body">
-        <div class="date">${s.d}</div><h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <div class="chips">${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}</div>
-      </div>
+    <a class="n4">
+      <img class="fill" src="${img(s.th)}" />
+      <img class="main" src="${img(s.th)}" />
+      <div class="shade"></div><span class="dur">${s.min} min</span>
+      <div class="body">${bodyBlock(s)}</div>
     </a>`).join('');
 
   document.getElementById('g5').innerHTML = D.map((s) => `
-    <a class="c5">
-      <img class="bg" src="${img(s.th)}" /><div class="shade"></div><span class="dur" style="top:10px;bottom:auto;">${s.min} min</span>
-      <div class="body">
-        <div class="date">${s.d}</div><h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <div class="chips">${chips(s)}</div>
-      </div>
+    <a class="n5">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+      <div class="body"><img class="echo" src="${img(s.th)}" /><div class="in">${bodyBlock(s)}</div></div>
     </a>`).join('');
 
   document.getElementById('g6').innerHTML = D.map((s) => `
-    <a class="c6">
+    <a class="n6">
       <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="body">
-        <div class="date">${s.d}</div><h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <span class="vq">${s.v}</span>
-        <div class="chips">${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}</div>
-      </div>
+      <div class="body">${bodyBlock(s)}</div>
     </a>`).join('');
 
-  document.getElementById('g7').innerHTML = D.map((s) => `
-    <a class="c7">
-      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span><div class="chips">${chips(s)}</div></div>
-      <div class="body"><div class="date">${s.d}</div><h3>${s.t}</h3><p class="sum">${s.sum}</p></div>
-    </a>`).join('');
-
-  document.getElementById('g8').innerHTML = D.map((s) => `
-    <a class="c8">
-      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="body">
-        <div class="toprow"><span class="date">${s.d}</span><span class="vref">${s.v}</span></div>
-        <h3>${s.t}</h3>
-        <p class="sum">${s.sum}</p>
-        <div class="tps">${s.tp.map((t) => `<span>${t}</span>`).join('')}</div>
-      </div>
-    </a>`).join('');
-
-  const NAMES = ['Elevated Classic', 'Footer Bar', 'Split Panel', 'Scripture Ribbon', 'Overlay Editorial', 'Left Ruler', 'Tags on Frame', 'Journal'];
+  const NAMES = ['Seamless Fade', 'Ambient Glow', 'Glass Overlap', 'Letterboxed Poster', 'Backlit Panel', 'Editorial Below'];
   const sw = document.getElementById('switch');
   NAMES.forEach((n, i) => {
     const b = document.createElement('button');
