@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Way Archive: 10 books-page directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #1c3061; --bg: #0b101e; --panel: #111830; --panel2: #172038;
+    --line: #232d4c; --text: #eef1f7; --muted: #8d96b0; --blue: #8caef2;
+  }
+  body { font-family: Inter, sans-serif; background: var(--bg); color: var(--text); }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  .variant { display: none; min-height: 100vh; padding-bottom: 120px; }
+  .variant.on { display: block; }
+  .serif { font-family: Fraunces, serif; }
+
+  .switch {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 99;
+    display: flex; gap: 6px; padding: 8px; border-radius: 14px;
+    background: rgba(5, 8, 16, 0.94); border: 1px solid #26304f;
+    backdrop-filter: blur(10px); flex-wrap: wrap; justify-content: center; max-width: 96vw;
+  }
+  .switch button {
+    border: 0; background: transparent; color: var(--muted); font: 600 12px Inter, sans-serif;
+    padding: 8px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+  }
+  .switch button.on { background: var(--navy); color: #fff; }
+
+  header.site { display: flex; justify-content: space-between; align-items: center; padding: 20px 44px; border-bottom: 1px solid var(--line); }
+  .mark { background: var(--navy); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 0.06em; padding: 9px 15px 10px; border-radius: 7px; line-height: 1; display: inline-block; }
+  .navlinks { display: flex; gap: 24px; font-size: 13.5px; color: var(--muted); font-weight: 500; align-items: center; }
+  .navlinks .active { color: var(--blue); }
+  .hero { max-width: 1140px; margin: 0 auto; padding: 56px 24px 0; }
+  .hero .kick { color: var(--blue); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 2.5px; }
+  .hero h1 { font-family: Fraunces, serif; font-size: 52px; font-weight: 500; margin-top: 14px; line-height: 1.08; }
+  .hero h1 em { color: var(--blue); }
+
+  /* 1 HEATMAP */
+  .b1 .wrap { max-width: 1140px; margin: 44px auto 0; padding: 0 24px; }
+  .b1 .sect { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 30px 0 12px; }
+  .b1 .map { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .b1 .cell { border-radius: 10px; padding: 12px 13px; border: 1px solid var(--line); min-height: 74px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s, border-color 0.15s; }
+  .b1 a.cell:hover { transform: translateY(-2px); border-color: rgba(140,174,242,0.5); }
+  .b1 .cell b { font-size: 13.5px; font-weight: 700; }
+  .b1 .cell span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(238,241,247,0.75); }
+  .b1 .cell.off { opacity: 0.32; }
+  .b1 .cell.off b { color: var(--muted); }
+
+  /* 2 BAR INDEX */
+  .b2 .wrap { max-width: 1000px; margin: 44px auto 0; padding: 0 24px; }
+  .b2 .sect { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 34px 0 14px; }
+  .b2 .row { display: grid; grid-template-columns: 170px 1fr 44px; gap: 16px; align-items: center; padding: 6px 8px; border-radius: 8px; }
+  .b2 a.row:hover { background: var(--panel); }
+  .b2 .nm { font-size: 14px; }
+  .b2 a.row .nm { color: var(--blue); }
+  .b2 .row.off .nm { color: #46506e; }
+  .b2 .track { height: 8px; border-radius: 99px; background: var(--panel2); overflow: hidden; }
+  .b2 .fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3b5aa8, var(--blue)); }
+  .b2 .ct { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); text-align: right; }
+
+  /* 3 BOOKSHELF */
+  .b3 .wrap { max-width: 1240px; margin: 50px auto 0; padding: 0 24px; }
+  .b3 .shelf-label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 36px 0 0; }
+  .b3 .shelf { display: flex; align-items: flex-end; gap: 3px; padding: 18px 14px 0; border-bottom: 10px solid var(--navy); flex-wrap: wrap; }
+  .b3 .spine { writing-mode: vertical-rl; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-bottom: none; border-radius: 4px 4px 0 0; padding: 12px 0; font-size: 11.5px; font-weight: 600; color: var(--text); transition: transform 0.15s; }
+  .b3 a.spine:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.6); }
+  .b3 .spine i { font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--blue); }
+  .b3 .spine.off { opacity: 0.3; }
+
+  /* 4 PERIODIC */
+  .b4 .wrap { max-width: 1240px; margin: 44px auto 0; padding: 0 24px; }
+  .b4 .sect { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 30px 0 12px; }
+  .b4 .table { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .b4 .el { position: relative; aspect-ratio: 1; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; transition: transform 0.15s, border-color 0.15s; }
+  .b4 .el.nt { background: #101c3d; border-color: #2a3c72; }
+  .b4 a.el:hover { transform: translateY(-3px); border-color: var(--blue); }
+  .b4 .el .ab { font-family: Fraunces, serif; font-size: 24px; font-weight: 600; }
+  .b4 .el .full { font-size: 9.5px; color: var(--muted); margin-top: 3px; line-height: 1.2; }
+  .b4 .el .ct { position: absolute; top: 8px; right: 9px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--blue); }
+  .b4 .el.off { opacity: 0.32; }
+
+  /* 5 BIG NUMBERS */
+  .b5 .wrap { max-width: 1240px; margin: 44px auto 0; padding: 0 24px; }
+  .b5 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .b5 .c { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; transition: transform 0.15s, border-color 0.15s; }
+  .b5 a.c:hover { transform: translateY(-3px); border-color: rgba(140,174,242,0.55); }
+  .b5 .c b { font-family: Fraunces, serif; font-size: 44px; font-weight: 600; color: var(--blue); display: block; line-height: 1; }
+  .b5 .c span { font-size: 14.5px; font-weight: 600; display: block; margin-top: 10px; }
+  .b5 .c i { font-style: normal; font-size: 11px; color: var(--muted); }
+  .b5 .rest { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .b5 .rest span { font-size: 12px; color: #46506e; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; }
+
+  /* 6 LEDGER */
+  .b6 .wrap { max-width: 1140px; margin: 44px auto 0; padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  .b6 .sect { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .b6 .row { position: relative; display: flex; justify-content: space-between; align-items: baseline; padding: 8px 12px; border-bottom: 1px solid #161d33; overflow: hidden; }
+  .b6 .row .spark { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(140,174,242,0.07); }
+  .b6 a.row:hover { background: var(--panel); }
+  .b6 .nm { font-size: 14px; position: relative; }
+  .b6 a.row .nm { color: var(--blue); }
+  .b6 .row.off .nm { color: #46506e; }
+  .b6 .ct { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); position: relative; }
+
+  /* 7 SPINE */
+  .b7 .wrap { max-width: 760px; margin: 50px auto 0; padding: 0 24px; position: relative; }
+  .b7 .line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--line); transform: translateX(-50%); }
+  .b7 .test { position: relative; text-align: center; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); background: var(--bg); padding: 8px 0; margin: 20px 0 6px; z-index: 2; }
+  .b7 .node { position: relative; display: flex; align-items: center; gap: 18px; padding: 7px 0; z-index: 1; }
+  .b7 .node:nth-child(odd) { flex-direction: row-reverse; }
+  .b7 .half { width: calc(50% - 20px); display: flex; align-items: center; gap: 10px; }
+  .b7 .node:nth-child(odd) .half { justify-content: flex-start; }
+  .b7 .node:nth-child(even) .half { justify-content: flex-end; }
+  .b7 .dot { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 99px; background: var(--blue); box-shadow: 0 0 0 3px rgba(140,174,242,0.15); }
+  .b7 .dot.off { background: #2a3454; box-shadow: none; }
+  .b7 .nm { font-size: 13.5px; }
+  .b7 a .nm { color: var(--blue); }
+  .b7 .off-nm { color: #46506e; font-size: 13px; }
+  .b7 .ct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  /* 8 TYPE CLOUD */
+  .b8 .wrap { max-width: 1100px; margin: 60px auto 0; padding: 0 24px; text-align: center; }
+  .b8 .sect { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 44px 0 22px; }
+  .b8 .cloud { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 26px; row-gap: 10px; }
+  .b8 .bk { font-family: Fraunces, serif; font-weight: 500; line-height: 1.15; color: var(--text); transition: color 0.15s; }
+  .b8 a.bk:hover { color: var(--blue); }
+  .b8 .bk sup { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); margin-left: 3px; }
+  .b8 .bk.off { color: #38415f; }
+
+  /* 9 BRUTALIST */
+  .b9 header.site { border-bottom: 3px solid #fff; }
+  .b9 .shout { padding: 50px 40px 34px; border-bottom: 3px solid #fff; }
+  .b9 .shout h1 { font-weight: 900; font-size: clamp(54px, 8vw, 110px); line-height: 0.92; text-transform: uppercase; letter-spacing: -0.015em; }
+  .b9 .shout h1 span { color: transparent; -webkit-text-stroke: 2px var(--blue); }
+  .b9 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); border-left: 3px solid #fff; }
+  .b9 .c { border-right: 3px solid #fff; border-bottom: 3px solid #fff; padding: 18px 20px 20px; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+  .b9 a.c:hover { background: var(--navy); }
+  .b9 .c b { font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1.15; }
+  .b9 .c span { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: var(--blue); font-weight: 600; }
+  .b9 .c.off b { color: #46506e; }
+  .b9 .c.off span { color: #2a3454; }
+
+  /* 10 DASHBOARD */
+  .b10 .top { max-width: 1140px; margin: 50px auto 0; padding: 0 24px; display: flex; align-items: center; gap: 54px; }
+  .b10 svg { flex-shrink: 0; }
+  .b10 .ring-num { font-family: Fraunces, serif; font-size: 44px; font-weight: 600; fill: var(--text); }
+  .b10 .ring-sub { font-size: 11px; fill: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .b10 .legend { display: flex; gap: 40px; }
+  .b10 .legend b { font-family: Fraunces, serif; font-size: 30px; font-weight: 600; display: block; }
+  .b10 .legend span { color: var(--muted); font-size: 12.5px; }
+  .b10 .chips { max-width: 1140px; margin: 40px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .b10 .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 500; transition: border-color 0.15s; }
+  .b10 a.chip:hover { border-color: var(--blue); }
+  .b10 .chip i { font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); }
+  .b10 .chip.off { opacity: 0.3; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+<div class="switch" id="switch"></div>
+
+<script>
+const COUNTS = {"Romans":38,"Ephesians":31,"Hosea":1,"Psalms":35,"Hebrews":25,"Matthew":72,"Job":2,"John":74,"Isaiah":17,"Revelation":9,"Malachi":4,"Genesis":28,"Proverbs":37,"Habakkuk":1,"Luke":34,"1 Thessalonians":4,"1 Samuel":6,"1 Corinthians":20,"1 Peter":8,"Mark":17,"1 John":8,"Song of Solomon":7,"James":30,"Exodus":15,"Philippians":15,"Colossians":10,"Galatians":19,"Acts":21,"Leviticus":1,"1 Timothy":4,"2 Corinthians":30,"Daniel":5,"1 Kings":2,"Deuteronomy":7,"Jude":1,"Micah":1,"Jeremiah":8,"Numbers":2,"Nehemiah":2,"2 Timothy":10,"Ezra":1,"2 Peter":2,"Jonah":2,"Ezekiel":2,"Judges":2,"Joshua":3,"2 Samuel":1,"Titus":2,"Lamentations":2,"Ruth":1,"2 Kings":1,"Ecclesiastes":2};
+const BOOKS = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+const ABBR = ["Gen","Exod","Lev","Num","Deut","Josh","Judg","Ruth","1Sam","2Sam","1Kgs","2Kgs","1Chr","2Chr","Ezra","Neh","Esth","Job","Ps","Prov","Eccl","Song","Isa","Jer","Lam","Ezek","Dan","Hos","Joel","Amos","Obad","Jon","Mic","Nah","Hab","Zeph","Hag","Zech","Mal","Matt","Mark","Luke","John","Acts","Rom","1Cor","2Cor","Gal","Eph","Phil","Col","1Th","2Th","1Tim","2Tim","Titus","Phlm","Heb","Jas","1Pet","2Pet","1Jn","2Jn","3Jn","Jude","Rev"];
+const NT_START = 39;
+const MAX = Math.max(...Object.values(COUNTS));
+const c = b => COUNTS[b] || 0;
+const OT = BOOKS.slice(0, NT_START), NT = BOOKS.slice(NT_START);
+const covered = BOOKS.filter(b => c(b) > 0).length;
+const total = Object.values(COUNTS).reduce((a, x) => a + x, 0);
+const heat = n => n === 0 ? 'transparent' : `rgba(140, 174, 242, ${(0.08 + 0.5 * Math.pow(n / MAX, 0.45)).toFixed(3)})`;
+const nav = `<nav class="navlinks"><a>Sermons</a><a>Series</a><a>Speakers</a><a>Topics</a><a class="active">Books</a><a>Ask</a><a>YouTube ↗</a></nav>`;
+const site = `<header class="site"><span class="mark">WAY</span>${nav}</header>`;
+const hero = `<div class="hero"><div class="kick">Way Church · Books</div><h1>${covered} of 66 books, <em>preached.</em></h1></div>`;
+
+const VARIANTS = [
+
+{ name: '1 Heatmap', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT, 0], ['New Testament', NT, NT_START]].map(([label, books, off]) => `
+    <div class="sect">${label}</div>
+    <div class="map">${books.map((b, i) => {
+      const n = c(b);
+      const inner = `<b>${b}</b><span>${n > 0 ? n + (n === 1 ? ' sermon' : ' sermons') : ''}</span>`;
+      return n > 0
+        ? `<a class="cell" style="background:${heat(n)}">${inner}</a>`
+        : `<div class="cell off">${inner}</div>`;
+    }).join('')}</div>`).join('')}
+  </div>` },
+
+{ name: '2 Bar index', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT], ['New Testament', NT]].map(([label, books]) => `
+    <div class="sect">${label}</div>
+    ${books.map(b => {
+      const n = c(b);
+      const bar = `<span class="nm">${b}</span><div class="track"><div class="fill" style="width:${(n / MAX * 100).toFixed(1)}%"></div></div><div class="ct">${n || ''}</div>`;
+      return n > 0 ? `<a class="row">${bar}</a>` : `<div class="row off">${bar}</div>`;
+    }).join('')}`).join('')}
+  </div>` },
+
+{ name: '3 Bookshelf', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT], ['New Testament', NT]].map(([label, books]) => `
+    <div class="shelf-label">${label}</div>
+    <div class="shelf">${books.map(b => {
+      const n = c(b);
+      const h = 90 + Math.round(110 * Math.pow(n / MAX, 0.5));
+      const w = 26 + Math.round(18 * Math.pow(n / MAX, 0.5));
+      const inner = `${b}${n > 0 ? `<i>${n}</i>` : ''}`;
+      return n > 0
+        ? `<a class="spine" style="height:${h}px;width:${w}px;background:linear-gradient(180deg,${heat(n)},var(--panel))">${inner}</a>`
+        : `<div class="spine off" style="height:86px;width:24px">${inner}</div>`;
+    }).join('')}</div>`).join('')}
+  </div>` },
+
+{ name: '4 Periodic table', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT, 0], ['New Testament', NT, NT_START]].map(([label, books, off]) => `
+    <div class="sect">${label}</div>
+    <div class="table">${books.map((b, i) => {
+      const n = c(b);
+      const nt = off === NT_START ? ' nt' : '';
+      const inner = `${n > 0 ? `<span class="ct">${n}</span>` : ''}<div class="ab">${ABBR[off + i]}</div><div class="full">${b}</div>`;
+      return n > 0 ? `<a class="el${nt}">${inner}</a>` : `<div class="el off${nt}">${inner}</div>`;
+    }).join('')}</div>`).join('')}
+  </div>` },
+
+{ name: '5 Big numbers', html: () => site + hero + `
+  <div class="wrap" style="margin-top:44px">
+    <div class="grid">${BOOKS.filter(b => c(b) > 0).sort((a, b) => c(b) - c(a)).map(b => `
+      <a class="c"><b>${c(b)}</b><span>${b}</span><i>${c(b) === 1 ? 'sermon' : 'sermons'}</i></a>`).join('')}
+    </div>
+    <div class="rest">${BOOKS.filter(b => c(b) === 0).map(b => `<span>${b}</span>`).join('')}</div>
+  </div>` },
+
+{ name: '6 Ledger + sparks', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT], ['New Testament', NT]].map(([label, books]) => `
+    <div>
+      <div class="sect">${label}</div>
+      ${books.map(b => {
+        const n = c(b);
+        const inner = `<div class="spark" style="width:${(n / MAX * 100).toFixed(1)}%"></div><span class="nm">${b}</span><span class="ct">${n || ''}</span>`;
+        return n > 0 ? `<a class="row">${inner}</a>` : `<div class="row off">${inner}</div>`;
+      }).join('')}
+    </div>`).join('')}
+  </div>` },
+
+{ name: '7 Scripture spine', html: () => site + hero + `
+  <div class="wrap">
+    <div class="line"></div>
+    <div class="test">Old Testament</div>
+    ${OT.map(b => spineNode(b)).join('')}
+    <div class="test">New Testament</div>
+    ${NT.map(b => spineNode(b)).join('')}
+  </div>` },
+
+{ name: '8 Type cloud', html: () => site + hero + `
+  <div class="wrap">
+    ${[['Old Testament', OT], ['New Testament', NT]].map(([label, books]) => `
+    <div class="sect">${label}</div>
+    <div class="cloud">${books.map(b => {
+      const n = c(b);
+      const size = 17 + Math.round(41 * Math.pow(n / MAX, 0.6));
+      return n > 0
+        ? `<a class="bk" style="font-size:${size}px">${b}<sup>${n}</sup></a>`
+        : `<span class="bk off" style="font-size:15px">${b}</span>`;
+    }).join('')}</div>`).join('')}
+  </div>` },
+
+{ name: '9 Brutalist', html: () => site + `
+  <div class="shout"><h1>${covered} OF 66 BOOKS.<br/><span>PREACHED.</span></h1></div>
+  <div class="grid">${BOOKS.map(b => {
+    const n = c(b);
+    const inner = `<b>${b}</b><span>${n ? String(n).padStart(2, '0') : '00'}</span>`;
+    return n > 0 ? `<a class="c">${inner}</a>` : `<div class="c off">${inner}</div>`;
+  }).join('')}</div>` },
+
+{ name: '10 Dashboard', html: () => {
+  const R = 74, C = 2 * Math.PI * R, frac = covered / 66;
+  return site + hero + `
+  <div class="top">
+    <svg width="190" height="190" viewBox="0 0 190 190">
+      <circle cx="95" cy="95" r="${R}" fill="none" stroke="#1d2745" stroke-width="14" />
+      <circle cx="95" cy="95" r="${R}" fill="none" stroke="#8caef2" stroke-width="14" stroke-linecap="round"
+        stroke-dasharray="${(C * frac).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 95 95)" />
+      <text x="95" y="99" text-anchor="middle" class="ring-num">${covered}/66</text>
+      <text x="95" y="122" text-anchor="middle" class="ring-sub">books</text>
+    </svg>
+    <div class="legend">
+      <div><b>${total}</b><span>book mentions</span></div>
+      <div><b>John</b><span>most preached · ${c('John')}</span></div>
+      <div><b>${66 - covered}</b><span>not yet preached</span></div>
+    </div>
+  </div>
+  <div class="chips">${BOOKS.map(b => {
+    const n = c(b);
+    return n > 0 ? `<a class="chip">${b}<i>${n}</i></a>` : `<span class="chip off">${b}</span>`;
+  }).join('')}</div>`; } },
+];
+
+function spineNode(b) {
+  const n = c(b);
+  const d = n === 0 ? 8 : 10 + Math.round(18 * Math.pow(n / MAX, 0.55));
+  const half = n > 0
+    ? `<a class="half"><span class="nm">${b}</span><span class="ct">${n}</span></a>`
+    : `<div class="half"><span class="off-nm">${b}</span></div>`;
+  return `<div class="node" style="min-height:${Math.max(d + 10, 30)}px">${half}<span class="dot${n ? '' : ' off'}" style="width:${d}px;height:${d}px"></span></div>`;
+}
+
+const root = document.getElementById('root');
+const sw = document.getElementById('switch');
+VARIANTS.forEach((v, i) => {
+  const sec = document.createElement('div');
+  sec.className = `variant b${i + 1}` + (i === 0 ? ' on' : '');
+  sec.innerHTML = v.html();
+  root.appendChild(sec);
+  const btn = document.createElement('button');
+  btn.textContent = v.name;
+  if (i === 0) btn.classList.add('on');
+  btn.onclick = () => {
+    document.querySelectorAll('.variant').forEach(el => el.classList.remove('on'));
+    document.querySelectorAll('.switch button').forEach(el => el.classList.remove('on'));
+    sec.classList.add('on'); btn.classList.add('on');
+    window.scrollTo(0, 0);
+  };
+  sw.appendChild(btn);
+});
+</script>
+</body>
+</html>
