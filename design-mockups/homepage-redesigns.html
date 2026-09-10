@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Way Archive: 10 homepage directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #1c3061; --navy-deep: #0b101e; --panel: #111830; --panel2: #172038;
+    --line: #232d4c; --text: #eef1f7; --muted: #8d96b0; --blue: #8caef2;
+  }
+  body { font-family: Inter, sans-serif; background: #05070d; color: var(--text); }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  img { display: block; }
+  .variant { display: none; min-height: 100vh; }
+  .variant.on { display: block; }
+
+  /* switcher */
+  .switch {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 99;
+    display: flex; gap: 6px; padding: 8px; border-radius: 14px;
+    background: rgba(5, 8, 16, 0.92);
+    border: 1px solid #26304f; backdrop-filter: blur(10px); flex-wrap: wrap; justify-content: center;
+    max-width: 96vw;
+  }
+  .switch button {
+    border: 0; background: transparent; color: var(--muted); font: 600 12px Inter, sans-serif;
+    padding: 8px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+  }
+  .switch button.on { background: var(--navy); color: #fff; }
+
+  /* shared header pieces */
+  .mark { background: var(--navy); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 0.06em; padding: 9px 15px 10px; border-radius: 7px; line-height: 1; display: inline-block; }
+  .navlinks { display: flex; gap: 26px; font-size: 13.5px; color: var(--muted); font-weight: 500; align-items: center; }
+  .navlinks .active { color: var(--blue); }
+  .serif { font-family: Fraunces, serif; }
+
+  /* ============ 1. CINEMATIC ============ */
+  .v1 { background: var(--navy-deep); }
+  .v1 .stage { position: relative; height: 92vh; overflow: hidden; }
+  .v1 .stage img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .v1 .stage .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,8,16,0.55) 0%, rgba(5,8,16,0.15) 40%, rgba(5,8,16,0.96) 88%, #05080f 100%); }
+  .v1 header { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 26px 48px; }
+  .v1 .stagecopy { position: absolute; left: 48px; bottom: 120px; z-index: 2; max-width: 760px; }
+  .v1 .kick { color: var(--blue); font-weight: 700; letter-spacing: 0.24em; font-size: 11.5px; text-transform: uppercase; }
+  .v1 h1 { font-family: Fraunces, serif; font-size: 74px; line-height: 1.02; font-weight: 500; margin: 16px 0 14px; }
+  .v1 h1 em { color: var(--blue); }
+  .v1 .sub { color: #c3c9dd; font-size: 15px; max-width: 520px; line-height: 1.6; }
+  .v1 .play { display: inline-flex; gap: 12px; align-items: center; margin-top: 24px; background: #fff; color: #0b101e; font-weight: 700; font-size: 14px; padding: 13px 22px; border-radius: 999px; }
+  .v1 .strip { position: relative; z-index: 4; display: flex; gap: 18px; padding: 0 48px 60px; margin-top: -70px; overflow-x: auto; }
+  .v1 .strip .c { flex: 0 0 300px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .v1 .strip img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v1 .strip .b { padding: 14px 16px 16px; }
+  .v1 .strip .d { font-size: 11.5px; color: var(--muted); }
+  .v1 .strip h3 { font-family: Fraunces, serif; font-size: 16.5px; margin-top: 5px; font-weight: 600; line-height: 1.25; }
+
+  /* ============ 2. EDITORIAL ============ */
+  .v2 { background: #0a0e1a; padding-bottom: 90px; }
+  .v2 header { display: flex; justify-content: space-between; align-items: center; padding: 26px 56px; border-bottom: 1px solid var(--line); }
+  .v2 .wrap { max-width: 1280px; margin: 0 auto; padding: 70px 40px 0; }
+  .v2 .masthead { display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: end; border-bottom: 1px solid var(--line); padding-bottom: 54px; }
+  .v2 h1 { font-family: Fraunces, serif; font-size: 88px; font-weight: 400; line-height: 0.98; letter-spacing: -0.01em; }
+  .v2 h1 em { color: var(--blue); }
+  .v2 .lede { color: var(--muted); font-size: 14px; line-height: 1.7; }
+  .v2 .lede b { color: var(--text); font-family: Fraunces, serif; font-size: 30px; display: block; font-weight: 600; margin-bottom: 4px; }
+  .v2 .ledegrid { display: flex; gap: 44px; }
+  .v2 .issue { display: grid; grid-template-columns: 1.35fr 1fr; gap: 54px; padding-top: 54px; }
+  .v2 .cover img { width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+  .v2 .cover .cap { display: flex; justify-content: space-between; border-top: 2px solid var(--text); margin-top: 14px; padding-top: 12px; }
+  .v2 .cover h2 { font-family: Fraunces, serif; font-size: 30px; font-weight: 600; max-width: 480px; line-height: 1.1; }
+  .v2 .cover .n { font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 12px; text-align: right; }
+  .v2 .index .row { display: grid; grid-template-columns: 44px 1fr auto; gap: 16px; align-items: baseline; padding: 17px 0; border-bottom: 1px solid var(--line); }
+  .v2 .index .num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--blue); }
+  .v2 .index h3 { font-family: Fraunces, serif; font-size: 19px; font-weight: 500; }
+  .v2 .index .who { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .v2 .index .min { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  /* ============ 3. SPLIT ============ */
+  .v3 { display: grid; grid-template-columns: 460px 1fr; min-height: 100vh; background: #0a0e1a; }
+  .v3 .side { background: var(--navy); position: sticky; top: 0; height: 100vh; padding: 40px 44px; display: flex; flex-direction: column; }
+  .v3 .side .navlinks { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: 60px; font-size: 15px; color: #b9c6e8; }
+  .v3 .side .navlinks .active { color: #fff; }
+  .v3 .giant { font-weight: 900; font-size: 92px; letter-spacing: 0.02em; color: #fff; line-height: 0.95; }
+  .v3 .side h1 { font-family: Fraunces, serif; font-weight: 500; font-size: 26px; line-height: 1.25; color: #dbe4fa; margin-top: auto; }
+  .v3 .side .st { display: flex; gap: 30px; margin-top: 26px; color: #9fb1e0; font-size: 12px; }
+  .v3 .side .st b { display: block; color: #fff; font-family: Fraunces, serif; font-size: 24px; }
+  .v3 .feed { padding: 44px 48px 100px; }
+  .v3 .feed .row { display: grid; grid-template-columns: 280px 1fr; gap: 26px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  .v3 .feed img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; }
+  .v3 .feed .d { color: var(--muted); font-size: 12px; }
+  .v3 .feed h3 { font-family: Fraunces, serif; font-size: 24px; font-weight: 600; margin: 6px 0 8px; }
+  .v3 .feed p { color: var(--muted); font-size: 13px; line-height: 1.65; max-width: 640px; }
+
+  /* ============ 4. POSTER WALL ============ */
+  .v4 { background: #05070d; padding-bottom: 90px; }
+  .v4 header { display: flex; justify-content: space-between; align-items: center; padding: 26px 40px; }
+  .v4 .intro { text-align: center; padding: 46px 20px 38px; }
+  .v4 .intro h1 { font-family: Fraunces, serif; font-size: 46px; font-weight: 500; }
+  .v4 .intro h1 em { color: var(--blue); }
+  .v4 .intro p { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .v4 .wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 10px; }
+  .v4 .tile { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16/9; }
+  .v4 .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s; }
+  .v4 .tile:hover img { transform: scale(1.05); }
+  .v4 .tile .ov { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(5,7,13,0.92)); display: flex; flex-direction: column; justify-content: flex-end; padding: 18px; opacity: 0; transition: opacity 0.25s; }
+  .v4 .tile:hover .ov { opacity: 1; }
+  .v4 .tile.first .ov { opacity: 1; }
+  .v4 .tile h3 { font-family: Fraunces, serif; font-size: 19px; font-weight: 600; }
+  .v4 .tile .d { font-size: 11.5px; color: #b9c1d9; margin-top: 4px; }
+  .v4 .tile .tagf { position: absolute; top: 12px; left: 12px; background: var(--blue); color: #0b101e; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; padding: 5px 10px; border-radius: 6px; }
+
+  /* ============ 5. PRINT / LIGHT ============ */
+  .v5 { background: #f4f1ea; color: #101a33; padding-bottom: 90px; }
+  .v5 header { display: flex; justify-content: space-between; align-items: center; padding: 24px 52px; border-bottom: 2px solid #101a33; }
+  .v5 .navlinks { color: #5a617c; }
+  .v5 .navlinks .active { color: #101a33; font-weight: 700; }
+  .v5 .wrap { max-width: 1240px; margin: 0 auto; padding: 60px 36px 0; }
+  .v5 .hero { display: grid; grid-template-columns: 1fr 470px; gap: 60px; align-items: center; padding-bottom: 50px; border-bottom: 1px solid #cdc7b8; }
+  .v5 h1 { font-family: Fraunces, serif; font-size: 66px; font-weight: 500; line-height: 1.03; }
+  .v5 h1 em { color: var(--navy); }
+  .v5 .st { display: flex; gap: 36px; margin-top: 28px; font-size: 12.5px; color: #5a617c; }
+  .v5 .st b { display: block; font-family: Fraunces, serif; font-size: 26px; color: #101a33; }
+  .v5 .fc { border: 2px solid #101a33; background: #fff; box-shadow: 7px 7px 0 #101a33; }
+  .v5 .fc img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v5 .fc .b { padding: 18px 20px 20px; }
+  .v5 .fc .k { color: var(--navy); font-size: 10.5px; letter-spacing: 0.2em; font-weight: 800; }
+  .v5 .fc h3 { font-family: Fraunces, serif; font-size: 21px; margin-top: 7px; }
+  .v5 .fc .d { font-size: 12px; color: #5a617c; margin-top: 5px; }
+  .v5 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 46px; }
+  .v5 .c { background: #fff; border: 1px solid #d8d2c4; }
+  .v5 .c img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v5 .c .b { padding: 15px 17px 18px; }
+  .v5 .c .d { font-size: 11.5px; color: #5a617c; }
+  .v5 .c h3 { font-family: Fraunces, serif; font-size: 17.5px; margin-top: 5px; line-height: 1.25; }
+
+  /* ============ 6. ARCHIVE INDEX ============ */
+  .v6 { background: #070a12; padding-bottom: 110px; }
+  .v6 header { display: flex; justify-content: space-between; align-items: center; padding: 26px 48px; border-bottom: 1px solid var(--line); }
+  .v6 .wrap { max-width: 1200px; margin: 0 auto; padding: 64px 32px 0; }
+  .v6 .top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+  .v6 h1 { font-family: Fraunces, serif; font-size: 58px; font-weight: 500; line-height: 1.03; }
+  .v6 h1 em { color: var(--blue); }
+  .v6 .meta { font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 12px; text-align: right; line-height: 1.9; }
+  .v6 .meta b { color: var(--blue); }
+  .v6 .lead { position: relative; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 8px; display: grid; grid-template-columns: 380px 1fr; background: var(--panel); }
+  .v6 .lead img { width: 100%; height: 100%; object-fit: cover; }
+  .v6 .lead .b { padding: 26px 30px; }
+  .v6 .lead .k { color: var(--blue); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; }
+  .v6 .lead h3 { font-family: Fraunces, serif; font-size: 27px; margin: 10px 0; }
+  .v6 .lead p { color: var(--muted); font-size: 13px; line-height: 1.65; }
+  .v6 .row { display: grid; grid-template-columns: 60px 130px 1fr 190px 70px; gap: 18px; align-items: center; padding: 15px 18px; border-bottom: 1px solid #161d33; border-radius: 10px; font-size: 13.5px; }
+  .v6 .row:hover { background: var(--panel); }
+  .v6 .row .n, .v6 .row .dt, .v6 .row .mn { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); }
+  .v6 .row .n { color: var(--blue); }
+  .v6 .row h3 { font-family: Fraunces, serif; font-size: 17px; font-weight: 500; }
+  .v6 .row .sp { color: var(--muted); font-size: 12px; }
+  .v6 .row .mn { text-align: right; }
+
+  /* ============ 7. SPOTLIGHT ============ */
+  .v7 { background: radial-gradient(1100px 620px at 50% -80px, #162a55, transparent 70%), #070a13; padding-bottom: 90px; }
+  .v7 header { display: flex; justify-content: space-between; align-items: center; padding: 26px 48px; }
+  .v7 .center { text-align: center; padding: 40px 20px 34px; }
+  .v7 h1 { font-family: Fraunces, serif; font-size: 56px; font-weight: 500; }
+  .v7 h1 em { color: var(--blue); }
+  .v7 .theatre { display: flex; gap: 22px; align-items: center; justify-content: center; padding: 10px 40px 0; }
+  .v7 .wing { flex: 0 0 240px; opacity: 0.45; transform: scale(0.94); }
+  .v7 .wing img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; }
+  .v7 .wing h4 { font-family: Fraunces, serif; font-size: 14px; margin-top: 10px; font-weight: 500; text-align: center; }
+  .v7 .main { flex: 0 0 620px; background: var(--panel); border: 1px solid rgba(140,174,242,0.4); border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 70px rgba(140,174,242,0.09); }
+  .v7 .main img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v7 .main .b { padding: 22px 26px 26px; text-align: center; }
+  .v7 .main .k { color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: 0.22em; }
+  .v7 .main h3 { font-family: Fraunces, serif; font-size: 25px; margin-top: 9px; }
+  .v7 .main .d { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+  .v7 .dots { display: flex; gap: 7px; justify-content: center; margin-top: 30px; }
+  .v7 .dots i { width: 7px; height: 7px; border-radius: 99px; background: #26304f; }
+  .v7 .dots i.on { background: var(--blue); width: 22px; }
+  .v7 .below { max-width: 1200px; margin: 54px auto 0; padding: 0 32px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .v7 .below .c { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .v7 .below img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v7 .below .b { padding: 12px 14px 15px; }
+  .v7 .below .d { font-size: 11px; color: var(--muted); }
+  .v7 .below h3 { font-family: Fraunces, serif; font-size: 14.5px; margin-top: 4px; font-weight: 600; line-height: 1.3; }
+
+  /* ============ 8. BRUTALIST ============ */
+  .v8 { background: #0b101e; padding-bottom: 100px; }
+  .v8 header { display: flex; justify-content: space-between; align-items: center; padding: 22px 40px; border-bottom: 3px solid #fff; }
+  .v8 .navlinks { color: #c8d2ec; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; }
+  .v8 .shout { padding: 54px 40px 40px; border-bottom: 3px solid #fff; }
+  .v8 .shout h1 { font-weight: 900; font-size: clamp(70px, 11vw, 150px); line-height: 0.9; text-transform: uppercase; letter-spacing: -0.015em; }
+  .v8 .shout h1 span { color: transparent; -webkit-text-stroke: 2px var(--blue); }
+  .v8 .bar { display: flex; justify-content: space-between; padding: 16px 40px; border-bottom: 3px solid #fff; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 0.12em; color: var(--blue); }
+  .v8 .grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .v8 .c { border-right: 3px solid #fff; border-bottom: 3px solid #fff; }
+  .v8 .c:nth-child(3n) { border-right: 0; }
+  .v8 .c img { width: 100%; aspect-ratio: 16/9; object-fit: cover; filter: saturate(0.9); }
+  .v8 .c .b { padding: 18px 20px 22px; }
+  .v8 .c .d { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); }
+  .v8 .c h3 { font-weight: 800; font-size: 19px; text-transform: uppercase; margin-top: 8px; line-height: 1.15; }
+  .v8 .c:hover { background: var(--navy); }
+
+  /* ============ 9. GLASS ============ */
+  .v9 { min-height: 100vh; padding-bottom: 100px; background:
+      radial-gradient(900px 500px at 12% -10%, rgba(72, 110, 200, 0.55), transparent 60%),
+      radial-gradient(800px 520px at 88% 8%, rgba(120, 90, 230, 0.35), transparent 60%),
+      radial-gradient(700px 500px at 55% 110%, rgba(60, 130, 220, 0.25), transparent 60%),
+      #070a14; }
+  .v9 header { display: flex; justify-content: space-between; align-items: center; padding: 24px 44px; }
+  .v9 .pill { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(14px); border-radius: 999px; padding: 10px 24px; }
+  .v9 .hero { max-width: 1280px; margin: 46px auto 0; padding: 0 36px; display: grid; grid-template-columns: 1fr 480px; gap: 56px; align-items: center; }
+  .v9 h1 { font-family: Fraunces, serif; font-size: 64px; font-weight: 500; line-height: 1.04; }
+  .v9 h1 em { background: linear-gradient(90deg, #9db9f5, #c1a9f8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .v9 .st { display: flex; gap: 14px; margin-top: 30px; }
+  .v9 .st div { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.13); backdrop-filter: blur(14px); border-radius: 14px; padding: 14px 20px; font-size: 12px; color: #b9c3de; }
+  .v9 .st b { display: block; font-family: Fraunces, serif; font-size: 23px; color: #fff; }
+  .v9 .fc { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(18px); border-radius: 22px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,0.45); }
+  .v9 .fc img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v9 .fc .b { padding: 18px 22px 22px; }
+  .v9 .fc .k { font-size: 10.5px; font-weight: 800; letter-spacing: 0.2em; color: #aecbff; }
+  .v9 .fc h3 { font-family: Fraunces, serif; font-size: 21px; margin-top: 8px; }
+  .v9 .fc .d { color: #a7b1cc; font-size: 12px; margin-top: 5px; }
+  .v9 .grid { max-width: 1280px; margin: 60px auto 0; padding: 0 36px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .v9 .c { background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(14px); border-radius: 16px; overflow: hidden; transition: transform 0.2s, background 0.2s; }
+  .v9 .c:hover { transform: translateY(-4px); background: rgba(255,255,255,0.09); }
+  .v9 .c img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .v9 .c .b { padding: 13px 15px 16px; }
+  .v9 .c .d { font-size: 11px; color: #a7b1cc; }
+  .v9 .c h3 { font-family: Fraunces, serif; font-size: 15px; margin-top: 4px; font-weight: 600; line-height: 1.3; }
+
+  /* ============ 10. THEATER ============ */
+  .v10 { background: #04060c; padding-bottom: 90px; }
+  .v10 header { display: flex; justify-content: space-between; align-items: center; padding: 24px 44px; }
+  .v10 .screenwrap { max-width: 1240px; margin: 26px auto 0; padding: 0 32px; }
+  .v10 .screen { position: relative; border-radius: 24px; overflow: hidden; border: 1px solid #1d2743; box-shadow: 0 0 0 1px rgba(140,174,242,0.08), 0 40px 120px rgba(20, 45, 110, 0.35); }
+  .v10 .screen img { width: 100%; aspect-ratio: 21/9; object-fit: cover; }
+  .v10 .screen .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(4,6,12,0.9)); }
+  .v10 .screen .playbtn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -58%); width: 86px; height: 86px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(8px); display: grid; place-items: center; }
+  .v10 .screen .playbtn::after { content: ''; border-left: 22px solid #fff; border-top: 13px solid transparent; border-bottom: 13px solid transparent; margin-left: 6px; }
+  .v10 .screen .cap { position: absolute; left: 30px; right: 30px; bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .v10 .screen .k { color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: 0.22em; }
+  .v10 .screen h1 { font-family: Fraunces, serif; font-size: 40px; font-weight: 500; margin-top: 8px; }
+  .v10 .screen .d { color: #b6bfd8; font-size: 12.5px; margin-top: 6px; }
+  .v10 .screen .mn { font-family: 'JetBrains Mono', monospace; color: #b6bfd8; font-size: 12px; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 8px; }
+  .v10 .rowlabel { max-width: 1240px; margin: 44px auto 14px; padding: 0 32px; display: flex; justify-content: space-between; align-items: baseline; }
+  .v10 .rowlabel h2 { font-family: Fraunces, serif; font-size: 22px; font-weight: 600; }
+  .v10 .rowlabel span { color: var(--muted); font-size: 12.5px; }
+  .v10 .rail { display: flex; gap: 16px; overflow-x: auto; padding: 6px 32px 20px; max-width: 1240px; margin: 0 auto; scrollbar-width: none; }
+  .v10 .rail::-webkit-scrollbar { display: none; }
+  .v10 .rail .c { flex: 0 0 264px; }
+  .v10 .rail img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; border: 1px solid #1d2743; transition: transform 0.2s, border-color 0.2s; }
+  .v10 .rail .c:hover img { transform: scale(1.04); border-color: var(--blue); }
+  .v10 .rail h3 { font-family: Fraunces, serif; font-size: 15px; font-weight: 600; margin-top: 10px; line-height: 1.3; }
+  .v10 .rail .d { font-size: 11px; color: var(--muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<div class="switch" id="switch"></div>
+
+<script>
+const S = [
+ {t:"I Need Peace | Grant Troutt", d:"2026-09-07", th:"https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg", m:31, sp:"Grant Troutt", su:"Grant Troutt preaches from Psalm 34 about finding peace not by escaping hardship but by learning to walk with God inside the 'cave' of suffering."},
+ {t:"How to Overcome Anxious Thoughts | Noah Herrin", d:"2026-08-31", th:"https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg", m:30, sp:"Noah Herrin", su:"Anxious, negative thoughts can be changed by reorienting our thinking toward the consistent, gracious character of God."},
+ {t:"I Got the Bag | Noah Herrin", d:"2026-08-24", th:"https://i.ytimg.com/vi/46zVMFuXMsU/maxresdefault.jpg", m:37, sp:"Noah Herrin", su:"Every follower of Jesus has been entrusted with a bag: time, talent, and treasure."},
+ {t:"Do Your Job | Noah Herrin", d:"2026-08-17", th:"https://i.ytimg.com/vi/b42BkFdMkgg/maxresdefault.jpg", m:33, sp:"Noah Herrin", su:"Work is part of God's good design, given before the Fall, and should be understood as worship."},
+ {t:"Test God | Noah Herrin", d:"2026-08-10", th:"https://i.ytimg.com/vi/leCtfp9lRRo/maxresdefault.jpg", m:41, sp:"Noah Herrin", su:"Tithing is a biblical act of stewardship, not a burdensome law."},
+ {t:"The god of Money | Noah Herrin", d:"2026-08-03", th:"https://i.ytimg.com/vi/doFs4_gvkqg/maxresdefault.jpg", m:39, sp:"Noah Herrin", su:"Money can either be a tool or an idol."},
+ {t:"What to Do When You Don't Know What to Do | Grant Troutt", d:"2026-07-27", th:"https://i.ytimg.com/vi/OTngLMPGWPY/maxresdefault.jpg", m:28, sp:"Grant Troutt", su:"Rejoice always, pray without ceasing, give thanks in all circumstances."},
+ {t:"Satan's Strategy & How to Overcome It | Madi Prewett Troutt", d:"2026-07-20", th:"https://i.ytimg.com/vi/pMJq1abak9M/maxresdefault.jpg", m:34, sp:"Madi Prewett Troutt", su:"Alongside a good and real God there is a real, cunning enemy."},
+ {t:"There's Still Hope for You | Tanner Bezet", d:"2026-07-13", th:"https://i.ytimg.com/vi/5K7OqfVUYzA/maxresdefault.jpg", m:32, sp:"Tanner Bezet", su:"Jesus meets discouraged people where they are and offers renewed hope."},
+];
+const fdate = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric', year:'numeric'});
+const shortdate = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+const nav = act => `<nav class="navlinks">${['Sermons','Series','Speakers','Topics','Books','Ask'].map(x => `<a class="${x===act?'active':''}">${x}</a>`).join('')}<a>YouTube ↗</a></nav>`;
+const title = t => t.split('|')[0].trim();
+
+const VARIANTS = [
+{ name: '1 Cinematic', html: () => `
+  <div class="stage">
+    <img class="bg" src="${S[0].th}" /><div class="shade"></div>
+    <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+    <div class="stagecopy">
+      <div class="kick">Latest Sermon · ${shortdate(S[0].d)}</div>
+      <h1>${title(S[0].t)}<br /><em>${S[0].sp}</em></h1>
+      <p class="sub">${S[0].su}</p>
+      <a class="play">▶ &nbsp;Watch now · ${S[0].m} min</a>
+    </div>
+  </div>
+  <div class="strip">${S.slice(1,6).map(s => `
+    <a class="c"><img src="${s.th}" /><div class="b"><div class="d">${shortdate(s.d)} · ${s.m} min</div><h3>${s.t}</h3></div></a>`).join('')}
+  </div>` },
+
+{ name: '2 Editorial', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="wrap">
+    <div class="masthead">
+      <h1>Find any moment, <em>from any Sunday.</em></h1>
+      <div class="ledegrid">
+        <div class="lede"><b>155</b>sermons archived, transcribed, and searchable</div>
+        <div class="lede"><b>52</b>books of the Bible preached</div>
+      </div>
+    </div>
+    <div class="issue">
+      <a class="cover">
+        <img src="${S[0].th}" />
+        <div class="cap"><h2>${S[0].t}</h2><div class="n">LATEST<br/>${shortdate(S[0].d)} · ${S[0].m} MIN</div></div>
+      </a>
+      <div class="index">${S.slice(1,8).map((s,i) => `
+        <a class="row"><span class="num">${String(i+2).padStart(3,'0')}</span><span><h3>${title(s.t)}</h3><div class="who">${s.sp} · ${shortdate(s.d)}</div></span><span class="min">${s.m} MIN</span></a>`).join('')}
+      </div>
+    </div>
+  </div>` },
+
+{ name: '3 Split screen', html: () => `
+  <div class="side">
+    <div class="giant">WAY</div>
+    ${nav('Sermons')}
+    <h1>Every sermon ever preached. Find any moment, from any Sunday.</h1>
+    <div class="st"><div><b>155</b>sermons</div><div><b>52</b>books</div><div><b>10</b>series</div></div>
+  </div>
+  <div class="feed">${S.map(s => `
+    <a class="row"><img src="${s.th}" /><span><div class="d">${fdate(s.d)} · ${s.m} min</div><h3>${title(s.t)}</h3><p>${s.su}</p></span></a>`).join('')}
+  </div>` },
+
+{ name: '4 Poster wall', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="intro"><h1>Find any moment, <em>from any Sunday.</em></h1><p>155 sermons · 52 books of the Bible</p></div>
+  <div class="wall">${S.map((s,i) => `
+    <a class="tile ${i===0?'first':''}">${i===0?'<span class="tagf">LATEST</span>':''}<img src="${s.th}" /><div class="ov"><h3>${title(s.t)}</h3><div class="d">${s.sp} · ${shortdate(s.d)} · ${s.m} min</div></div></a>`).join('')}
+  </div>` },
+
+{ name: '5 Print light', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Find any moment, <em>from any Sunday.</em></h1>
+        <div class="st"><div><b>155</b>sermons archived</div><div><b>52</b>books of the Bible</div></div>
+      </div>
+      <a class="fc"><img src="${S[0].th}" /><div class="b"><div class="k">LATEST SERMON</div><h3>${S[0].t}</h3><div class="d">${fdate(S[0].d)} · ${S[0].m} min</div></div></a>
+    </div>
+    <div class="grid">${S.slice(1,7).map(s => `
+      <a class="c"><img src="${s.th}" /><div class="b"><div class="d">${shortdate(s.d)} · ${s.m} min</div><h3>${s.t}</h3></div></a>`).join('')}
+    </div>
+  </div>` },
+
+{ name: '6 Archive index', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="wrap">
+    <div class="top">
+      <h1>The Way <em>archive.</em></h1>
+      <div class="meta">SERMONS <b>155</b><br/>BOOKS <b>52</b><br/>SINCE <b>2023</b></div>
+    </div>
+    <a class="lead"><img src="${S[0].th}" /><div class="b"><div class="k">001 / LATEST / ${shortdate(S[0].d).toUpperCase()}</div><h3>${S[0].t}</h3><p>${S[0].su}</p></div></a>
+    ${S.slice(1).map((s,i) => `
+    <a class="row"><span class="n">${String(i+2).padStart(3,'0')}</span><span class="dt">${s.d}</span><h3>${title(s.t)}</h3><span class="sp">${s.sp}</span><span class="mn">${s.m} MIN</span></a>`).join('')}
+  </div>` },
+
+{ name: '7 Spotlight', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="center"><h1>This week <em>at Way.</em></h1></div>
+  <div class="theatre">
+    <a class="wing"><img src="${S[2].th}" /><h4>${title(S[2].t)}</h4></a>
+    <a class="main"><img src="${S[0].th}" /><div class="b"><div class="k">LATEST SERMON</div><h3>${S[0].t}</h3><div class="d">${fdate(S[0].d)} · ${S[0].m} min</div></div></a>
+    <a class="wing"><img src="${S[1].th}" /><h4>${title(S[1].t)}</h4></a>
+  </div>
+  <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+  <div class="below">${S.slice(3,7).map(s => `
+    <a class="c"><img src="${s.th}" /><div class="b"><div class="d">${shortdate(s.d)}</div><h3>${title(s.t)}</h3></div></a>`).join('')}
+  </div>` },
+
+{ name: '8 Brutalist', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="shout"><h1>EVERY<br/>SUNDAY.<br/><span>SEARCHABLE.</span></h1></div>
+  <div class="bar"><span>155 SERMONS</span><span>52 BOOKS</span><span>10 SERIES</span><span>EST. NASHVILLE</span></div>
+  <div class="grid">${S.map(s => `
+    <a class="c"><img src="${s.th}" /><div class="b"><div class="d">${s.d} / ${s.m} MIN</div><h3>${title(s.t)}</h3></div></a>`).join('')}
+  </div>` },
+
+{ name: '9 Glass', html: () => `
+  <header><span class="mark">WAY</span><span class="pill">${nav('Sermons')}</span></header>
+  <div class="hero">
+    <div>
+      <h1>Find any moment, <em>from any Sunday.</em></h1>
+      <div class="st"><div><b>155</b>sermons archived</div><div><b>52</b>books of the Bible</div></div>
+    </div>
+    <a class="fc"><img src="${S[0].th}" /><div class="b"><div class="k">LATEST SERMON</div><h3>${S[0].t}</h3><div class="d">${fdate(S[0].d)} · ${S[0].m} min</div></div></a>
+  </div>
+  <div class="grid">${S.slice(1).map(s => `
+    <a class="c"><img src="${s.th}" /><div class="b"><div class="d">${shortdate(s.d)} · ${s.m} min</div><h3>${title(s.t)}</h3></div></a>`).join('')}
+  </div>` },
+
+{ name: '10 Theater', html: () => `
+  <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+  <div class="screenwrap">
+    <a class="screen">
+      <img src="${S[0].th}" /><div class="shade"></div><div class="playbtn"></div>
+      <div class="cap">
+        <div><div class="k">LATEST SERMON</div><h1>${S[0].t}</h1><div class="d">${fdate(S[0].d)}</div></div>
+        <span class="mn">${S[0].m}:00</span>
+      </div>
+    </a>
+  </div>
+  <div class="rowlabel"><h2>Recent Sundays</h2><span>155 sermons · 52 books</span></div>
+  <div class="rail">${S.slice(1).map(s => `
+    <a class="c"><img src="${s.th}" /><h3>${title(s.t)}</h3><div class="d">${s.sp} · ${shortdate(s.d)} · ${s.m} min</div></a>`).join('')}
+  </div>` },
+];
+
+const root = document.getElementById('root');
+const sw = document.getElementById('switch');
+VARIANTS.forEach((v, i) => {
+  const sec = document.createElement('div');
+  sec.className = `variant v${i+1}` + (i === 0 ? ' on' : '');
+  sec.innerHTML = v.html();
+  root.appendChild(sec);
+  const btn = document.createElement('button');
+  btn.textContent = v.name;
+  if (i === 0) btn.classList.add('on');
+  btn.onclick = () => {
+    document.querySelectorAll('.variant').forEach(el => el.classList.remove('on'));
+    document.querySelectorAll('.switch button').forEach(el => el.classList.remove('on'));
+    sec.classList.add('on'); btn.classList.add('on');
+    window.scrollTo(0, 0);
+  };
+  sw.appendChild(btn);
+});
+</script>
+</body>
+</html>
