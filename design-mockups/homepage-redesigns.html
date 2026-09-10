@@ -254,6 +254,27 @@
   .v10 .rail .c:hover img { transform: scale(1.04); border-color: var(--blue); }
   .v10 .rail h3 { font-family: Fraunces, serif; font-size: 15px; font-weight: 600; margin-top: 10px; line-height: 1.3; }
   .v10 .rail .d { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  /* ============ 11. HYBRID 1+4+8 ============ */
+  .v11 { background: #05070d; padding-bottom: 90px; }
+  .v11 .stage { position: relative; height: 92vh; overflow: hidden; }
+  .v11 .stage img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .v11 .stage .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,8,16,0.6) 0%, rgba(5,8,16,0.2) 40%, rgba(5,8,16,0.97) 90%, #05070d 100%); }
+  .v11 header { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 24px 40px; }
+  .v11 .navlinks { text-transform: uppercase; font-weight: 700; font-size: 11.5px; letter-spacing: 0.08em; color: #c8d2ec; }
+  .v11 .stagecopy { position: absolute; left: 40px; right: 40px; bottom: 110px; z-index: 2; }
+  .v11 .kick { font-family: 'JetBrains Mono', monospace; color: var(--blue); font-size: 12px; letter-spacing: 0.16em; }
+  .v11 h1 { font-weight: 900; font-size: clamp(56px, 8.5vw, 118px); line-height: 0.92; text-transform: uppercase; letter-spacing: -0.015em; margin: 14px 0 0; }
+  .v11 h1 span { color: transparent; -webkit-text-stroke: 2px var(--blue); }
+  .v11 .play { display: inline-flex; gap: 12px; align-items: center; margin-top: 26px; background: #fff; color: #0b101e; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; padding: 14px 24px; border-radius: 999px; }
+  .v11 .bar { position: relative; z-index: 4; display: flex; justify-content: space-between; padding: 16px 40px; border-top: 3px solid #fff; border-bottom: 3px solid #fff; background: #05070d; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 0.12em; color: var(--blue); }
+  .v11 .wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
+  .v11 .tile { position: relative; overflow: hidden; aspect-ratio: 16/9; }
+  .v11 .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s; }
+  .v11 .tile:hover img { transform: scale(1.05); }
+  .v11 .tile .ov { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 38%, rgba(5,7,13,0.94)); display: flex; flex-direction: column; justify-content: flex-end; padding: 18px; opacity: 0; transition: opacity 0.25s; }
+  .v11 .tile:hover .ov { opacity: 1; }
+  .v11 .tile .d { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); }
+  .v11 .tile h3 { font-weight: 800; font-size: 18px; text-transform: uppercase; margin-top: 7px; line-height: 1.15; }
 </style>
 </head>
 <body>
@@ -410,6 +431,21 @@ const VARIANTS = [
   <div class="rail">${S.slice(1).map(s => `
     <a class="c"><img src="${s.th}" /><h3>${title(s.t)}</h3><div class="d">${s.sp} · ${shortdate(s.d)} · ${s.m} min</div></a>`).join('')}
   </div>` },
+
+{ name: '11 Hybrid 1+4+8', html: () => { const words = title(S[0].t).toUpperCase().split(' '); const last = words.pop(); return `
+  <div class="stage">
+    <img class="bg" src="${S[0].th}" /><div class="shade"></div>
+    <header><span class="mark">WAY</span>${nav('Sermons')}</header>
+    <div class="stagecopy">
+      <div class="kick">LATEST SERMON / ${shortdate(S[0].d).toUpperCase()} / ${S[0].sp.toUpperCase()}</div>
+      <h1>${words.join(' ')} <span>${last}.</span></h1>
+      <a class="play">▶ &nbsp;Watch now · ${S[0].m} min</a>
+    </div>
+  </div>
+  <div class="bar"><span>155 SERMONS</span><span>52 BOOKS</span><span>10 SERIES</span><span>EST. NASHVILLE</span></div>
+  <div class="wall">${S.slice(1).map(s => `
+    <a class="tile"><img src="${s.th}" /><div class="ov"><div class="d">${s.d} / ${s.m} MIN</div><h3>${title(s.t)}</h3></div></a>`).join('')}
+  </div>`; } },
 ];
 
 const root = document.getElementById('root');
