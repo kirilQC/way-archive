@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ask redesigns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b101e; --panel: #111830; --panel-2: #172038; --line: #232d4c;
+    --text: #eef1f7; --muted: #8d96b0; --navy: #1c3061;
+    --amber: #8caef2; --amber-dim: rgba(140,174,242,0.14);
+    --violet: #8f7df0; --violet-dim: rgba(143,125,240,0.14);
+    --serif: 'Fraunces', serif; --sans: 'Inter', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); padding-bottom: 90px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* fake site header */
+  .hdr { padding: 20px 44px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+  .hdr .mark { background: var(--navy); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 0.06em; padding: 8px 15px 9px; border-radius: 7px; }
+  .hdr nav { display: flex; gap: 26px; font-size: 13.5px; color: var(--muted); font-weight: 500; }
+  .hdr nav b { color: var(--text); }
+
+  .variant { display: none; min-height: calc(100vh - 170px); }
+  .variant.show { display: block; }
+
+  /* switcher */
+  .switch { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(9,13,26,0.92); backdrop-filter: blur(12px); border-top: 1px solid var(--line); display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; z-index: 99; }
+  .switch button { background: var(--panel); border: 1px solid var(--line); color: var(--muted); font: 600 12px var(--sans); border-radius: 999px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .switch button.on { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
+
+  /* shared bits */
+  .kick { color: var(--amber); font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+  .vcard { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 13.5px; line-height: 1.65; color: #c8cdda; }
+  .vcard b { display: block; color: var(--amber); font-size: 12.5px; margin-bottom: 5px; }
+  .vcard i.tr { color: var(--muted); font-size: 11.5px; }
+  .src { display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .src img { width: 92px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
+  .src b { font-size: 13px; display: block; margin-bottom: 2px; }
+  .src span { font-size: 12px; color: var(--muted); }
+  .disc { color: var(--muted); font-size: 11.5px; text-align: center; margin-top: 26px; }
+
+  /* ============ V1 Command Palette ============ */
+  .v1 { display: none; align-items: flex-start; justify-content: center; padding: 90px 24px 40px; }
+  .v1.show { display: flex; }
+  .v1 .pal { width: 720px; max-width: 100%; background: rgba(17,24,48,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(140,174,242,0.25); border-radius: 20px; box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset; overflow: hidden; }
+  .v1 .pal-in { display: flex; align-items: center; gap: 14px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
+  .v1 .pal-in .q-ico { color: var(--amber); font-size: 20px; }
+  .v1 .pal-in input { flex: 1; background: none; border: none; outline: none; color: var(--text); font: 500 18px var(--sans); }
+  .v1 .pal-in kbd { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; font: 600 11px var(--sans); color: var(--muted); }
+  .v1 .pal-sec { padding: 10px 12px; }
+  .v1 .pal-sec h5 { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 8px 12px 6px; }
+  .v1 .pal-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; color: #d5dae6; }
+  .v1 .pal-row:hover, .v1 .pal-row.sel { background: var(--amber-dim); color: var(--text); }
+  .v1 .pal-row .tag2 { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .v1 .pal-row .dot { width: 26px; height: 26px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px; color: var(--amber); flex: none; }
+  .v1 .under { margin-top: 26px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+  /* ============ V2 Split Study ============ */
+  .v2 .wrap { max-width: 1240px; margin: 40px auto 0; padding: 0 32px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: start; }
+  .v2 .q { background: var(--navy); color: #fff; border-radius: 16px 16px 4px 16px; padding: 14px 18px; font-size: 15px; font-weight: 500; margin-left: auto; max-width: 80%; width: fit-content; }
+  .v2 .a { margin-top: 22px; font-size: 15.5px; line-height: 1.85; color: #d7dbe6; }
+  .v2 .a p + p { margin-top: 14px; }
+  .v2 .a .cite { background: var(--amber-dim); color: var(--amber); border-radius: 5px; padding: 0 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .v2 .rail { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 10px; }
+  .v2 .rail h4 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+  .v2 .ask-in { max-width: 1240px; margin: 40px auto 0; padding: 0 32px; display: flex; gap: 10px; }
+  .v2 .ask-in input { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; color: var(--text); font: 500 14.5px var(--sans); outline: none; }
+  .v2 .ask-in button { background: var(--amber); color: #0b101e; border: none; border-radius: 12px; padding: 0 26px; font: 700 14px var(--sans); cursor: pointer; }
+
+  /* ============ V3 Full Chat ============ */
+  .v3 .thread { max-width: 760px; margin: 46px auto 0; padding: 0 24px; display: flex; flex-direction: column; gap: 20px; }
+  .v3 .mq { align-self: flex-end; background: var(--navy); color: #fff; border-radius: 18px 18px 4px 18px; padding: 13px 18px; font-size: 15px; max-width: 78%; }
+  .v3 .ma { align-self: stretch; font-size: 15.5px; line-height: 1.8; color: #d7dbe6; }
+  .v3 .ma p + p { margin-top: 12px; }
+  .v3 .ma .vrow { display: flex; gap: 10px; overflow-x: auto; margin-top: 16px; padding-bottom: 4px; }
+  .v3 .ma .vrow .vcard { min-width: 300px; }
+  .v3 .dock { position: fixed; left: 0; right: 0; bottom: 58px; padding: 18px 24px 20px; background: linear-gradient(to top, var(--bg) 65%, transparent); }
+  .v3 .dock-in { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 8px 8px 22px; box-shadow: 0 16px 50px rgba(0,0,0,0.45); }
+  .v3 .dock-in input { flex: 1; background: none; border: none; outline: none; color: var(--text); font: 500 15px var(--sans); }
+  .v3 .dock-in button { background: var(--amber); border: none; color: #0b101e; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+  .v3 .pad { height: 130px; }
+
+  /* ============ V4 Editorial Answer ============ */
+  .v4 .art { max-width: 700px; margin: 56px auto 0; padding: 0 24px; }
+  .v4 .art .kick { display: block; text-align: center; }
+  .v4 h1 { font-family: var(--serif); font-size: 44px; font-weight: 500; line-height: 1.12; text-align: center; margin: 14px 0 10px; }
+  .v4 .by { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 34px; }
+  .v4 .body { font-size: 16.5px; line-height: 1.9; color: #d7dbe6; }
+  .v4 .body p + p { margin-top: 16px; }
+  .v4 .body p:first-child::first-letter { font-family: var(--serif); font-size: 52px; float: left; line-height: 0.9; padding: 6px 10px 0 0; color: var(--amber); }
+  .v4 sup { color: var(--amber); font-weight: 700; cursor: pointer; }
+  .v4 .foot { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .v4 .foot h4 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .v4 .fn { display: flex; gap: 12px; font-size: 13.5px; line-height: 1.65; color: #c8cdda; }
+  .v4 .fn b { color: var(--amber); flex: none; }
+  .v4 .srcs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
+
+  /* ============ V5 Cinema Ask ============ */
+  .v5 { position: relative; overflow: hidden; }
+  .v5 .bgs { position: absolute; inset: -60px; display: grid; grid-template-columns: 1fr 1fr 1fr; opacity: 0.9; filter: blur(52px) brightness(0.3) saturate(1.3); }
+  .v5 .bgs div { background-size: cover; background-position: center; }
+  .v5 .inner { position: relative; text-align: center; padding: 120px 24px 60px; }
+  .v5 h1 { font-family: var(--serif); font-size: 56px; font-weight: 500; line-height: 1.08; max-width: 760px; margin: 16px auto 0; }
+  .v5 h1 em { color: var(--amber); font-style: italic; }
+  .v5 .bar { max-width: 680px; margin: 40px auto 0; display: flex; align-items: center; gap: 10px; background: rgba(11,16,30,0.72); backdrop-filter: blur(16px); border: 1px solid rgba(140,174,242,0.3); border-radius: 999px; padding: 8px 8px 8px 24px; box-shadow: 0 30px 90px rgba(0,0,0,0.55); }
+  .v5 .bar input { flex: 1; background: none; border: none; outline: none; color: var(--text); font: 500 15.5px var(--sans); }
+  .v5 .bar button { background: var(--amber); border: none; color: #0b101e; border-radius: 999px; padding: 12px 24px; font: 700 13.5px var(--sans); cursor: pointer; }
+  .v5 .chips { margin-top: 22px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .v5 .chips button { background: rgba(17,24,48,0.6); backdrop-filter: blur(10px); border: 1px solid var(--line); color: #c8cdda; border-radius: 999px; padding: 9px 16px; font: 500 13px var(--sans); cursor: pointer; }
+  .v5 .strip { position: relative; display: flex; gap: 12px; justify-content: center; margin-top: 64px; padding: 0 24px; }
+  .v5 .strip .src { width: 300px; background: rgba(17,24,48,0.7); backdrop-filter: blur(10px); }
+
+  /* ============ V6 Topic Launchpad ============ */
+  .v6 .wrap { max-width: 1100px; margin: 50px auto 0; padding: 0 32px; }
+  .v6 h1 { font-family: var(--serif); font-size: 46px; font-weight: 500; margin-top: 12px; }
+  .v6 h1 em { color: var(--amber); font-style: italic; }
+  .v6 .bar { display: flex; gap: 10px; margin-top: 26px; max-width: 720px; }
+  .v6 .bar input { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; color: var(--text); font: 500 14.5px var(--sans); outline: none; }
+  .v6 .bar button { background: var(--amber); color: #0b101e; border: none; border-radius: 12px; padding: 0 26px; font: 700 14px var(--sans); cursor: pointer; }
+  .v6 h4 { margin: 44px 0 14px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .v6 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .v6 .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px 18px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+  .v6 .tile:hover { border-color: var(--amber); transform: translateY(-3px); }
+  .v6 .tile b { font-family: var(--serif); font-size: 19px; font-weight: 500; display: block; }
+  .v6 .tile span { color: var(--muted); font-size: 12.5px; }
+  .v6 .tile .ex { display: block; margin-top: 12px; font-size: 12.5px; color: var(--amber); }
+
+  /* ============ V7 Scripture Cards ============ */
+  .v7 .wrap { max-width: 860px; margin: 48px auto 0; padding: 0 24px; }
+  .v7 .q { text-align: center; }
+  .v7 .q h2 { font-family: var(--serif); font-size: 34px; font-weight: 500; font-style: italic; margin-top: 10px; }
+  .v7 .flow { margin-top: 36px; }
+  .v7 .flow p { font-size: 15.5px; line-height: 1.85; color: #d7dbe6; max-width: 680px; margin: 0 auto 18px; }
+  .v7 .big-verse { background: linear-gradient(135deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 16px; padding: 28px 32px; margin: 28px auto; max-width: 740px; }
+  .v7 .big-verse p { font-family: var(--serif); font-size: 21px; line-height: 1.55; color: var(--text); margin: 0; max-width: none; }
+  .v7 .big-verse footer { margin-top: 12px; color: var(--amber); font-weight: 700; font-size: 13px; }
+  .v7 .big-verse footer i { color: var(--muted); font-weight: 400; }
+  .v7 .srcs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 740px; margin: 34px auto 0; }
+
+  /* ============ V8 Threads Workspace ============ */
+  .v8 .lay { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 170px); }
+  .v8 .side { border-right: 1px solid var(--line); padding: 22px 14px; }
+  .v8 .side .new { width: 100%; background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); border-radius: 10px; padding: 11px; font: 700 13px var(--sans); cursor: pointer; }
+  .v8 .side h5 { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 22px 10px 8px; }
+  .v8 .th { padding: 10px 12px; border-radius: 10px; font-size: 13.5px; color: #c8cdda; cursor: pointer; line-height: 1.4; }
+  .v8 .th.on { background: var(--panel-2); color: var(--text); }
+  .v8 .th span { display: block; font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .v8 .main { padding: 34px 40px 120px; max-width: 860px; }
+  .v8 .mq { background: var(--navy); color: #fff; border-radius: 16px 16px 4px 16px; padding: 13px 18px; font-size: 14.5px; width: fit-content; max-width: 75%; margin-left: auto; }
+  .v8 .ma { margin-top: 20px; font-size: 15px; line-height: 1.8; color: #d7dbe6; }
+  .v8 .ma p + p { margin-top: 12px; }
+  .v8 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+
+  /* ============ V9 Pulpit Q&A ============ */
+  .v9 .stagex { text-align: center; padding: 70px 24px 0; }
+  .v9 .youask { color: var(--muted); font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; }
+  .v9 h1 { font-family: var(--serif); font-style: italic; font-size: 58px; font-weight: 500; line-height: 1.1; max-width: 900px; margin: 18px auto 0; }
+  .v9 .rule { width: 70px; height: 3px; background: var(--amber); margin: 34px auto; border-radius: 2px; }
+  .v9 .script { max-width: 900px; margin: 0 auto; padding: 0 24px; column-count: 2; column-gap: 44px; font-size: 15px; line-height: 1.85; color: #d7dbe6; text-align: left; }
+  .v9 .script p + p { margin-top: 14px; }
+  .v9 .film { display: flex; gap: 14px; justify-content: center; margin-top: 54px; padding: 0 24px; }
+  .v9 .frame { width: 250px; }
+  .v9 .frame img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+  .v9 .frame b { display: block; font-size: 13px; margin-top: 8px; }
+  .v9 .frame span { font-size: 12px; color: var(--muted); }
+
+  /* ============ V10 Zen Minimal ============ */
+  .v10 { display: none; min-height: calc(100vh - 170px); align-items: center; justify-content: center; position: relative; }
+  .v10.show { display: flex; }
+  .v10 .glow2 { position: absolute; width: 560px; height: 560px; border-radius: 50%; background: radial-gradient(circle, rgba(140,174,242,0.13), transparent 65%); animation: breathe2 7s ease-in-out infinite; }
+  @keyframes breathe2 { 50% { transform: scale(1.15); opacity: 0.7; } }
+  .v10 .zen { position: relative; text-align: center; width: 640px; max-width: 92%; }
+  .v10 .zen .kick { letter-spacing: 0.26em; }
+  .v10 .zen input { width: 100%; margin-top: 34px; background: none; border: none; border-bottom: 1px solid var(--line); outline: none; padding: 14px 4px; text-align: center; color: var(--text); font: italic 500 26px var(--serif); transition: border-color 0.3s; }
+  .v10 .zen input::placeholder { color: #4d5877; }
+  .v10 .zen input:focus { border-bottom-color: var(--amber); }
+  .v10 .hint { margin-top: 22px; color: var(--muted); font-size: 12.5px; }
+  .v10 .exs { margin-top: 46px; display: flex; flex-direction: column; gap: 12px; }
+  .v10 .exs button { background: none; border: none; color: #7b86a3; font: italic 400 15px var(--serif); cursor: pointer; transition: color 0.2s; }
+  .v10 .exs button:hover { color: var(--amber); }
+
+  @media (max-width: 900px) {
+    .v2 .wrap, .v8 .lay { grid-template-columns: 1fr; }
+    .v6 .tiles { grid-template-columns: 1fr 1fr; }
+    .v9 .script { column-count: 1; }
+    .v5 h1, .v9 h1 { font-size: 36px; }
+    .v4 .srcs, .v7 .srcs, .v8 .grid2 { grid-template-columns: 1fr; }
+    .v5 .strip, .v9 .film { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="mark">WAY</div>
+  <nav><span>Sermons</span><span>Series</span><span>Speakers</span><span>Topics</span><span>Books</span><b>Ask</b><span>YouTube</span></nav>
+</div>
+
+<!-- ============ V1 Command Palette ============ -->
+<section class="variant v1" id="v1">
+  <div>
+    <div class="pal">
+      <div class="pal-in">
+        <span class="q-ico">✦</span>
+        <input placeholder="Ask about the Bible or anything Way Church has preached" />
+        <kbd>Enter</kbd>
+      </div>
+      <div class="pal-sec">
+        <h5>Try asking</h5>
+        <div class="pal-row sel"><span class="dot">?</span>What has been preached on anxiety?<span class="tag2">3 sermons</span></div>
+        <div class="pal-row"><span class="dot">?</span>What does the Bible say about forgiveness?<span class="tag2">Scripture</span></div>
+        <div class="pal-row"><span class="dot">?</span>How do I pray when I don't know what to say?<span class="tag2">Scripture</span></div>
+        <h5>Jump to a topic</h5>
+        <div class="pal-row"><span class="dot">#</span>Fear &amp; Anxiety<span class="tag2">12 sermons</span></div>
+        <div class="pal-row"><span class="dot">#</span>Money &amp; Generosity<span class="tag2">8 sermons</span></div>
+      </div>
+    </div>
+    <p class="under">AI assistant, not a pastor. Verses shown are real NLT text.</p>
+  </div>
+</section>
+
+<!-- ============ V2 Split Study ============ -->
+<section class="variant v2" id="v2">
+  <div class="wrap">
+    <div>
+      <div class="q">What has been preached on anxiety?</div>
+      <div class="a">
+        <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from <span class="cite">Hebrews 13:7-9</span> that because Jesus is the same yesterday, today, and forever, you never have to fill the unknown with worst-case scenarios.</p>
+        <p>Practically, the church points to prayer as the exchange rate for worry. Instead of rehearsing the problem, you tell God what you need and thank him for what he has already done <span class="cite">Philippians 4:6-7</span>. Grant Troutt adds that peace is developed inside hardship, not by escaping it, using David's years in the cave as the backdrop.</p>
+        <p>The invitation in every one of these messages is the same: give God the worry itself, not just the tidy version of it, because he genuinely cares about you <span class="cite">1 Peter 5:7</span>.</p>
+      </div>
+    </div>
+    <aside class="rail">
+      <h4>Cited in this answer</h4>
+      <div class="vcard"><b>Philippians 4:6-7</b>"Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done." <i class="tr">(NLT)</i></div>
+      <div class="vcard"><b>1 Peter 5:7</b>"Give all your worries and cares to God, for he cares about you." <i class="tr">(NLT)</i></div>
+      <h4>From the pulpit</h4>
+      <a class="src"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></span></a>
+      <a class="src"><img src="https://i.ytimg.com/vi/YButSa3hS3g/maxresdefault.jpg" /><span><b>Why Am I Anxious?</b><span>Noah Herrin · May 4, 2026</span></span></a>
+      <a class="src"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><span><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></span></a>
+    </aside>
+  </div>
+  <div class="ask-in"><input placeholder="Ask a follow-up" /><button>Send</button></div>
+</section>
+
+<!-- ============ V3 Full Chat ============ -->
+<section class="variant v3" id="v3">
+  <div class="thread">
+    <div class="mq">What has been preached on anxiety?</div>
+    <div class="ma">
+      <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from Hebrews 13 that because Jesus is the same yesterday, today, and forever, you never have to fill the unknown with worst-case scenarios.</p>
+      <p>Practically, the church points to prayer as the exchange rate for worry: tell God what you need, thank him for what he has done, and let his peace stand guard over your mind.</p>
+      <div class="vrow">
+        <div class="vcard"><b>Philippians 4:6-7</b>"Don't worry about anything; instead, pray about everything." <i class="tr">(NLT)</i></div>
+        <div class="vcard"><b>1 Peter 5:7</b>"Give all your worries and cares to God, for he cares about you." <i class="tr">(NLT)</i></div>
+        <div class="vcard"><b>Matthew 6:34</b>"So don't worry about tomorrow, for tomorrow will bring its own worries." <i class="tr">(NLT)</i></div>
+      </div>
+      <div class="vrow">
+        <a class="src" style="min-width:340px"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></span></a>
+        <a class="src" style="min-width:340px"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><span><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></span></a>
+      </div>
+    </div>
+    <div class="mq">How do I actually stop the spiral at 2am?</div>
+    <div class="ma"><p>Noah's counsel in that message is refreshingly concrete: interrupt the loop out loud. Name the fear, then name what is true about God next to it...</p></div>
+  </div>
+  <div class="pad"></div>
+  <div class="dock"><div class="dock-in"><input placeholder="Ask a follow-up about anxiety, or anything else" /><button>↑</button></div></div>
+</section>
+
+<!-- ============ V4 Editorial Answer ============ -->
+<section class="variant v4" id="v4">
+  <article class="art">
+    <span class="kick">You asked</span>
+    <h1>What has been preached on anxiety?</h1>
+    <div class="by">Answered from 3 Way Church sermons and 3 passages of Scripture</div>
+    <div class="body">
+      <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from Hebrews 13 that because Jesus is the same yesterday, today, and forever, you never have to fill the unknown with worst-case scenarios.<sup>1</sup></p>
+      <p>Practically, the church points to prayer as the exchange rate for worry. Instead of rehearsing the problem, you tell God what you need and thank him for what he has already done.<sup>2</sup> Grant Troutt adds that peace is developed inside hardship, not by escaping it, using David's years in the cave as the backdrop.</p>
+      <p>The invitation in every one of these messages is the same: give God the worry itself, not just the tidy version of it, because he genuinely cares about you.<sup>3</sup></p>
+    </div>
+    <div class="foot">
+      <h4>Scripture cited</h4>
+      <div class="fn"><b>1.</b><span><b style="color:var(--amber)">Hebrews 13:8</b> "Jesus Christ is the same yesterday, today, and forever." (NLT)</span></div>
+      <div class="fn"><b>2.</b><span><b style="color:var(--amber)">Philippians 4:6-7</b> "Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done." (NLT)</span></div>
+      <div class="fn"><b>3.</b><span><b style="color:var(--amber)">1 Peter 5:7</b> "Give all your worries and cares to God, for he cares about you." (NLT)</span></div>
+    </div>
+    <div class="srcs">
+      <a class="src"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></span></a>
+      <a class="src"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><span><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></span></a>
+    </div>
+    <p class="disc">AI assistant, not a pastor. Verses shown are real NLT text.</p>
+  </article>
+</section>
+
+<!-- ============ V5 Cinema Ask ============ -->
+<section class="variant v5" id="v5">
+  <div class="bgs">
+    <div style="background-image:url('https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg')"></div>
+    <div style="background-image:url('https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg')"></div>
+    <div style="background-image:url('https://i.ytimg.com/vi/YButSa3hS3g/maxresdefault.jpg')"></div>
+  </div>
+  <div class="inner">
+    <span class="kick">Way Church · Ask</span>
+    <h1>Bring the question<br /><em>you actually have.</em></h1>
+    <div class="bar"><input placeholder="Ask about the Bible or anything Way Church has preached" /><button>Ask</button></div>
+    <div class="chips">
+      <button>What has been preached on anxiety?</button>
+      <button>What does the Bible say about forgiveness?</button>
+      <button>How do I pray when I don't know what to say?</button>
+    </div>
+    <div class="strip">
+      <a class="src"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Most asked about this week</span></span></a>
+      <a class="src"><img src="https://i.ytimg.com/vi/4pbR1DBXDFs/maxresdefault.jpg" /><span><b>When Life isn't Fair</b><span>Noah Herrin · Jun 29</span></span></a>
+      <a class="src"><img src="https://i.ytimg.com/vi/LhrEfiUQEhg/maxresdefault.jpg" /><span><b>My Missing Peace</b><span>Noah Herrin · Dec 22</span></span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ V6 Topic Launchpad ============ -->
+<section class="variant v6" id="v6">
+  <div class="wrap">
+    <span class="kick">Way Church · Ask</span>
+    <h1>Scripture questions, <em>sermon answers.</em></h1>
+    <div class="bar"><input placeholder="Ask anything" /><button>Send</button></div>
+    <h4>Or start from what Way Church has preached</h4>
+    <div class="tiles">
+      <div class="tile"><b>Fear &amp; Anxiety</b><span>12 sermons</span><span class="ex">"How do I stop overthinking?"</span></div>
+      <div class="tile"><b>Money</b><span>8 sermons</span><span class="ex">"Is it wrong to want more?"</span></div>
+      <div class="tile"><b>Relationships</b><span>10 sermons</span><span class="ex">"How do I forgive family?"</span></div>
+      <div class="tile"><b>Prayer</b><span>9 sermons</span><span class="ex">"What if I don't feel anything?"</span></div>
+      <div class="tile"><b>Purpose</b><span>7 sermons</span><span class="ex">"What is God's will for me?"</span></div>
+      <div class="tile"><b>Doubt</b><span>5 sermons</span><span class="ex">"Can I question and still believe?"</span></div>
+      <div class="tile"><b>Grace</b><span>11 sermons</span><span class="ex">"Have I out-sinned grace?"</span></div>
+      <div class="tile"><b>Hope</b><span>6 sermons</span><span class="ex">"How do I keep going?"</span></div>
+    </div>
+    <p class="disc">AI assistant, not a pastor. Verses shown are real NLT text.</p>
+  </div>
+</section>
+
+<!-- ============ V7 Scripture Cards ============ -->
+<section class="variant v7" id="v7">
+  <div class="wrap">
+    <div class="q"><span class="kick">You asked</span><h2>"What has been preached on anxiety?"</h2></div>
+    <div class="flow">
+      <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from Hebrews 13 that because Jesus never changes, you never have to fill the unknown with worst-case scenarios.</p>
+      <div class="big-verse">
+        <p>"Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done. Then you will experience God's peace, which exceeds anything we can understand."</p>
+        <footer>Philippians 4:6-7 <i>· New Living Translation</i></footer>
+      </div>
+      <p>Practically, the church points to prayer as the exchange rate for worry. Grant Troutt adds that peace is developed inside hardship, not by escaping it, using David's years in the cave as the backdrop.</p>
+      <div class="big-verse">
+        <p>"Give all your worries and cares to God, for he cares about you."</p>
+        <footer>1 Peter 5:7 <i>· New Living Translation</i></footer>
+      </div>
+      <p>The invitation in every one of these messages is the same: give God the worry itself, not just the tidy version of it.</p>
+      <div class="srcs">
+        <a class="src"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></span></a>
+        <a class="src"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><span><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ V8 Threads Workspace ============ -->
+<section class="variant v8" id="v8">
+  <div class="lay">
+    <aside class="side">
+      <button class="new">+ New question</button>
+      <h5>Today</h5>
+      <div class="th on">What has been preached on anxiety?<span>3 sermons cited</span></div>
+      <h5>Earlier</h5>
+      <div class="th">How should Christians think about money?<span>2 sermons cited</span></div>
+      <div class="th">What does Hebrews 13 mean?<span>Scripture study</span></div>
+      <div class="th">Who preached the Peace series?<span>Archive lookup</span></div>
+    </aside>
+    <div class="main">
+      <div class="mq">What has been preached on anxiety?</div>
+      <div class="ma">
+        <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from Hebrews 13 that because Jesus is the same yesterday, today, and forever, you never have to fill the unknown with worst-case scenarios.</p>
+        <p>Practically, the church points to prayer as the exchange rate for worry: tell God what you need, thank him for what he has done, and let his peace stand guard over your mind.</p>
+        <div class="grid2">
+          <div class="vcard"><b>Philippians 4:6-7</b>"Don't worry about anything; instead, pray about everything." <i class="tr">(NLT)</i></div>
+          <div class="vcard"><b>1 Peter 5:7</b>"Give all your worries and cares to God, for he cares about you." <i class="tr">(NLT)</i></div>
+        </div>
+        <div class="grid2">
+          <a class="src"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><span><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></span></a>
+          <a class="src"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><span><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ V9 Pulpit Q&A ============ -->
+<section class="variant v9" id="v9">
+  <div class="stagex">
+    <div class="youask">You asked</div>
+    <h1>"What has been preached on anxiety?"</h1>
+    <div class="rule"></div>
+  </div>
+  <div class="script">
+    <p>Way Church keeps coming back to one idea when it talks about anxiety: anxious thoughts lose their grip when you fix your mind on the character of God. Noah Herrin teaches from Hebrews 13:7-9 that because Jesus is the same yesterday, today, and forever, you never have to fill the unknown with worst-case scenarios.</p>
+    <p>Practically, the church points to prayer as the exchange rate for worry. Instead of rehearsing the problem, you tell God what you need and thank him for what he has already done (Philippians 4:6-7). Grant Troutt adds that peace is developed inside hardship, not by escaping it, using David's years in the cave as the backdrop.</p>
+    <p>The invitation in every one of these messages is the same: give God the worry itself, not just the tidy version of it, because he genuinely cares about you (1 Peter 5:7).</p>
+  </div>
+  <div class="film">
+    <a class="frame"><img src="https://i.ytimg.com/vi/CfpvQ4IuWdQ/maxresdefault.jpg" /><b>How to Overcome Anxious Thoughts</b><span>Noah Herrin · Aug 31, 2026</span></a>
+    <a class="frame"><img src="https://i.ytimg.com/vi/YButSa3hS3g/maxresdefault.jpg" /><b>Why Am I Anxious?</b><span>Noah Herrin · May 4, 2026</span></a>
+    <a class="frame"><img src="https://i.ytimg.com/vi/GsglpMuRjic/maxresdefault.jpg" /><b>I Need Peace</b><span>Grant Troutt · Sep 7, 2026</span></a>
+  </div>
+</section>
+
+<!-- ============ V10 Zen Minimal ============ -->
+<section class="variant v10" id="v10">
+  <div class="glow2"></div>
+  <div class="zen">
+    <span class="kick">Ask</span>
+    <input placeholder="What is on your mind?" />
+    <div class="hint">Press Enter · Answers come from Scripture and Way Church sermons</div>
+    <div class="exs">
+      <button>What has been preached on anxiety?</button>
+      <button>What does the Bible say about forgiveness?</button>
+      <button>How do I pray when I don't know what to say?</button>
+    </div>
+  </div>
+</section>
+
+<div class="switch" id="switch"></div>
+
+<script>
+  const NAMES = [
+    '1 · Command Palette', '2 · Split Study', '3 · Full Chat', '4 · Editorial Answer',
+    '5 · Cinema Ask', '6 · Topic Launchpad', '7 · Scripture Cards', '8 · Threads',
+    '9 · Pulpit Q&A', '10 · Zen Minimal',
+  ];
+  const bar = document.getElementById('switch');
+  NAMES.forEach((n, i) => {
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.onclick = () => show(i + 1);
+    bar.appendChild(b);
+  });
+  function show(n) {
+    document.querySelectorAll('.variant').forEach((v) => v.classList.remove('show'));
+    document.getElementById('v' + n).classList.add('show');
+    [...bar.children].forEach((b, i) => b.classList.toggle('on', i === n - 1));
+    window.scrollTo(0, 0);
+  }
+  show(1);
+</script>
+</body>
+</html>
