@@ -427,6 +427,8 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
   position: absolute; inset: -60px;
   display: grid; grid-template-columns: 1fr 1fr 1fr;
   filter: blur(52px) brightness(0.3) saturate(1.3);
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 96%);
+  mask-image: linear-gradient(180deg, #000 30%, transparent 96%);
 }
 .ac-bgs div { background-size: cover; background-position: center; }
 .ac-hero > :not(.ac-bgs) { position: relative; }
