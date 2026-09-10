@@ -11,7 +11,7 @@
     --bg: #0b101e; --panel: #111830; --panel-2: #172038; --line: #232d4c;
     --text: #eef1f7; --muted: #8d96b0; --navy: #1c3061;
     --amber: #8caef2; --amber-dim: rgba(140,174,242,0.14);
-    --violet: #8f7df0;
+    --violet: #8f7df0; --violet-dim: rgba(143,125,240,0.14);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
@@ -49,133 +49,132 @@
   .switch button.on { background: var(--amber); color: #0b101e; }
 
   .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  @media (max-width: 1000px) { .g3, .g4 { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 640px) { .g3, .g4 { grid-template-columns: 1fr; } }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 1000px) { .g3 { grid-template-columns: 1fr 1fr; } .g2 { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .g3 { grid-template-columns: 1fr; } }
 
-  /* ===== V1 Poster ===== */
-  .p-card { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 3/3.7; transition: transform 0.25s, border-color 0.2s; }
-  .p-card:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .p-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-  .p-card:hover img { transform: scale(1.05); }
-  .p-card .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0) 30%, rgba(11,16,30,0.55) 60%, rgba(11,16,30,0.97) 100%); }
-  .p-card .body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; }
-  .p-card .meta { font-size: 11.5px; color: #c3c9dd; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
-  .p-card h3 { font-family: Fraunces, serif; font-size: 23px; font-weight: 500; line-height: 1.15; }
-  .p-card p { font-size: 13px; line-height: 1.6; color: #c3c9dd; margin-top: 10px; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s, opacity 0.35s; }
-  .p-card:hover p { max-height: 120px; opacity: 1; }
+  /* Shared bits */
+  .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
+  .chip-v { font-size: 11.5px; font-weight: 700; color: var(--amber); background: var(--amber-dim); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+  .chip-t { font-size: 11.5px; font-weight: 600; color: #b9a8ff; background: var(--violet-dim); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+  .sum { font-size: 13.5px; line-height: 1.65; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-  /* ===== V2 Clean Minimal ===== */
-  .m-card { transition: transform 0.2s; }
-  .m-card:hover { transform: translateY(-4px); }
-  .m-card .th { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/9; }
-  .m-card .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-  .m-card:hover .th img { transform: scale(1.04); }
-  .m-card .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
-  .m-card h3 { font-family: Fraunces, serif; font-size: 20px; font-weight: 500; line-height: 1.2; margin: 14px 0 6px; }
-  .m-card:hover h3 { color: var(--amber); }
-  .m-card .meta { font-size: 12.5px; color: var(--muted); }
+  /* ===== V1 Elevated Classic ===== */
+  .c1 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
+  .c1:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .c1 .th { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+  .c1 .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .c1:hover .th img { transform: scale(1.04); }
+  .c1 .body { padding: 20px; }
+  .c1 .date { font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+  .c1 h3 { font-family: Fraunces, serif; font-size: 22px; font-weight: 500; line-height: 1.18; margin-bottom: 10px; }
+  .c1:hover h3 { color: var(--amber); }
+  .c1 .sum { margin-bottom: 16px; }
+  .c1 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
-  /* ===== V3 Editorial Rows ===== */
-  .r-list { display: flex; flex-direction: column; }
-  .r-card { display: grid; grid-template-columns: 300px 1fr auto; gap: 26px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); transition: background 0.2s; }
-  .r-card:first-child { border-top: 1px solid var(--line); }
-  .r-card:hover { background: rgba(17,24,48,0.4); }
-  .r-card .th { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
-  .r-card .th img { width: 100%; height: 100%; object-fit: cover; }
-  .r-card .dur { position: absolute; right: 8px; bottom: 8px; background: rgba(11,16,30,0.8); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
-  .r-card .meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .r-card h3 { font-family: Fraunces, serif; font-size: 24px; font-weight: 500; line-height: 1.15; margin-bottom: 8px; }
-  .r-card:hover h3 { color: var(--amber); }
-  .r-card p { font-size: 13.5px; line-height: 1.65; color: var(--muted); max-width: 640px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .r-card .go { font-size: 22px; color: var(--muted); padding: 0 12px; transition: transform 0.2s, color 0.2s; }
-  .r-card:hover .go { transform: translateX(6px); color: var(--amber); }
-  @media (max-width: 800px) { .r-card { grid-template-columns: 1fr; } .r-card .go { display: none; } }
-
-  /* ===== V4 Overlay Reveal ===== */
-  .o-card { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/10.5; transition: transform 0.25s, border-color 0.2s; }
-  .o-card:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .o-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .o-card .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0.05), rgba(11,16,30,0.9) 82%); }
-  .o-card .base { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px; transition: transform 0.3s, opacity 0.3s; }
-  .o-card h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.15; }
-  .o-card .meta { font-size: 12px; color: #c3c9dd; margin-top: 5px; }
-  .o-card .more {
-    position: absolute; inset: 0; padding: 22px; background: rgba(11,16,30,0.88); backdrop-filter: blur(6px);
-    display: flex; flex-direction: column; justify-content: center; gap: 12px;
-    opacity: 0; transition: opacity 0.3s;
+  /* ===== V2 Footer Bar ===== */
+  .c2 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.25s, border-color 0.2s; }
+  .c2:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .c2 .th { position: relative; aspect-ratio: 16/9; }
+  .c2 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .c2 .body { padding: 18px 20px; flex: 1; }
+  .c2 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+  .c2 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
+  .c2:hover h3 { color: var(--amber); }
+  .c2 .foot {
+    border-top: 1px solid var(--line); padding: 12px 20px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
   }
-  .o-card:hover .more { opacity: 1; }
-  .o-card:hover .base { opacity: 0; }
-  .o-card .more h3 { color: var(--amber); }
-  .o-card .more p { font-size: 13.5px; line-height: 1.65; color: #d9deeb; }
-  .o-card .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  .o-card .chips span { font-size: 11px; font-weight: 600; color: var(--amber); background: var(--amber-dim); padding: 4px 10px; border-radius: 999px; }
+  .c2 .foot b { font-size: 12px; font-weight: 700; color: var(--amber); white-space: nowrap; }
+  .c2 .foot .tps { display: flex; gap: 10px; font-size: 12px; color: var(--muted); font-weight: 600; overflow: hidden; }
+  .c2 .foot .tps span { white-space: nowrap; }
 
-  /* ===== V5 Frame Split ===== */
-  .f-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
-  .f-card:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .f-card .th { position: relative; aspect-ratio: 16/9; }
-  .f-card .th img { width: 100%; height: 100%; object-fit: cover; }
-  .f-card .date-badge {
-    position: absolute; left: 14px; bottom: -16px;
-    background: var(--navy); border: 1px solid rgba(140,174,242,0.35);
-    border-radius: 10px; padding: 8px 12px; text-align: center; line-height: 1.1;
-  }
-  .f-card .date-badge b { display: block; font-size: 17px; }
-  .f-card .date-badge span { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; }
-  .f-card .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(11,16,30,0.8); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
-  .f-card .body { padding: 30px 18px 18px; }
-  .f-card h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 6px; }
-  .f-card:hover h3 { color: var(--amber); }
-  .f-card .spk { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
-  .f-card .verse { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--amber); background: var(--amber-dim); padding: 5px 11px; border-radius: 999px; }
+  /* ===== V3 Split Panel ===== */
+  .c3 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; grid-template-columns: 46% 1fr; transition: transform 0.25s, border-color 0.2s; }
+  .c3:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
+  .c3 .th { position: relative; min-height: 100%; }
+  .c3 .th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .c3 .body { padding: 20px 22px; display: flex; flex-direction: column; }
+  .c3 .date { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+  .c3 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 10px; }
+  .c3:hover h3 { color: var(--amber); }
+  .c3 .sum { flex: 1; margin-bottom: 14px; }
+  .c3 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  @media (max-width: 640px) { .c3 { grid-template-columns: 1fr; } .c3 .th { aspect-ratio: 16/9; } }
 
-  /* ===== V6 Glass Caption ===== */
-  .gl-card { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/10; transition: transform 0.25s, border-color 0.2s; }
-  .gl-card:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .gl-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-  .gl-card:hover img { transform: scale(1.05); }
-  .gl-card .cap {
-    position: absolute; left: 10px; right: 10px; bottom: 10px;
-    background: rgba(13,19,36,0.72); backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.12); border-radius: 13px; padding: 13px 16px;
+  /* ===== V4 Scripture Ribbon ===== */
+  .c4 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .c4:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .c4 .th { position: relative; aspect-ratio: 16/9; }
+  .c4 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .c4 .ribbon {
+    position: absolute; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(90deg, rgba(11,16,30,0.92), rgba(11,16,30,0.55));
+    backdrop-filter: blur(6px); padding: 8px 14px;
+    font-family: Fraunces, serif; font-style: italic; font-size: 13.5px; color: var(--amber);
   }
-  .gl-card h3 { font-family: Fraunces, serif; font-size: 18.5px; font-weight: 500; line-height: 1.2; }
-  .gl-card .meta { font-size: 11.5px; color: #c3c9dd; margin-top: 4px; }
-  .gl-card p { font-size: 12.5px; line-height: 1.6; color: #d9deeb; margin-top: 8px; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s, opacity 0.35s; }
-  .gl-card:hover p { max-height: 100px; opacity: 1; }
+  .c4 .body { padding: 18px 20px 20px; }
+  .c4 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+  .c4 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
+  .c4:hover h3 { color: var(--amber); }
+  .c4 .sum { margin-bottom: 14px; }
+  .c4 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
-  /* ===== V7 Spotlight ===== */
-  .s-card { transition: transform 0.2s; }
-  .s-card:hover { transform: translateY(-4px); }
-  .s-card .th { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 16/9; border: 1px solid var(--line); }
-  .s-card .th img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.25) brightness(0.75); transition: filter 0.4s, transform 0.5s; }
-  .s-card:hover .th img { filter: saturate(1.05) brightness(1); transform: scale(1.03); }
-  .s-card .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(11,16,30,0.8); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
-  .s-card .spk { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); font-weight: 700; margin: 14px 0 5px; }
-  .s-card h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; }
-  .s-card .meta { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  /* ===== V5 Overlay Editorial ===== */
+  .c5 { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 3/3.5; transition: transform 0.25s, border-color 0.2s; }
+  .c5:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .c5 img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+  .c5:hover img.bg { transform: scale(1.05); }
+  .c5 .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0.05) 20%, rgba(11,16,30,0.72) 55%, rgba(11,16,30,0.97) 100%); }
+  .c5 .body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; }
+  .c5 .date { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; margin-bottom: 7px; }
+  .c5 h3 { font-family: Fraunces, serif; font-size: 22px; font-weight: 500; line-height: 1.16; margin-bottom: 9px; }
+  .c5 .sum { color: #b9c0d4; margin-bottom: 14px; -webkit-line-clamp: 2; }
+  .c5 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 
-  /* ===== V8 Ticket ===== */
-  .t-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; position: relative; transition: transform 0.25s, border-color 0.2s; }
-  .t-card:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
-  .t-card .th { position: relative; aspect-ratio: 16/9; }
-  .t-card .th img { width: 100%; height: 100%; object-fit: cover; }
-  .t-card .tear {
-    height: 0; border-top: 2px dashed var(--line); position: relative; margin: 0 14px;
+  /* ===== V6 Left Ruler ===== */
+  .c6 { position: relative; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 16px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .c6:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); border-left-color: var(--amber); }
+  .c6 .th { position: relative; aspect-ratio: 16/8.5; }
+  .c6 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .c6 .body { padding: 18px 20px 20px; }
+  .c6 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+  .c6 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
+  .c6:hover h3 { color: var(--amber); }
+  .c6 .sum { margin-bottom: 14px; }
+  .c6 .vq {
+    font-family: Fraunces, serif; font-style: italic; font-size: 14px; color: var(--amber);
+    margin-bottom: 12px; display: block;
   }
-  .t-card .tear::before, .t-card .tear::after {
-    content: ''; position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--bg); border: 1px solid var(--line);
-  }
-  .t-card .tear::before { left: -24px; }
-  .t-card .tear::after { right: -24px; }
-  .t-card .body { padding: 16px 18px 18px; }
-  .t-card .meta { display: flex; gap: 8px; font-size: 11.5px; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
-  .t-card .meta i { font-style: normal; color: var(--amber); }
-  .t-card h3 { font-family: Fraunces, serif; font-size: 20px; font-weight: 500; line-height: 1.2; }
-  .t-card:hover h3 { color: var(--amber); }
+  .c6 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ===== V7 Tags on Frame ===== */
+  .c7 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .c7:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .c7 .th { position: relative; aspect-ratio: 16/9; }
+  .c7 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .c7 .th .chips { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; right: 70px; }
+  .c7 .th .chip-v, .c7 .th .chip-t { backdrop-filter: blur(8px); background: rgba(11,16,30,0.72); border: 1px solid rgba(140,174,242,0.35); }
+  .c7 .th .chip-t { border-color: rgba(143,125,240,0.4); }
+  .c7 .body { padding: 18px 20px 20px; }
+  .c7 .date { font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+  .c7 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
+  .c7:hover h3 { color: var(--amber); }
+
+  /* ===== V8 Journal ===== */
+  .c8 { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .c8:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .c8 .th { position: relative; aspect-ratio: 16/9; margin: 12px 12px 0; border-radius: 12px; overflow: hidden; }
+  .c8 .th img { width: 100%; height: 100%; object-fit: cover; }
+  .c8 .body { padding: 16px 20px 20px; }
+  .c8 .toprow { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .c8 .date { font-size: 12px; color: var(--muted); }
+  .c8 .vref { font-size: 12px; font-weight: 700; color: var(--amber); }
+  .c8 h3 { font-family: Fraunces, serif; font-size: 21px; font-weight: 500; line-height: 1.2; margin-bottom: 9px; }
+  .c8:hover h3 { color: var(--amber); }
+  .c8 .sum { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px dotted var(--line); }
+  .c8 .tps { display: flex; gap: 14px; font-size: 12px; font-weight: 600; color: #b9a8ff; }
+  .c8 .tps span::before { content: '#'; opacity: 0.6; margin-right: 1px; }
 </style>
 </head>
 <body>
@@ -187,83 +186,106 @@
   </div>
 </div>
 
-<section class="variant" id="v1"><div class="vtag">1 · Poster</div><div class="wrap g4" id="g1"></div></section>
-<section class="variant" id="v2"><div class="vtag">2 · Clean Minimal</div><div class="wrap g3" id="g2"></div></section>
-<section class="variant" id="v3"><div class="vtag">3 · Editorial Rows</div><div class="wrap r-list" id="g3"></div></section>
-<section class="variant" id="v4"><div class="vtag">4 · Overlay Reveal</div><div class="wrap g3" id="g4"></div></section>
-<section class="variant" id="v5"><div class="vtag">5 · Frame Split</div><div class="wrap g3" id="g5"></div></section>
-<section class="variant" id="v6"><div class="vtag">6 · Glass Caption</div><div class="wrap g3" id="g6"></div></section>
-<section class="variant" id="v7"><div class="vtag">7 · Spotlight</div><div class="wrap g3" id="g7"></div></section>
-<section class="variant" id="v8"><div class="vtag">8 · Ticket</div><div class="wrap g3" id="g8"></div></section>
+<section class="variant" id="v1"><div class="vtag">1 · Elevated Classic</div><div class="wrap g3" id="g1"></div></section>
+<section class="variant" id="v2"><div class="vtag">2 · Footer Bar</div><div class="wrap g3" id="g2"></div></section>
+<section class="variant" id="v3"><div class="vtag">3 · Split Panel</div><div class="wrap g2" id="g3"></div></section>
+<section class="variant" id="v4"><div class="vtag">4 · Scripture Ribbon</div><div class="wrap g3" id="g4"></div></section>
+<section class="variant" id="v5"><div class="vtag">5 · Overlay Editorial</div><div class="wrap g3" id="g5"></div></section>
+<section class="variant" id="v6"><div class="vtag">6 · Left Ruler</div><div class="wrap g3" id="g6"></div></section>
+<section class="variant" id="v7"><div class="vtag">7 · Tags on Frame</div><div class="wrap g3" id="g7"></div></section>
+<section class="variant" id="v8"><div class="vtag">8 · Journal</div><div class="wrap g3" id="g8"></div></section>
 
 <div class="switch" id="switch"></div>
 
 <script>
   // Real data from Supabase (Sep 2026)
   const D = [
-    { t: 'I Need Peace', sp: 'Grant Troutt', d: 'Sep 7, 2026', dd: '7', dm: 'Sep', min: 31, th: 'GsglpMuRjic', v: 'Psalm 34:1-3', tp: ['Suffering', 'Hope'], sum: 'Grant Troutt preaches from Psalm 34 about finding peace not by escaping hardship but by learning to walk with God inside the cave of suffering.' },
-    { t: 'How to Overcome Anxious Thoughts', sp: 'Noah Herrin', d: 'Aug 31, 2026', dd: '31', dm: 'Aug', min: 30, th: 'CfpvQ4IuWdQ', v: 'Hebrews 13:7-9', tp: ['Fear & Anxiety', 'Grace'], sum: 'Noah Herrin preaches from Hebrews 13 to show that anxious, negative thoughts can be changed by reorienting our thinking toward the consistent, gracious character of God.' },
-    { t: 'I Got the Bag', sp: 'Noah Herrin', d: 'Aug 24, 2026', dd: '24', dm: 'Aug', min: 37, th: '46zVMFuXMsU', v: 'Matthew 25:14-30', tp: ['Generosity', 'Wisdom'], sum: 'Noah Herrin preaches from the parable of the talents: every follower of Jesus has been entrusted with time, talent, and treasure, and will be held accountable for how it is stewarded.' },
-    { t: 'Do Your Job', sp: 'Noah Herrin', d: 'Aug 17, 2026', dd: '17', dm: 'Aug', min: 33, th: 'b42BkFdMkgg', v: 'Genesis 2:15', tp: ['Worship', 'Purpose'], sum: 'Noah Herrin argues that work is part of God\u2019s good design, given before the Fall, and should be understood as worship, not punishment.' },
-    { t: 'Test God', sp: 'Noah Herrin', d: 'Aug 10, 2026', dd: '10', dm: 'Aug', min: 41, th: 'leCtfp9lRRo', v: 'Malachi 3:10-11', tp: ['Generosity', 'Worship'], sum: 'Noah Herrin preaches on tithing as a biblical act of stewardship, not a burdensome law: returning the first and best of what God entrusts to us.' },
-    { t: 'The god of Money', sp: 'Noah Herrin', d: 'Aug 3, 2026', dd: '3', dm: 'Aug', min: 39, th: 'doFs4_gvkqg', v: 'Matthew 6:19-21', tp: ['Money', 'Worship'], sum: 'Noah Herrin launches the Money Moves series, teaching from Matthew 6 that money can either be a tool or an idol.' },
-    { t: 'What to Do When You Don\u2019t Know What to Do', sp: 'Grant Troutt', d: 'Jul 27, 2026', dd: '27', dm: 'Jul', min: 28, th: 'OTngLMPGWPY', v: '1 Thess 5:16-18', tp: ['Prayer', 'Hope'], sum: 'Grant Troutt centers on three short verses as a practical roadmap: rejoice always, pray without ceasing, and give thanks in all circumstances.' },
-    { t: 'Satan\u2019s Strategy & How to Overcome It', sp: 'Madi Prewett Troutt', d: 'Jul 20, 2026', dd: '20', dm: 'Jul', min: 34, th: 'pMJq1abak9M', v: 'Genesis 3:6', tp: ['Sin & Repentance', 'Holiness'], sum: 'Madi Prewett Troutt traces Satan\u2019s tactics from Genesis 3, warning that alongside a good and real God there is a real, cunning enemy.' },
+    { t: 'I Need Peace', sp: 'Grant Troutt', d: 'Monday, Sep 7, 2026', min: 31, th: 'GsglpMuRjic', v: 'Psalm 34:1-3', tp: ['Suffering', 'Hope'], sum: 'Grant Troutt preaches from Psalm 34 about finding peace not by escaping hardship but by learning to walk with God inside the cave of suffering. Peace is developed in depth, not delivered on demand.' },
+    { t: 'How to Overcome Anxious Thoughts', sp: 'Noah Herrin', d: 'Monday, Aug 31, 2026', min: 30, th: 'CfpvQ4IuWdQ', v: 'Hebrews 13:7-9', tp: ['Fear & Anxiety', 'Grace'], sum: 'Noah Herrin preaches from Hebrews 13 to show that anxious, negative thoughts can be changed by reorienting our thinking toward the consistent, gracious character of God.' },
+    { t: 'I Got the Bag', sp: 'Noah Herrin', d: 'Monday, Aug 24, 2026', min: 37, th: '46zVMFuXMsU', v: 'Matthew 25:14-30', tp: ['Generosity', 'Wisdom'], sum: 'Noah Herrin preaches from the parable of the talents: every follower of Jesus has been entrusted with time, talent, and treasure, and will be held accountable for how it is stewarded.' },
+    { t: 'Do Your Job', sp: 'Noah Herrin', d: 'Monday, Aug 17, 2026', min: 33, th: 'b42BkFdMkgg', v: 'Genesis 2:15', tp: ['Worship', 'Purpose'], sum: 'Noah Herrin argues that work is part of God\u2019s good design, given before the Fall, and should be understood as worship, not punishment. The Hebrew word avoda links work and worship.' },
+    { t: 'Test God', sp: 'Noah Herrin', d: 'Monday, Aug 10, 2026', min: 41, th: 'leCtfp9lRRo', v: 'Malachi 3:10-11', tp: ['Generosity', 'Worship'], sum: 'Noah Herrin preaches on tithing as a biblical act of stewardship, not a burdensome law: returning the first and best of what God entrusts to us through the local church.' },
+    { t: 'The god of Money', sp: 'Noah Herrin', d: 'Monday, Aug 3, 2026', min: 39, th: 'doFs4_gvkqg', v: 'Matthew 6:19-21', tp: ['Money', 'Worship'], sum: 'Noah Herrin launches the Money Moves series, teaching from Matthew 6 that money can either be a tool or an idol. When money becomes a god in our hearts it blinds us and steals our joy.' },
   ];
   const img = (id) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+  const chips = (s) => `<span class="chip-v">${s.v}</span>${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}`;
 
   document.getElementById('g1').innerHTML = D.map((s) => `
-    <a class="p-card"><img src="${img(s.th)}" /><div class="shade"></div>
-      <div class="body"><div class="meta">${s.d} · ${s.min} min</div><h3>${s.t}</h3><p>${s.sum}</p></div>
-    </a>`).join('');
-
-  document.getElementById('g2').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="m-card"><div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <h3>${s.t}</h3><div class="meta">${s.sp} · ${s.d}</div>
-    </a>`).join('');
-
-  document.getElementById('g3').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="r-card">
+    <a class="c1">
       <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div><div class="meta">${s.d} · ${s.sp}</div><h3>${s.t}</h3><p>${s.sum}</p></div>
-      <span class="go">→</span>
-    </a>`).join('');
-
-  document.getElementById('g4').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="o-card"><img src="${img(s.th)}" /><div class="veil"></div>
-      <div class="base"><h3>${s.t}</h3><div class="meta">${s.sp} · ${s.d} · ${s.min} min</div></div>
-      <div class="more"><h3>${s.t}</h3><p>${s.sum}</p>
-        <div class="chips"><span>${s.v}</span>${s.tp.map((t) => `<span>${t}</span>`).join('')}</div>
+      <div class="body">
+        <div class="date">${s.d}</div><h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <div class="chips">${chips(s)}</div>
       </div>
     </a>`).join('');
 
-  document.getElementById('g5').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="f-card">
-      <div class="th"><img src="${img(s.th)}" />
-        <div class="date-badge"><b>${s.dd}</b><span>${s.dm}</span></div>
-        <span class="dur">${s.min} min</span>
+  document.getElementById('g2').innerHTML = D.map((s) => `
+    <a class="c2">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+      <div class="body"><div class="date">${s.d}</div><h3>${s.t}</h3><p class="sum">${s.sum}</p></div>
+      <div class="foot"><b>${s.v}</b><div class="tps">${s.tp.map((t) => `<span>${t}</span>`).join('')}</div></div>
+    </a>`).join('');
+
+  document.getElementById('g3').innerHTML = D.map((s) => `
+    <a class="c3">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+      <div class="body">
+        <div class="date">${s.d}</div><h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <div class="chips">${chips(s)}</div>
       </div>
-      <div class="body"><h3>${s.t}</h3><div class="spk">${s.sp}</div><span class="verse">${s.v}</span></div>
     </a>`).join('');
 
-  document.getElementById('g6').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="gl-card"><img src="${img(s.th)}" />
-      <div class="cap"><h3>${s.t}</h3><div class="meta">${s.sp} · ${s.d} · ${s.min} min</div><p>${s.sum}</p></div>
+  document.getElementById('g4').innerHTML = D.map((s) => `
+    <a class="c4">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span><div class="ribbon">${s.v}</div></div>
+      <div class="body">
+        <div class="date">${s.d}</div><h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <div class="chips">${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}</div>
+      </div>
     </a>`).join('');
 
-  document.getElementById('g7').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="s-card"><div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
-      <div class="spk">${s.sp}</div><h3>${s.t}</h3><div class="meta">${s.d}</div>
+  document.getElementById('g5').innerHTML = D.map((s) => `
+    <a class="c5">
+      <img class="bg" src="${img(s.th)}" /><div class="shade"></div><span class="dur" style="top:10px;bottom:auto;">${s.min} min</span>
+      <div class="body">
+        <div class="date">${s.d}</div><h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <div class="chips">${chips(s)}</div>
+      </div>
     </a>`).join('');
 
-  document.getElementById('g8').innerHTML = D.slice(0, 6).map((s) => `
-    <a class="t-card">
-      <div class="th"><img src="${img(s.th)}" /></div>
-      <div class="tear"></div>
-      <div class="body"><div class="meta"><i>${s.v}</i><span>·</span><span>${s.d}</span><span>·</span><span>${s.min} min</span></div><h3>${s.t}</h3></div>
+  document.getElementById('g6').innerHTML = D.map((s) => `
+    <a class="c6">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+      <div class="body">
+        <div class="date">${s.d}</div><h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <span class="vq">${s.v}</span>
+        <div class="chips">${s.tp.map((t) => `<span class="chip-t">${t}</span>`).join('')}</div>
+      </div>
     </a>`).join('');
 
-  const NAMES = ['Poster', 'Clean Minimal', 'Editorial Rows', 'Overlay Reveal', 'Frame Split', 'Glass Caption', 'Spotlight', 'Ticket'];
+  document.getElementById('g7').innerHTML = D.map((s) => `
+    <a class="c7">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span><div class="chips">${chips(s)}</div></div>
+      <div class="body"><div class="date">${s.d}</div><h3>${s.t}</h3><p class="sum">${s.sum}</p></div>
+    </a>`).join('');
+
+  document.getElementById('g8').innerHTML = D.map((s) => `
+    <a class="c8">
+      <div class="th"><img src="${img(s.th)}" /><span class="dur">${s.min} min</span></div>
+      <div class="body">
+        <div class="toprow"><span class="date">${s.d}</span><span class="vref">${s.v}</span></div>
+        <h3>${s.t}</h3>
+        <p class="sum">${s.sum}</p>
+        <div class="tps">${s.tp.map((t) => `<span>${t}</span>`).join('')}</div>
+      </div>
+    </a>`).join('');
+
+  const NAMES = ['Elevated Classic', 'Footer Bar', 'Split Panel', 'Scripture Ribbon', 'Overlay Editorial', 'Left Ruler', 'Tags on Frame', 'Journal'];
   const sw = document.getElementById('switch');
   NAMES.forEach((n, i) => {
     const b = document.createElement('button');
