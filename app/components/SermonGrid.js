@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { noDashes } from '../../lib/text.js';
 
 function formatDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
@@ -23,7 +24,7 @@ export default function SermonGrid({ sermons }) {
           <div className="card-body">
             <div className="date">{formatDate(s.date)}</div>
             <h3>{s.title}</h3>
-            <p>{s.summary?.split('. ').slice(0, 2).join('. ')}.</p>
+            <p>{noDashes(s.summary?.split('. ').slice(0, 2).join('. '))}.</p>
             <div className="tags">
               {(s.verses || []).slice(0, 1).map((v) => (
                 <span key={v.reference} className="tag book">

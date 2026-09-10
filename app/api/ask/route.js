@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { db } from '../../../lib/supabase.js';
+import { noDashes } from '../../../lib/text.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -87,7 +88,7 @@ export async function POST(request) {
       {
         role: 'system',
         content:
-          "You answer questions about what Way Church (Nashville) has taught, using ONLY the provided sermon excerpts. Synthesize across sermons; mention sermon titles naturally when referencing them. If the excerpts don't address the question, say so plainly. 2-4 short paragraphs, plain text.",
+          "You answer questions about what Way Church (Nashville) has taught, using ONLY the provided sermon excerpts. Synthesize across sermons; mention sermon titles naturally when referencing them. If the excerpts don't address the question, say so plainly. 2-4 short paragraphs, plain text. Never use em dashes or en dashes; use commas, periods, or colons instead.",
       },
       { role: 'user', content: `Question: ${q}\n\nSermons:\n\n${context}` },
     ],
@@ -120,7 +121,7 @@ export async function POST(request) {
     .map(({ id, title, date, speaker }) => ({ id, title, date, speaker }));
 
   return Response.json({
-    answer: result.answer,
+    answer: noDashes(result.answer),
     sources: sources.length ? sources : (sermons || []).map(({ id, title, date, speaker }) => ({ id, title, date, speaker })),
   });
 }

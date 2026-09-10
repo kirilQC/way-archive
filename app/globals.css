@@ -196,6 +196,8 @@ select.chip { appearance: none; }
 .transcript-block p { font-size: 13px; color: var(--muted); line-height: 1.65; }
 
 .site-footer .synced { margin-top: 6px; font-size: 11px; opacity: 0.7; }
+.footer-link { color: var(--amber); font-size: 12.5px; font-weight: 500; }
+.footer-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Discussion questions */
 .dq { margin: 0 0 4px 18px; }
@@ -213,7 +215,7 @@ select.chip { appearance: none; }
 .ask-source span { font-size: 12px; color: var(--muted); }
 .meta-link:hover { color: var(--amber); }
 .hl { display: flex; gap: 10px; font-size: 13.5px; color: #c6c9d2; line-height: 1.6; margin-bottom: 11px; }
-.hl::before { content: '—'; color: var(--amber); }
+.hl::before { content: '▸'; color: var(--amber); font-size: 10px; }
 
 /* Clickable timestamped highlights */
 button.hl-jump {

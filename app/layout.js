@@ -8,7 +8,7 @@ const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-serif', weight
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata = {
-  title: 'Way Church — Sermon Archive',
+  title: 'Way Archive',
   description: 'Every Way Church sermon, transcribed, summarized, and searchable.',
 };
 
@@ -47,7 +47,10 @@ export default async function RootLayout({ children }) {
         </header>
         {children}
         <footer className="site-footer">
-          Built by Kiril Ivlev
+          <a href="https://www.waychurch.com/" target="_blank" rel="noreferrer" className="footer-link">
+            waychurch.com
+          </a>
+          <div style={{ marginTop: 6 }}>Built by Kiril Ivlev</div>
           {synced && <div className="synced">last synced @ {synced} CT</div>}
         </footer>
       </body>

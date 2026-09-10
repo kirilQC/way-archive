@@ -3,7 +3,7 @@ import { db } from '../../lib/supabase.js';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Topics — Way Church Sermon Archive' };
+export const metadata = { title: 'Way Archive' };
 
 export default async function TopicsPage() {
   const { data } = await db()

@@ -3,7 +3,7 @@ import { db } from '../../lib/supabase.js';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Series — Way Church Sermon Archive' };
+export const metadata = { title: 'Way Archive' };
 
 function monthYear(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -50,7 +50,7 @@ export default async function SeriesPage() {
                 <div className="card-body">
                   <div className="date">
                     {monthYear(first.date)}
-                    {monthYear(first.date) !== monthYear(last.date) ? ` – ${monthYear(last.date)}` : ''}
+                    {monthYear(first.date) !== monthYear(last.date) ? ` - ${monthYear(last.date)}` : ''}
                   </div>
                   <h3>{name}</h3>
                   <div className="tags">

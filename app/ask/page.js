@@ -1,6 +1,6 @@
 import AskClient from './AskClient.js';
 
-export const metadata = { title: 'Ask — Way Church Sermon Archive' };
+export const metadata = { title: 'Way Archive' };
 
 export default function AskPage() {
   return (

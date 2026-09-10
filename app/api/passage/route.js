@@ -21,7 +21,9 @@ function bookId(name) {
   return idx === -1 ? null : idx + 1;
 }
 
-const strip = (html) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+import { noDashes } from '../../../lib/text.js';
+
+const strip = (html) => noDashes(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
 
 export async function GET(request) {
   const ref = new URL(request.url).searchParams.get('ref')?.trim();
@@ -67,7 +69,7 @@ export async function GET(request) {
       const data = await res.json();
       if (data.text) {
         return Response.json(
-          { text: data.text.trim().replace(/\s+/g, ' '), translation: data.translation_name || 'WEB' },
+          { text: noDashes(data.text.trim().replace(/\s+/g, ' ')), translation: data.translation_name || 'WEB' },
           { headers }
         );
       }

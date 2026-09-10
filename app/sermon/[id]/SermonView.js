@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { noDashes } from '../../../lib/text.js';
 
 function formatDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
@@ -37,11 +38,11 @@ function Verse({ reference, quote }) {
       <b>{reference}</b>
       {passage?.text ? (
         <span>
-          “{passage.text}
-          {passage.truncated ? '…' : '”'} <i className="verse-trans">— {passage.translation}</i>
+          “{noDashes(passage.text)}
+          {passage.truncated ? '…' : '”'} <i className="verse-trans">({passage.translation})</i>
         </span>
       ) : (
-        <span>{quote}</span>
+        <span>{noDashes(quote)}</span>
       )}
     </div>
   );
@@ -85,7 +86,7 @@ function DiscussionQuestions({ sermonId }) {
       ) : (
         <ol className="dq">
           {questions.map((q, i) => (
-            <li key={i}>{q}</li>
+            <li key={i}>{noDashes(q)}</li>
           ))}
         </ol>
       )}
@@ -123,14 +124,14 @@ function Transcript({ sermonId, onSeek }) {
               <button className="hl-time" onClick={() => onSeek(b.start)}>
                 {formatTime(b.start)}
               </button>
-              <p>{b.text}</p>
+              <p>{noDashes(b.text)}</p>
             </div>
           ))}
         </div>
       )}
       {open && data && !data.segments && data.text && (
         <div className="transcript">
-          <p className="panel-text">{data.text}</p>
+          <p className="panel-text">{noDashes(data.text)}</p>
         </div>
       )}
     </>
@@ -190,7 +191,7 @@ export default function SermonView({ sermon: s }) {
       <div className="cols">
         <div className="panel-box">
           <h4>Summary</h4>
-          <p className="panel-text">{s.summary}</p>
+          <p className="panel-text">{noDashes(s.summary)}</p>
 
           {(s.highlights || []).length > 0 && (
             <>
@@ -198,12 +199,12 @@ export default function SermonView({ sermon: s }) {
               {s.highlights.map((h, i) =>
                 typeof h === 'string' ? (
                   <div key={i} className="hl">
-                    {h}
+                    {noDashes(h)}
                   </div>
                 ) : (
                   <button key={i} className="hl hl-jump" onClick={() => seekTo(h.start_seconds)}>
                     <span className="hl-time">{formatTime(h.start_seconds)}</span>
-                    <span>{h.text}</span>
+                    <span>{noDashes(h.text)}</span>
                   </button>
                 )
               )}
@@ -213,7 +214,7 @@ export default function SermonView({ sermon: s }) {
           {s.notes && (
             <>
               <h4 className="mt">Notes & Takeaways</h4>
-              <p className="panel-text">{s.notes}</p>
+              <p className="panel-text">{noDashes(s.notes)}</p>
             </>
           )}
 

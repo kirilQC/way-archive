@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { noDashes } from '../../lib/text.js';
 
 function formatDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
@@ -123,7 +124,7 @@ export default function Archive({ sermons }) {
       <div className="toolbar">
         <input
           className="search"
-          placeholder="Search everything ever said — titles, verses, topics, full transcripts…"
+          placeholder="Search everything ever said: titles, verses, topics, full transcripts…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -159,7 +160,7 @@ export default function Archive({ sermons }) {
               <div className="kicker">Latest Sermon</div>
               <div className="date">{formatDate(latest.date)}</div>
               <h3>{latest.title}</h3>
-              <p>{latest.summary}</p>
+              <p>{noDashes(latest.summary)}</p>
               <Tags sermon={latest} max={3} />
             </div>
           </Link>
@@ -171,7 +172,7 @@ export default function Archive({ sermons }) {
       {!searching && filtered.length === 0 ? (
         <div className="empty">
           {sermons.length === 0
-            ? 'No sermons yet — run the backfill script to fill the archive.'
+            ? 'No sermons yet. Run the backfill script to fill the archive.'
             : 'Nothing matches that search.'}
         </div>
       ) : (
@@ -188,9 +189,12 @@ export default function Archive({ sermons }) {
                   <div className="date">{formatDate(s.date)}</div>
                   <h3>{s.title}</h3>
                   {hit?.snippet ? (
-                    <p className="snippet" dangerouslySetInnerHTML={{ __html: `…${hit.snippet}…` }} />
+                    <p
+                      className="snippet"
+                      dangerouslySetInnerHTML={{ __html: `…${noDashes(hit.snippet)}…` }}
+                    />
                   ) : (
-                    <p>{s.summary?.split('. ').slice(0, 2).join('. ')}.</p>
+                    <p>{noDashes(s.summary?.split('. ').slice(0, 2).join('. '))}.</p>
                   )}
                   <Tags sermon={s} />
                 </div>

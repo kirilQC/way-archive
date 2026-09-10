@@ -1,6 +1,7 @@
 // Returns discussion questions for a sermon, generating and storing them on first request.
 import OpenAI from 'openai';
 import { db } from '../../../lib/supabase.js';
+import { noDashes } from '../../../lib/text.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -23,7 +24,7 @@ export async function GET(request) {
   if (!sermon) return Response.json({ error: 'not found' }, { status: 404 });
 
   if (Array.isArray(sermon.discussion_questions) && sermon.discussion_questions.length) {
-    return Response.json({ questions: sermon.discussion_questions });
+    return Response.json({ questions: sermon.discussion_questions.map(noDashes) });
   }
   if (!sermon.transcript) return Response.json({ questions: [] });
 
@@ -34,7 +35,7 @@ export async function GET(request) {
       {
         role: 'system',
         content:
-          'Write 4-6 small-group discussion questions grounded in this specific sermon. Mix reflection ("when have you...") with application ("what would change if..."). Reference the sermon\'s actual illustrations and passages. No generic filler.',
+          'Write 4-6 small-group discussion questions grounded in this specific sermon. Mix reflection ("when have you...") with application ("what would change if..."). Reference the sermon\'s actual illustrations and passages. No generic filler. Never use em dashes or en dashes; use commas, periods, or colons instead.',
       },
       {
         role: 'user',
@@ -56,7 +57,7 @@ export async function GET(request) {
     },
   });
 
-  const { questions } = JSON.parse(completion.choices[0].message.content);
+  const questions = JSON.parse(completion.choices[0].message.content).questions.map(noDashes);
   // Persist so we never regenerate (ignore failure if column isn't migrated yet)
   await db().from('sermons').update({ discussion_questions: questions }).eq('id', id);
 

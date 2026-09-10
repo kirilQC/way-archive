@@ -24,9 +24,9 @@ export default async function Home() {
         <div className="glow" />
         <div className="kicker">Way Church · Sermon Archive</div>
         <h1>
-          Sunday&apos;s word,
+          Find any moment,
           <br />
-          <em>every day after.</em>
+          <em>from any Sunday.</em>
         </h1>
         <p>
           Each week&apos;s sermon is pulled from YouTube, transcribed, and distilled into summaries,
