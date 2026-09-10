@@ -76,15 +76,43 @@ export default function BibleClient() {
           messages: next.map(({ role, content }) => ({ role, content })),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'failed');
-      setMessages([
-        ...next,
-        { role: 'assistant', content: data.answer, verses: data.verses, sources: data.sources },
-      ]);
+      if (!res.ok || !res.body) throw new Error('failed');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      const DONE = '###DONE###';
+      let buffer = '';
+      let finished = false;
+
+      while (!finished) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const idx = buffer.indexOf(DONE);
+        if (idx !== -1) {
+          // Final tail: { verses, sources }
+          const answerText = buffer.slice(0, idx).trimEnd();
+          let tail = { verses: [], sources: [] };
+          try {
+            tail = JSON.parse(buffer.slice(idx + DONE.length));
+          } catch {}
+          setMessages([
+            ...next,
+            { role: 'assistant', content: answerText, verses: tail.verses, sources: tail.sources },
+          ]);
+          finished = true;
+        } else {
+          // Stream the growing answer live
+          const partial = buffer;
+          setMessages([...next, { role: 'assistant', content: partial, streaming: true }]);
+        }
+      }
+      if (!finished) {
+        setMessages([...next, { role: 'assistant', content: buffer.trimEnd() }]);
+      }
     } catch {
       setError('Something went wrong. Try again.');
-      setMessages(next.slice(0, -1));
+      setMessages(next);
       setInput(q);
     } finally {
       setLoading(false);
@@ -102,11 +130,20 @@ export default function BibleClient() {
               </div>
             ) : (
               <div key={i} className="chat-answer panel-box">
-                {m.content.split('\n').filter(Boolean).map((p, j) => (
+                {m.content.split('\n').filter(Boolean).map((p, j, arr) => (
                   <p key={j} className="panel-text" style={{ marginBottom: 10 }}>
                     {p}
+                    {m.streaming && j === arr.length - 1 && <span className="chat-cursor" />}
                   </p>
                 ))}
+                {m.streaming && !m.content && (
+                  <p className="panel-text">
+                    <span className="chat-cursor" />
+                  </p>
+                )}
+                {m.streaming && (
+                  <p className="chat-status">Writing from Scripture…</p>
+                )}
                 {(m.verses || []).length > 0 && (
                   <div style={{ marginTop: 14 }}>
                     {m.verses.map((v) => (
@@ -128,7 +165,11 @@ export default function BibleClient() {
               </div>
             )
           )}
-          {loading && <div className="chat-answer panel-box panel-text">Searching the Scriptures…</div>}
+          {loading && !messages.some((m) => m.streaming) && (
+            <div className="chat-answer panel-box panel-text chat-thinking">
+              Searching the Scriptures<span className="dots" />
+            </div>
+          )}
           <div ref={endRef} />
         </div>
       )}

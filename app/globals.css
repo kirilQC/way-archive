@@ -230,6 +230,19 @@ select.chip { appearance: none; }
 }
 .chat-answer { align-self: flex-start; max-width: 92%; }
 .chat-answer p:last-of-type { margin-bottom: 0; }
+.chat-cursor {
+  display: inline-block; width: 8px; height: 15px; margin-left: 3px;
+  background: var(--amber); vertical-align: text-bottom; border-radius: 2px;
+  animation: blink 0.9s steps(2, start) infinite;
+}
+@keyframes blink { to { visibility: hidden; } }
+.chat-status { margin-top: 10px; font-size: 11.5px; color: var(--muted); font-style: italic; }
+.chat-thinking .dots::after {
+  content: ''; animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; }
+}
 .chat-disclaimer {
   margin-top: 14px; text-align: center;
   font-size: 11.5px; color: var(--muted); opacity: 0.8;
