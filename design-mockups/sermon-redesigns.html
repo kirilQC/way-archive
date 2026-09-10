@@ -171,6 +171,39 @@
   .v7-qs p { font-size: 13.5px; line-height: 1.7; color: #c8cdda; margin-bottom: 16px; break-inside: avoid; }
   .v7-qs p b { color: var(--blue); font-family: var(--serif); font-size: 17px; margin-right: 8px; }
 
+  /* ============ V9 Cinema + Tabs ============ */
+  .v9-body { max-width: 1200px; margin: 44px auto 0; padding: 0 32px; }
+  .v9-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 34px; }
+  .v9-tab { padding: 13px 22px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .v9-tab:hover { color: var(--text); }
+  .v9-tab.on { color: var(--blue); border-bottom-color: var(--blue); }
+  .v9-pane { display: none; }
+  .v9-pane.on { display: block; }
+  .v9-h4 { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 16px; font-weight: 700; }
+  .v9-ov { display: grid; grid-template-columns: 1.6fr 1fr; gap: 48px; }
+  .v9-ov .lead { font-size: 16.5px; line-height: 1.85; color: #d7dbe6; }
+  .v9-ov .lead::first-letter { font-family: var(--serif); font-size: 50px; float: left; line-height: 0.9; padding: 5px 10px 0 0; color: var(--blue); }
+  .v9-quote { font-family: var(--serif); font-size: 23px; line-height: 1.45; font-style: italic; border-left: 3px solid var(--blue); padding: 4px 0 4px 24px; margin: 34px 0; }
+  .v9-quote small { display: block; margin-top: 10px; font-family: var(--sans); font-style: normal; font-size: 12px; color: var(--blue); font-weight: 700; }
+  .v9-notes { font-size: 14.5px; line-height: 1.8; color: var(--muted); }
+  .v9-hl { display: flex; gap: 12px; margin-bottom: 14px; font-size: 13.5px; line-height: 1.6; color: #c8cdda; align-items: baseline; }
+  .v9-verse { background: var(--panel); border-left: 2px solid var(--blue); border-radius: 10px; padding: 12px 15px; margin-bottom: 9px; }
+  .v9-verse b { color: var(--blue); font-size: 12.5px; display: block; margin-bottom: 4px; }
+  .v9-verse span { font-size: 12.5px; color: var(--muted); font-style: italic; line-height: 1.55; }
+  .v9-side section { margin-bottom: 36px; }
+  .v9-node { position: relative; margin-bottom: 30px; padding-left: 34px; }
+  .v9-node::before { content: ''; position: absolute; left: 3px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px var(--blue-dim); }
+  .v9-tl { position: relative; max-width: 720px; }
+  .v9-tl::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(180deg, var(--blue), var(--violet)); opacity: 0.4; }
+  .v9-node .t { font-size: 11.5px; font-weight: 700; color: var(--blue); margin-bottom: 5px; }
+  .v9-node p { font-size: 14.5px; line-height: 1.65; color: #d0d5e2; }
+  .v9-qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .v9-qcard { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; }
+  .v9-qcard b { font-family: var(--serif); font-size: 22px; color: var(--blue); display: block; margin-bottom: 10px; }
+  .v9-qcard p { font-size: 14px; line-height: 1.7; color: #c8cdda; }
+  .v9-vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 1000px; }
+  @media (max-width: 900px) { .v9-ov, .v9-qgrid, .v9-vgrid { grid-template-columns: 1fr; } }
+
   /* ============ V8 Command Deck ============ */
   .v8-wrap { max-width: 1340px; margin: 0 auto; padding: 36px 24px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
   .v8-card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
@@ -391,7 +424,73 @@ const VARIANTS = [
     <div class="v8-card v8-vs"><h4>Key Scriptures</h4>${S.verses.slice(0, 4).map((v) => `<div class="v8-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}</div>
     <div class="v8-card v8-qs"><h4>Discussion Questions</h4><ol>${S.qs.map((q) => `<li class="v8-q">${q}</li>`).join('')}</ol></div>
   </div>` },
+{ name: '9 · Cinema + Tabs', html: () => `
+  <div class="v2-hero">
+    <div class="bg" style="background-image:url('${S.thumb}')"></div>
+    <div class="kick">${S.date} · ${S.dur}</div>
+    <h1>${S.title}</h1>
+    <div class="m">${S.speaker} · Hebrews 13:7-9</div>
+    ${vid()}
+  </div>
+  <div class="v9-body">
+    <div class="v9-tabs">
+      ${['Overview', 'Timeline', 'Scriptures', 'Discussion'].map((t, i) => `<div class="v9-tab${i === 0 ? ' on' : ''}" onclick="v9tab(this,${i})">${t}</div>`).join('')}
+    </div>
+
+    <div class="v9-pane on">
+      <div class="v9-ov">
+        <div>
+          <p class="lead">${S.summary}</p>
+          <div class="v9-quote">"God is looking down waiting for another opportunity to be delighted in you again."<small>27:36 · ${S.speaker}</small></div>
+          <div class="v9-h4">Take it with you</div>
+          <p class="v9-notes">${S.notes}</p>
+        </div>
+        <div class="v9-side">
+          <section>
+            <div class="v9-h4">Highlights</div>
+            ${S.hls.map((h) => `<div class="v9-hl"><span class="tstamp">${mmss(h.t)}</span><span>${h.x}</span></div>`).join('')}
+          </section>
+          <section>
+            <div class="v9-h4">Key Scriptures</div>
+            ${S.verses.slice(0, 4).map((v) => `<div class="v9-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}
+          </section>
+          <section>
+            <div class="v9-h4">Topics</div>
+            ${S.topics.map((t) => `<span class="pill v" style="margin:0 6px 6px 0">${t}</span>`).join('')}
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="v9-pane">
+      <div class="v9-h4">The message, minute by minute</div>
+      <div class="v9-tl">
+        ${S.hls.map((h) => `<div class="v9-node"><div class="t">${mmss(h.t)}</div><p>${h.x}</p></div>`).join('')}
+        <div class="v9-node"><div class="t">30:20</div><p style="color:var(--muted)">End of message. Click any moment to jump the video there.</p></div>
+      </div>
+    </div>
+
+    <div class="v9-pane">
+      <div class="v9-h4">Scriptures, as preached</div>
+      <div class="v9-vgrid">
+        ${S.verses.map((v) => `<div class="v9-verse"><b>${v.r}</b><span>"${v.q}" (NLT)</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="v9-pane">
+      <div class="v9-h4">For your group</div>
+      <div class="v9-qgrid">
+        ${S.qs.map((q, i) => `<div class="v9-qcard"><b>${String(i + 1).padStart(2, '0')}</b><p>${q}</p></div>`).join('')}
+      </div>
+    </div>
+  </div>` },
 ];
+
+function v9tab(el, i) {
+  const body = el.closest('.v9-body');
+  body.querySelectorAll('.v9-tab').forEach((t, j) => t.classList.toggle('on', j === i));
+  body.querySelectorAll('.v9-pane').forEach((p, j) => p.classList.toggle('on', j === i));
+}
 
 function v3tab(el, i) {
   const wrap = el.closest('.v3-wrap');
