@@ -7,9 +7,9 @@ export default function AskPage() {
     <main>
       <section className="hero">
         <div className="glow" />
-        <div className="kicker">Way Church · Ask the Archive</div>
+        <div className="kicker">Way Church · Ask</div>
         <h1>
-          Ask <em>every sermon</em> at once.
+          Scripture questions, <em>sermon answers.</em>
         </h1>
       </section>
       <AskClient />

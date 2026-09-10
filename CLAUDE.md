@@ -42,11 +42,15 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
 - `/series`, `/series/[name]` (empty until detect-series has run)
 - `/speakers`, `/speakers/[name]`
 - `/topics`, `/topics/[name]` (topic hubs with key-scripture chips)
-- `/ask`: RAG Q&A (`/api/ask`: keyword extraction -> FTS -> excerpt windows -> cited answer)
-- `/bible`: multi-turn scripture chat (`/api/bible`). System prompt adapted from Cameron Pak's
-  open-sourced Bible Bot prompt (MIT-0). The model NEVER writes verse text; it returns
-  verse_references and the client renders real NLT text via `/api/passage` (no hallucinated
-  quotes possible). Also returns sermon_search_query -> FTS -> up to 3 related sermon links.
+- `/books`, `/books/[name]`: all 66 Bible books (canonical order, OT/NT columns from
+  `lib/books.js`) with per-book sermon counters from `bible_books`; unpreached books dimmed
+- `/ask`: unified multi-turn chat (`/api/ask`, streamed) answering both scripture questions and
+  "what has Way taught about X". System prompt adapted from Cameron Pak's open-sourced Bible
+  Bot prompt (MIT-0). Before the model runs, the last user message is FTS-searched and up to 4
+  sermon summaries injected as context so it can cite what was preached. The model NEVER writes
+  verse text; it streams answer text, then `###META###` + JSON (verse_references,
+  sermon_search_query). Server appends `###DONE###` + {verses, sources (with thumbnails)};
+  client renders real NLT text via `/api/passage` (no hallucinated quotes possible).
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript

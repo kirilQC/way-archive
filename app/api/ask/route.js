@@ -1,3 +1,12 @@
+// Unified Ask: multi-turn chat answering both scripture questions and
+// "what has Way Church taught about X" questions, streamed.
+// System prompt guardrails adapted from Cameron Pak's open-sourced Bible Bot prompt
+// (MIT No Attribution, https://gist.github.com/cameronapak/5f6353542c9683cb4967fe12a435db99).
+// The model streams plain answer text, then a ###META### line with JSON
+// { verse_references, sermon_search_query }. The server forwards the answer text
+// as it arrives, then appends a ###DONE### JSON tail with verses + related sermons.
+// Verse text itself is rendered client-side from /api/passage (real NLT text),
+// so the model only supplies references and is told never to fabricate quotes.
 import OpenAI from 'openai';
 import { db } from '../../../lib/supabase.js';
 import { noDashes } from '../../../lib/text.js';
@@ -6,122 +15,149 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 let openai;
-const MODEL = () => process.env.OPENAI_MODEL || 'gpt-5-mini';
 
-// Pull a transcript excerpt around the first occurrence of any search term
-function excerpt(transcript, terms, radius = 1200) {
-  if (!transcript) return '';
-  const lower = transcript.toLowerCase();
-  for (const term of terms) {
-    const idx = lower.indexOf(term.toLowerCase());
-    if (idx !== -1) {
-      return transcript.slice(Math.max(0, idx - radius), idx + radius);
-    }
+const META = '###META###';
+const DONE = '###DONE###';
+
+const SYSTEM = `You are the guide on the Way Church (Nashville) sermon archive website. You answer two kinds of questions, often blended: questions about the Bible, and questions about what Way Church has taught.
+
+Identity and safety:
+- You are an AI assistant, not a pastor or counselor. If asked, say so plainly.
+- For crisis situations (self-harm, abuse, emergencies), gently prioritize the person's safety: urge them to contact emergency services or a crisis line, and to reach out to a trusted person and their local church. Keep the spiritual reflection brief in those cases.
+- For serious personal issues (mental health, medical, legal, marriage crisis), encourage professional help and real church community alongside any biblical perspective.
+
+Theology:
+- Anchor answers in historic, orthodox Christianity. Scripture is the highest authority.
+- Salvation is by grace through faith in Jesus Christ.
+- Hold grace and truth together: be kind, and be biblically clear about sin and repentance. Reject prosperity gospel, cheap grace, and legalism.
+- On genuinely disputed secondary matters, briefly note that faithful Christians differ.
+
+Way Church sermons:
+- You may be given summaries of possibly relevant Way Church sermons. When they genuinely address the question, weave in what was preached and mention sermon titles naturally ("In 'The god of Money', Noah Herrin argues..."). Never invent sermon content; if the provided sermons don't address the question, answer from Scripture alone.
+
+Scripture rules:
+- NEVER invent, misattribute, or paraphrase-as-quote a Bible verse. Do not write out verse quotations in your answer text at all: the site displays the real NLT text for every reference you list.
+- Refer to passages naturally in prose ("Paul addresses this in Romans 8...").
+
+Style:
+- Concise: 1-3 short paragraphs. Warm, patient, non-quarrelsome, plain language.
+- Never use em dashes or en dashes; use commas, periods, or colons instead.
+- Stay on topic: Scripture, faith, theology, Christian living, this church's teaching. Politely redirect unrelated questions.
+
+OUTPUT FORMAT (exactly):
+1. Your answer as plain text.
+2. Then a new line containing exactly ${META}
+3. Then one line of JSON: {"verse_references": ["Book C:V" or "Book C:V-V", 1-4 items], "sermon_search_query": "1-3 lowercase keywords for finding related sermons in this church's archive, or empty string"}`;
+
+async function searchSermons(q, limit) {
+  if (!q?.trim()) return [];
+  try {
+    const { data } = await db().rpc('search_sermons', { q: q.trim() });
+    return (data || []).slice(0, limit).map((r) => r.id);
+  } catch {
+    return [];
   }
-  return transcript.slice(0, radius * 2);
+}
+
+async function sermonsByIds(ids, cols) {
+  if (!ids.length) return [];
+  const { data } = await db().from('sermons').select(cols).in('id', ids);
+  return ids.map((id) => (data || []).find((s) => s.id === id)).filter(Boolean);
 }
 
 export async function POST(request) {
-  const { question } = await request.json();
-  const q = question?.trim();
-  if (!q || q.length < 5) return Response.json({ error: 'Ask a fuller question.' }, { status: 400 });
+  const { messages } = await request.json();
+  if (!Array.isArray(messages) || !messages.length) {
+    return Response.json({ error: 'messages required' }, { status: 400 });
+  }
+  const history = messages.slice(-12).map((m) => ({
+    role: m.role === 'assistant' ? 'assistant' : 'user',
+    content: String(m.content || '').slice(0, 2000),
+  }));
+
+  // Retrieval before the model runs: give it real sermon summaries as context.
+  const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
+  const contextIds = await searchSermons(lastUser, 4);
+  const contextSermons = await sermonsByIds(contextIds, 'id,title,date,speaker,summary');
+  const contextMsg = contextSermons.length
+    ? [
+        {
+          role: 'system',
+          content:
+            'Possibly relevant Way Church sermons:\n\n' +
+            contextSermons
+              .map(
+                (s) =>
+                  `"${s.title}" (${s.speaker || 'unknown'}, ${s.date}): ${String(s.summary || '').slice(0, 400)}`
+              )
+              .join('\n\n'),
+        },
+      ]
+    : [];
 
   if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-  // 1. Turn the question into search queries
-  const kw = await openai.chat.completions.create({
-    model: MODEL(),
-    messages: [
-      {
-        role: 'system',
-        content:
-          'Convert the user question into 2-4 short full-text search queries (1-3 words each) that would find relevant passages in church sermon transcripts. Use synonyms across queries (e.g. "dating" → also "relationships", "marriage").',
-      },
-      { role: 'user', content: q },
-    ],
-    response_format: {
-      type: 'json_schema',
-      json_schema: {
-        name: 'queries',
-        strict: true,
-        schema: {
-          type: 'object',
-          additionalProperties: false,
-          properties: { queries: { type: 'array', items: { type: 'string' } } },
-          required: ['queries'],
-        },
-      },
-    },
+  const stream = await openai.chat.completions.create({
+    model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+    messages: [{ role: 'system', content: SYSTEM }, ...contextMsg, ...history],
+    stream: true,
+    reasoning_effort: 'low', // chat UX: fast first token matters more than deep reasoning
   });
-  const queries = JSON.parse(kw.choices[0].message.content).queries.slice(0, 4);
 
-  // 2. Retrieve top sermons via full-text search
-  const found = new Map(); // id -> best rank
-  for (const query of queries) {
-    const { data } = await db().rpc('search_sermons', { q: query });
-    for (const r of data || []) {
-      if (!found.has(r.id) || r.rank > found.get(r.id)) found.set(r.id, r.rank);
-    }
-  }
-  const topIds = [...found.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id]) => id);
-  if (topIds.length === 0) {
-    return Response.json({ answer: "Nothing in the archive addresses that yet.", sources: [] });
-  }
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      let full = '';
+      let pending = ''; // held-back tail in case the META delimiter spans chunks
+      let metaSeen = false;
+      try {
+        for await (const part of stream) {
+          const delta = part.choices?.[0]?.delta?.content || '';
+          if (!delta || metaSeen) {
+            full += delta;
+            continue;
+          }
+          full += delta;
+          pending += delta;
+          const idx = pending.indexOf(META);
+          if (idx !== -1) {
+            const text = pending.slice(0, idx).trimEnd();
+            if (text) controller.enqueue(encoder.encode(noDashes(text)));
+            metaSeen = true;
+            pending = '';
+          } else if (pending.length > META.length) {
+            const emit = pending.slice(0, pending.length - META.length);
+            pending = pending.slice(pending.length - META.length);
+            controller.enqueue(encoder.encode(noDashes(emit)));
+          }
+        }
+        if (!metaSeen && pending) controller.enqueue(encoder.encode(noDashes(pending)));
 
-  const { data: sermons } = await db()
-    .from('sermons')
-    .select('id,title,date,speaker,summary,transcript')
-    .in('id', topIds);
-
-  const terms = queries.flatMap((s) => s.split(/\s+/)).filter((w) => w.length > 3);
-  const context = (sermons || [])
-    .map(
-      (s) =>
-        `SERMON ${s.id}\nTitle: ${s.title}\nDate: ${s.date}\nSpeaker: ${s.speaker || 'unknown'}\nSummary: ${s.summary}\nTranscript excerpt: ${excerpt(s.transcript, terms)}`
-    )
-    .join('\n\n---\n\n');
-
-  // 3. Answer from the retrieved sermons
-  const completion = await openai.chat.completions.create({
-    model: MODEL(),
-    messages: [
-      {
-        role: 'system',
-        content:
-          "You answer questions about what Way Church (Nashville) has taught, using ONLY the provided sermon excerpts. Synthesize across sermons; mention sermon titles naturally when referencing them. If the excerpts don't address the question, say so plainly. 2-4 short paragraphs, plain text. Never use em dashes or en dashes; use commas, periods, or colons instead.",
-      },
-      { role: 'user', content: `Question: ${q}\n\nSermons:\n\n${context}` },
-    ],
-    response_format: {
-      type: 'json_schema',
-      json_schema: {
-        name: 'archive_answer',
-        strict: true,
-        schema: {
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            answer: { type: 'string' },
-            sermon_ids_used: {
-              type: 'array',
-              items: { type: 'string' },
-              description: 'ids of the sermons the answer actually drew from',
-            },
-          },
-          required: ['answer', 'sermon_ids_used'],
-        },
-      },
+        // Parse the meta tail
+        let verses = [];
+        let query = '';
+        const mIdx = full.indexOf(META);
+        if (mIdx !== -1) {
+          try {
+            const meta = JSON.parse(full.slice(mIdx + META.length).trim());
+            verses = [...new Set((meta.verse_references || []).map((v) => noDashes(String(v).trim())))].slice(0, 4);
+            query = String(meta.sermon_search_query || '');
+          } catch {
+            // meta malformed: answer already streamed, just skip extras
+          }
+        }
+        // Related sermons: model's query first, retrieval context as backup
+        let ids = await searchSermons(query, 3);
+        if (!ids.length) ids = contextIds.slice(0, 3);
+        const sources = await sermonsByIds(ids, 'id,title,date,speaker,thumbnail');
+        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses, sources })));
+      } catch {
+        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses: [], sources: [] })));
+      }
+      controller.close();
     },
   });
 
-  const result = JSON.parse(completion.choices[0].message.content);
-  const used = new Set(result.sermon_ids_used);
-  const sources = (sermons || [])
-    .filter((s) => used.has(s.id))
-    .map(({ id, title, date, speaker }) => ({ id, title, date, speaker }));
-
-  return Response.json({
-    answer: noDashes(result.answer),
-    sources: sources.length ? sources : (sermons || []).map(({ id, title, date, speaker }) => ({ id, title, date, speaker })),
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
   });
 }

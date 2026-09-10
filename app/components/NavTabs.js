@@ -8,8 +8,8 @@ const TABS = [
   { href: '/series', label: 'Series' },
   { href: '/speakers', label: 'Speakers' },
   { href: '/topics', label: 'Topics' },
+  { href: '/books', label: 'Books' },
   { href: '/ask', label: 'Ask' },
-  { href: '/bible', label: 'Bible' },
 ];
 
 export default function NavTabs() {

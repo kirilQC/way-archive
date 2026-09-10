@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 const EXAMPLES = [
-  'What has Way taught about money?',
-  'How should I handle anxiety?',
-  'What does the church say about dating and relationships?',
-  'How do I hear God\u2019s voice?',
+  'What has Way Church taught about money?',
+  'What does the Bible say about forgiveness?',
+  'How do I pray when I don\u2019t know what to say?',
+  'What has been preached on anxiety?',
 ];
 
 function formatDate(d) {
@@ -18,86 +18,196 @@ function formatDate(d) {
   });
 }
 
-export default function AskClient() {
-  const [question, setQuestion] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null); // { answer, sources } | { error }
+function VerseCard({ reference }) {
+  const [passage, setPassage] = useState(null);
 
-  const ask = async (q) => {
-    const text = (q || question).trim();
-    if (text.length < 5 || loading) return;
-    setQuestion(text);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/passage?ref=${encodeURIComponent(reference)}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => !cancelled && setPassage(data))
+      .catch(() => !cancelled && setPassage({ error: true }));
+    return () => {
+      cancelled = true;
+    };
+  }, [reference]);
+
+  if (passage?.error) return null;
+  return (
+    <div className="verse open">
+      <b>{reference}</b>
+      {passage?.text ? (
+        <span>
+          “{passage.text}
+          {passage.truncated ? '…' : '”'} <i className="verse-trans">({passage.translation})</i>
+        </span>
+      ) : (
+        <span>Loading…</span>
+      )}
+    </div>
+  );
+}
+
+export default function AskClient() {
+  // messages: { role: 'user'|'assistant', content, verses?, sources? }
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    if (messages.length) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [messages, loading]);
+
+  const send = async (text) => {
+    const q = (text || input).trim();
+    if (q.length < 2 || loading) return;
+    setInput('');
+    setError(null);
+    const next = [...messages, { role: 'user', content: q }];
+    setMessages(next);
     setLoading(true);
-    setResult(null);
     try {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text }),
+        body: JSON.stringify({
+          messages: next.map(({ role, content }) => ({ role, content })),
+        }),
       });
-      const data = await res.json();
-      setResult(res.ok ? data : { error: data.error || 'Something went wrong.' });
+      if (!res.ok || !res.body) throw new Error('failed');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      const DONE = '###DONE###';
+      let buffer = '';
+      let finished = false;
+
+      while (!finished) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const idx = buffer.indexOf(DONE);
+        if (idx !== -1) {
+          // Final tail: { verses, sources }
+          const answerText = buffer.slice(0, idx).trimEnd();
+          let tail = { verses: [], sources: [] };
+          try {
+            tail = JSON.parse(buffer.slice(idx + DONE.length));
+          } catch {}
+          setMessages([
+            ...next,
+            { role: 'assistant', content: answerText, verses: tail.verses, sources: tail.sources },
+          ]);
+          finished = true;
+        } else {
+          // Stream the growing answer live
+          const partial = buffer;
+          setMessages([...next, { role: 'assistant', content: partial, streaming: true }]);
+        }
+      }
+      if (!finished) {
+        setMessages([...next, { role: 'assistant', content: buffer.trimEnd() }]);
+      }
     } catch {
-      setResult({ error: 'Something went wrong.' });
+      setError('Something went wrong. Try again.');
+      setMessages(next);
+      setInput(q);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <div className="toolbar">
+    <div className="bible-chat">
+      {messages.length > 0 && (
+        <div className="chat-log">
+          {messages.map((m, i) =>
+            m.role === 'user' ? (
+              <div key={i} className="chat-user">
+                {m.content}
+              </div>
+            ) : (
+              <div key={i} className="chat-answer panel-box">
+                {m.content.split('\n').filter(Boolean).map((p, j, arr) => (
+                  <p key={j} className="panel-text" style={{ marginBottom: 10 }}>
+                    {p}
+                    {m.streaming && j === arr.length - 1 && <span className="chat-cursor" />}
+                  </p>
+                ))}
+                {m.streaming && !m.content && (
+                  <p className="panel-text">
+                    <span className="chat-cursor" />
+                  </p>
+                )}
+                {m.streaming && (
+                  <p className="chat-status">Writing from Scripture…</p>
+                )}
+                {(m.verses || []).length > 0 && (
+                  <div style={{ marginTop: 14 }}>
+                    {m.verses.map((v) => (
+                      <VerseCard key={v} reference={v} />
+                    ))}
+                  </div>
+                )}
+                {(m.sources || []).length > 0 && (
+                  <>
+                    <h4 className="mt">Way Church has preached on this</h4>
+                    {m.sources.map((s) => (
+                      <Link key={s.id} href={`/sermon/${s.id}`} className="ask-source">
+                        {s.thumbnail && (
+                          <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />
+                        )}
+                        <span className="ask-source-body">
+                          <b>{s.title}</b>
+                          <span>{[s.speaker, formatDate(s.date)].filter(Boolean).join(' · ')}</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </>
+                )}
+              </div>
+            )
+          )}
+          {loading && !messages.some((m) => m.streaming) && (
+            <div className="chat-answer panel-box panel-text chat-thinking">
+              Searching the archive<span className="dots" />
+            </div>
+          )}
+          <div ref={endRef} />
+        </div>
+      )}
+
+      {error && <div className="empty">{error}</div>}
+
+      <div className="toolbar" style={{ marginTop: messages.length ? 18 : 34 }}>
         <input
           className="search"
-          placeholder="Ask anything the church has ever preached on…"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && ask()}
+          placeholder="Ask about the Bible or anything Way Church has preached…"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && send()}
         />
-        <button className="chip on" onClick={() => ask()} disabled={loading}>
-          {loading ? 'Thinking…' : 'Ask'}
+        <button className="chip on" onClick={() => send()} disabled={loading}>
+          {loading ? 'Thinking…' : 'Send'}
         </button>
       </div>
 
-      {!result && !loading && (
+      {messages.length === 0 && !loading && (
         <div className="toolbar" style={{ marginTop: 12 }}>
           {EXAMPLES.map((ex) => (
-            <button key={ex} className="chip" onClick={() => ask(ex)}>
+            <button key={ex} className="chip" onClick={() => send(ex)}>
               {ex}
             </button>
           ))}
         </div>
       )}
 
-      {loading && <div className="empty">Reading the archive…</div>}
-
-      {result?.error && <div className="empty">{result.error}</div>}
-
-      {result?.answer && (
-        <div className="ask-result">
-          <div className="panel-box">
-            <h4>Answer</h4>
-            {result.answer.split('\n').filter(Boolean).map((p, i) => (
-              <p key={i} className="panel-text" style={{ marginBottom: 12 }}>
-                {p}
-              </p>
-            ))}
-          </div>
-          {result.sources?.length > 0 && (
-            <div className="panel-box" style={{ marginTop: 14 }}>
-              <h4>From these sermons</h4>
-              {result.sources.map((s) => (
-                <Link key={s.id} href={`/sermon/${s.id}`} className="ask-source">
-                  <b>{s.title}</b>
-                  <span>
-                    {[s.speaker, formatDate(s.date)].filter(Boolean).join(' · ')}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </>
+      <p className="chat-disclaimer">
+        AI assistant, not a pastor. Verses shown are real NLT text. For anything serious, talk to
+        your church community.
+      </p>
+    </div>
   );
 }
