@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function SermonPage({ params }) {
   const { id } = await params;
-  const cols = 'id,youtube_id,title,date,duration_seconds,summary,highlights,notes,bible_books,verses,topics,speaker';
+  const cols = 'id,youtube_id,title,date,thumbnail,duration_seconds,summary,highlights,notes,bible_books,verses,topics,speaker';
   let { data: sermon, error } = await db()
     .from('sermons')
     .select(`${cols},series`)

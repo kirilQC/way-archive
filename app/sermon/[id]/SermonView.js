@@ -77,70 +77,74 @@ function DiscussionQuestions({ sermonId }) {
     };
   }, [sermonId]);
 
-  if (questions && questions.length === 0) return null;
+  if (questions && questions.length === 0)
+    return <p className="panel-text">No discussion questions for this one.</p>;
+  if (!questions) return <p className="panel-text">Writing questions from the transcript…</p>;
   return (
-    <>
-      <h4 className="mt">Discussion Questions</h4>
-      {!questions ? (
-        <p className="panel-text">Writing questions from the transcript…</p>
-      ) : (
-        <ol className="dq">
-          {questions.map((q, i) => (
-            <li key={i}>{noDashes(q)}</li>
-          ))}
-        </ol>
-      )}
-    </>
+    <div className="sd-qgrid">
+      {questions.map((q, i) => (
+        <div key={i} className="sd-qcard">
+          <b>{String(i + 1).padStart(2, '0')}</b>
+          <p>{noDashes(q)}</p>
+        </div>
+      ))}
+    </div>
   );
 }
 
 function Transcript({ sermonId, onSeek }) {
-  const [open, setOpen] = useState(false);
   const [data, setData] = useState(null); // { segments } | { text } | { error }
 
-  const toggle = async () => {
-    setOpen(!open);
-    if (data || open) return;
-    try {
-      const res = await fetch(`/api/transcript?id=${sermonId}`);
-      if (!res.ok) throw new Error();
-      setData(await res.json());
-    } catch {
-      setData({ error: true });
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/transcript?id=${sermonId}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((d) => !cancelled && setData(d))
+      .catch(() => !cancelled && setData({ error: true }));
+    return () => {
+      cancelled = true;
+    };
+  }, [sermonId]);
 
+  if (!data) return <p className="panel-text">Loading transcript…</p>;
+  if (data.error) return <p className="panel-text">Transcript unavailable.</p>;
+  if (data.segments)
+    return (
+      <div className="transcript sd-transcript">
+        {groupSegments(data.segments).map((b, i) => (
+          <div key={i} className="transcript-block">
+            <button className="hl-time" onClick={() => onSeek(b.start)}>
+              {formatTime(b.start)}
+            </button>
+            <p>{noDashes(b.text)}</p>
+          </div>
+        ))}
+      </div>
+    );
   return (
-    <>
-      <button className="chip transcript-toggle" onClick={toggle}>
-        {open ? 'Hide full transcript' : 'Show full transcript'}
-      </button>
-      {open && !data && <p className="panel-text">Loading transcript…</p>}
-      {open && data?.error && <p className="panel-text">Transcript unavailable.</p>}
-      {open && data?.segments && (
-        <div className="transcript">
-          {groupSegments(data.segments).map((b, i) => (
-            <div key={i} className="transcript-block">
-              <button className="hl-time" onClick={() => onSeek(b.start)}>
-                {formatTime(b.start)}
-              </button>
-              <p>{noDashes(b.text)}</p>
-            </div>
-          ))}
-        </div>
-      )}
-      {open && data && !data.segments && data.text && (
-        <div className="transcript">
-          <p className="panel-text">{noDashes(data.text)}</p>
-        </div>
-      )}
-    </>
+    <div className="transcript sd-transcript">
+      <p className="panel-text">{noDashes(data.text)}</p>
+    </div>
   );
 }
 
+const TABS = ['Overview', 'Timeline', 'Scriptures', 'Discussion', 'Transcript'];
+
 export default function SermonView({ sermon: s }) {
   const iframeRef = useRef(null);
+  const [tab, setTab] = useState(0);
+  const [openedTabs, setOpenedTabs] = useState([true, false, false, false, false]);
   const minutes = s.duration_seconds ? `${Math.floor(s.duration_seconds / 60)} min` : null;
+  const title = (s.title || '').split('|')[0].trim();
+  const highlights = (s.highlights || []).filter((h) => typeof h !== 'string');
+  const pull = highlights.length
+    ? highlights.reduce((a, b) => (b.text.length > a.text.length ? b : a))
+    : null;
+
+  const pick = (i) => {
+    setTab(i);
+    setOpenedTabs((prev) => prev.map((v, j) => v || j === i));
+  };
 
   const seekTo = (seconds) => {
     const win = iframeRef.current?.contentWindow;
@@ -152,113 +156,157 @@ export default function SermonView({ sermon: s }) {
   };
 
   return (
-    <main className="detail">
-      <Link href="/" className="back">
-        ← All sermons
-      </Link>
-      <div className="kicker">{formatDate(s.date)}</div>
-      <h1>{s.title}</h1>
-      <div className="meta">
-        {s.speaker && (
-          <>
+    <main className="sermon-cinema">
+      <div className="sd-hero">
+        {s.thumbnail && <div className="sd-bg" style={{ backgroundImage: `url(${s.thumbnail})` }} />}
+        <div className="kicker">
+          {formatDate(s.date)}
+          {minutes ? ` · ${minutes}` : ''}
+        </div>
+        <h1>{title}</h1>
+        <div className="sd-meta">
+          {s.speaker && (
             <Link href={`/speakers/${encodeURIComponent(s.speaker)}`} className="meta-link">
               {s.speaker}
             </Link>
-            {' · '}
-          </>
-        )}
-        {[minutes, (s.verses || [])[0]?.reference].filter(Boolean).join(' · ')}
-        {s.series && (
-          <>
-            {' · '}
-            <Link href={`/series/${encodeURIComponent(s.series)}`} className="meta-link">
-              {s.series} series
-            </Link>
-          </>
-        )}
-      </div>
-
-      <div className="video-wrap">
-        <iframe
-          ref={iframeRef}
-          src={`https://www.youtube.com/embed/${s.youtube_id}?enablejsapi=1`}
-          title={s.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-
-      <div className="cols">
-        <div className="panel-box">
-          <h4>Summary</h4>
-          <p className="panel-text">{noDashes(s.summary)}</p>
-
-          {(s.highlights || []).length > 0 && (
+          )}
+          {(s.verses || [])[0]?.reference && <> · {s.verses[0].reference}</>}
+          {s.series && (
             <>
-              <h4 className="mt">Highlights</h4>
-              {s.highlights.map((h, i) =>
-                typeof h === 'string' ? (
-                  <div key={i} className="hl">
-                    {noDashes(h)}
-                  </div>
-                ) : (
-                  <button key={i} className="hl hl-jump" onClick={() => seekTo(h.start_seconds)}>
-                    <span className="hl-time">{formatTime(h.start_seconds)}</span>
-                    <span>{noDashes(h.text)}</span>
-                  </button>
-                )
-              )}
+              {' · '}
+              <Link href={`/series/${encodeURIComponent(s.series)}`} className="meta-link">
+                {s.series} series
+              </Link>
             </>
           )}
+        </div>
+        <div className="video-wrap sd-video">
+          <iframe
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${s.youtube_id}?enablejsapi=1`}
+            title={s.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </div>
 
-          {s.notes && (
-            <>
-              <h4 className="mt">Notes & Takeaways</h4>
-              <p className="panel-text">{noDashes(s.notes)}</p>
-            </>
-          )}
-
-          <DiscussionQuestions sermonId={s.id} />
-
-          <h4 className="mt">Transcript</h4>
-          <Transcript sermonId={s.id} onSeek={seekTo} />
+      <div className="sd-body">
+        <div className="sd-tabs">
+          {TABS.map((t, i) => (
+            <button key={t} className={`sd-tab${tab === i ? ' on' : ''}`} onClick={() => pick(i)}>
+              {t}
+            </button>
+          ))}
         </div>
 
-        <div className="panel-box">
-          {(s.verses || []).length > 0 && (
-            <>
-              <h4>Key Scriptures</h4>
+        {/* Overview */}
+        <div className="sd-pane" hidden={tab !== 0}>
+          <div className="sd-ov">
+            <div>
+              <p className="sd-lead">{noDashes(s.summary)}</p>
+              {pull && (
+                <blockquote className="sd-quote">
+                  “{noDashes(pull.text)}”
+                  <small>
+                    <button className="sd-quote-jump" onClick={() => seekTo(pull.start_seconds)}>
+                      {formatTime(pull.start_seconds)}
+                    </button>
+                    {s.speaker ? ` · ${s.speaker}` : ''}
+                  </small>
+                </blockquote>
+              )}
+              {s.notes && (
+                <>
+                  <h4 className="sd-h4">Take it with you</h4>
+                  <p className="sd-notes">{noDashes(s.notes)}</p>
+                </>
+              )}
+            </div>
+            <div className="sd-side">
+              {highlights.length > 0 && (
+                <section>
+                  <h4 className="sd-h4">Highlights</h4>
+                  {highlights.map((h, i) => (
+                    <button key={i} className="hl hl-jump" onClick={() => seekTo(h.start_seconds)}>
+                      <span className="hl-time">{formatTime(h.start_seconds)}</span>
+                      <span>{noDashes(h.text)}</span>
+                    </button>
+                  ))}
+                </section>
+              )}
+              {(s.verses || []).length > 0 && (
+                <section>
+                  <h4 className="sd-h4">Key Scriptures</h4>
+                  {s.verses.slice(0, 4).map((v, i) => (
+                    <Verse key={i} reference={v.reference} quote={v.quote} />
+                  ))}
+                </section>
+              )}
+              {(s.topics || []).length > 0 && (
+                <section>
+                  <h4 className="sd-h4">Topics</h4>
+                  <div className="tags">
+                    {s.topics.map((t) => (
+                      <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="tag topic">
+                        {t}
+                      </Link>
+                    ))}
+                    {(s.bible_books || []).map((b) => (
+                      <Link key={b} href={`/books/${encodeURIComponent(b)}`} className="tag book">
+                        {b}
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="sd-pane" hidden={tab !== 1}>
+          <h4 className="sd-h4">The message, minute by minute</h4>
+          <div className="sd-tl">
+            {highlights.map((h, i) => (
+              <button key={i} className="sd-node" onClick={() => seekTo(h.start_seconds)}>
+                <span className="t">{formatTime(h.start_seconds)}</span>
+                <p>{noDashes(h.text)}</p>
+              </button>
+            ))}
+            {s.duration_seconds ? (
+              <div className="sd-node end">
+                <span className="t">{formatTime(s.duration_seconds)}</span>
+                <p>End of message. Click any moment to jump the video there.</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Scriptures */}
+        <div className="sd-pane" hidden={tab !== 2}>
+          <h4 className="sd-h4">Scriptures, as preached</h4>
+          {(s.verses || []).length ? (
+            <div className="sd-vgrid">
               {s.verses.map((v, i) => (
                 <Verse key={i} reference={v.reference} quote={v.quote} />
               ))}
-            </>
+            </div>
+          ) : (
+            <p className="panel-text">No scripture references recorded for this sermon.</p>
           )}
+        </div>
 
-          {(s.topics || []).length > 0 && (
-            <>
-              <h4 className="mt">Topics</h4>
-              <div className="tags">
-                {s.topics.map((t) => (
-                  <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="tag topic">
-                    {t}
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
+        {/* Discussion */}
+        <div className="sd-pane" hidden={tab !== 3}>
+          <h4 className="sd-h4">For your group</h4>
+          {openedTabs[3] && <DiscussionQuestions sermonId={s.id} />}
+        </div>
 
-          {(s.bible_books || []).length > 0 && (
-            <>
-              <h4 className="mt">Books</h4>
-              <div className="tags">
-                {s.bible_books.map((b) => (
-                  <span key={b} className="tag book">
-                    {b}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
+        {/* Transcript */}
+        <div className="sd-pane" hidden={tab !== 4}>
+          <h4 className="sd-h4">Full transcript</h4>
+          {openedTabs[4] && <Transcript sermonId={s.id} onSeek={seekTo} />}
         </div>
       </div>
     </main>
