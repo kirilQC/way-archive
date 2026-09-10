@@ -48,13 +48,26 @@ function VerseCard({ reference, delay = 0 }) {
   );
 }
 
-export default function AskClient() {
+function SourceCard({ s, delay = 0 }) {
+  return (
+    <Link href={`/sermon/${s.id}`} className="ask-source pop-in" style={{ animationDelay: `${delay}ms` }}>
+      {s.thumbnail && <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />}
+      <span className="ask-source-body">
+        <b>{(s.title || '').split('|')[0].trim()}</b>
+        <span>{[s.speaker, formatDate(s.date)].filter(Boolean).join(' · ')}</span>
+      </span>
+    </Link>
+  );
+}
+
+export default function AskClient({ recent = [] }) {
   // messages: { role: 'user'|'assistant', content, verses?, sources? }
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const endRef = useRef(null);
+  const started = messages.length > 0 || loading;
 
   useEffect(() => {
     if (messages.length) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -119,10 +132,60 @@ export default function AskClient() {
     }
   };
 
+  const bar = (
+    <div className="ac-bar">
+      <input
+        placeholder="Ask about the Bible or anything Way Church has preached"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && send()}
+      />
+      <button onClick={() => send()} disabled={loading}>
+        {loading ? 'Thinking…' : 'Ask'}
+      </button>
+    </div>
+  );
+
   return (
-    <div className="bible-chat">
-      {messages.length > 0 && (
-        <div className="chat-log">
+    <main className="ask-cinema">
+      <div className={`ac-hero${started ? ' compact' : ''}`}>
+        {recent.length > 0 && (
+          <div className="ac-bgs">
+            {recent.map((s) => (
+              <div key={s.id} style={{ backgroundImage: `url(${s.thumbnail})` }} />
+            ))}
+          </div>
+        )}
+        <div className="kicker">Way Church · Ask</div>
+        <h1>
+          Bring the question <em>you actually have.</em>
+        </h1>
+        {!started && (
+          <>
+            {bar}
+            <div className="ac-chips">
+              {EXAMPLES.map((ex) => (
+                <button key={ex} onClick={() => send(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+            {recent.length > 0 && (
+              <>
+                <div className="ac-label">Latest from the pulpit</div>
+                <div className="ac-strip">
+                  {recent.map((s) => (
+                    <SourceCard key={s.id} s={s} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {started && (
+        <div className="chat-log ac-log">
           {messages.map((m, i) =>
             m.role === 'user' ? (
               <div key={i} className="chat-user">
@@ -141,9 +204,7 @@ export default function AskClient() {
                     <span className="chat-cursor" />
                   </p>
                 )}
-                {m.streaming && (
-                  <p className="chat-status">Writing from Scripture…</p>
-                )}
+                {m.streaming && <p className="chat-status">Writing from Scripture…</p>}
                 {(m.verses || []).length > 0 && (
                   <div style={{ marginTop: 14 }}>
                     {m.verses.map((v, k) => (
@@ -155,20 +216,7 @@ export default function AskClient() {
                   <>
                     <h4 className="mt">Way Church has preached on this</h4>
                     {m.sources.map((s, k) => (
-                      <Link
-                        key={s.id}
-                        href={`/sermon/${s.id}`}
-                        className="ask-source pop-in"
-                        style={{ animationDelay: `${k * 80}ms` }}
-                      >
-                        {s.thumbnail && (
-                          <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />
-                        )}
-                        <span className="ask-source-body">
-                          <b>{s.title}</b>
-                          <span>{[s.speaker, formatDate(s.date)].filter(Boolean).join(' · ')}</span>
-                        </span>
-                      </Link>
+                      <SourceCard key={s.id} s={s} delay={k * 80} />
                     ))}
                   </>
                 )}
@@ -186,33 +234,12 @@ export default function AskClient() {
 
       {error && <div className="empty">{error}</div>}
 
-      <div className="toolbar" style={{ marginTop: messages.length ? 18 : 34 }}>
-        <input
-          className="search"
-          placeholder="Ask about the Bible or anything Way Church has preached…"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
-        />
-        <button className="chip on" onClick={() => send()} disabled={loading}>
-          {loading ? 'Thinking…' : 'Send'}
-        </button>
-      </div>
-
-      {messages.length === 0 && !loading && (
-        <div className="toolbar" style={{ marginTop: 12 }}>
-          {EXAMPLES.map((ex) => (
-            <button key={ex} className="chip" onClick={() => send(ex)}>
-              {ex}
-            </button>
-          ))}
-        </div>
-      )}
+      {started && <div className="ac-follow">{bar}</div>}
 
       <p className="chat-disclaimer">
         AI assistant, not a pastor. Verses shown are real NLT text. For anything serious, talk to
         your church community.
       </p>
-    </div>
+    </main>
   );
 }
