@@ -6,23 +6,34 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Way Archive' };
 
-function BookList({ books, counts }) {
+function heat(count, max) {
+  if (!count) return 'transparent';
+  const a = 0.08 + 0.5 * Math.pow(count / max, 0.45);
+  return `rgba(140, 174, 242, ${a.toFixed(3)})`;
+}
+
+function BookMap({ books, counts, max }) {
   return (
-    <div className="book-list">
+    <div className="books-map">
       {books.map((name) => {
         const count = counts.get(name) || 0;
         const inner = (
           <>
-            <span className="book-name">{name}</span>
-            <span className="book-count">{count > 0 ? count : ''}</span>
+            <b>{name}</b>
+            <span>{count > 0 ? `${count} ${count === 1 ? 'sermon' : 'sermons'}` : ''}</span>
           </>
         );
         return count > 0 ? (
-          <Link key={name} href={`/books/${encodeURIComponent(name)}`} className="book-row">
+          <Link
+            key={name}
+            href={`/books/${encodeURIComponent(name)}`}
+            className="book-cell"
+            style={{ background: heat(count, max) }}
+          >
             {inner}
           </Link>
         ) : (
-          <div key={name} className="book-row off">
+          <div key={name} className="book-cell off">
             {inner}
           </div>
         );
@@ -44,6 +55,7 @@ export default async function BooksPage() {
     }
   }
   const covered = BOOKS.filter((b) => counts.get(b)).length;
+  const max = Math.max(1, ...counts.values());
 
   return (
     <main>
@@ -55,15 +67,11 @@ export default async function BooksPage() {
         </h1>
       </section>
 
-      <div className="books-wrap">
-        <div>
-          <h4 className="books-heading">Old Testament</h4>
-          <BookList books={BOOKS.slice(0, NT_START)} counts={counts} />
-        </div>
-        <div>
-          <h4 className="books-heading">New Testament</h4>
-          <BookList books={BOOKS.slice(NT_START)} counts={counts} />
-        </div>
+      <div className="books-map-wrap">
+        <h4 className="books-heading">Old Testament</h4>
+        <BookMap books={BOOKS.slice(0, NT_START)} counts={counts} max={max} />
+        <h4 className="books-heading nt">New Testament</h4>
+        <BookMap books={BOOKS.slice(NT_START)} counts={counts} max={max} />
       </div>
     </main>
   );

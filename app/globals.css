@@ -247,30 +247,24 @@ body:has(.home-cinema) .tab.active { color: #fff; background: rgba(255, 255, 255
 .hl { display: flex; gap: 10px; font-size: 13.5px; color: #c8cdda; line-height: 1.6; margin-bottom: 11px; }
 .hl::before { content: '▸'; color: var(--amber); font-size: 10px; }
 
-/* Books */
-.books-wrap {
-  max-width: 1140px; margin: 40px auto 0; padding: 0 24px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
-}
-@media (max-width: 760px) { .books-wrap { grid-template-columns: 1fr; } }
+/* Books heatmap */
+.books-map-wrap { max-width: 1140px; margin: 26px auto 0; padding: 0 24px; }
 .books-heading {
   font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--muted); margin-bottom: 12px;
 }
-.book-list { display: flex; flex-direction: column; }
-.book-row {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-  padding: 7px 10px; border-radius: 8px; font-size: 14px; line-height: 1.4;
+.books-heading.nt { margin-top: 34px; }
+.books-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.book-cell {
+  border-radius: 10px; padding: 12px 13px; border: 1px solid var(--line);
+  min-height: 74px; display: flex; flex-direction: column; justify-content: space-between;
+  transition: transform 0.15s, border-color 0.15s;
 }
-.book-row .book-name { color: var(--text); }
-a.book-row:hover { background: var(--panel-2); }
-a.book-row .book-name { color: var(--amber); }
-.book-row.off .book-name { color: #46506e; }
-.book-count {
-  font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--muted);
-  min-width: 24px; text-align: right;
-}
-a.book-row .book-count { color: var(--text); }
+a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 242, 0.5); }
+.book-cell b { font-size: 13.5px; font-weight: 700; }
+.book-cell span { font-size: 11px; color: rgba(238, 241, 247, 0.75); font-variant-numeric: tabular-nums; }
+.book-cell.off { opacity: 0.32; }
+.book-cell.off b { color: var(--muted); }
 
 /* Bible chat */
 .bible-chat { max-width: 860px; margin: 0 auto; padding: 0 24px; }
