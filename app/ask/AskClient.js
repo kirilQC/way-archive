@@ -34,7 +34,7 @@ function VerseCard({ reference, delay = 0 }) {
 
   if (passage?.error) return null;
   return (
-    <div className="verse open pop-in" style={{ animationDelay: `${delay}ms` }}>
+    <div className="ra-pull pop-in" style={{ animationDelay: `${delay}ms` }}>
       <b>{reference}</b>
       {passage?.text ? (
         <span>
@@ -81,6 +81,38 @@ export default function AskClient({ recent = [] }) {
     const next = [...messages, { role: 'user', content: q }];
     setMessages(next);
     setLoading(true);
+
+    // Typewriter: network chunks land in `target`; the ticker reveals it at a
+    // steady rate so the answer prints smoothly instead of jumping per chunk.
+    let target = '';
+    let shown = 0;
+    let tail = null;
+    let streamEnded = false;
+
+    const ticker = setInterval(() => {
+      if (shown > target.length) shown = target.length;
+      if (shown < target.length) {
+        const gap = target.length - shown;
+        // Hidden tabs throttle timers; skip the animation and show everything.
+        shown = document.hidden
+          ? target.length
+          : shown + Math.min(gap, Math.max(2, Math.round(gap / 30)));
+        setMessages([...next, { role: 'assistant', content: target.slice(0, shown), streaming: true }]);
+      } else if (streamEnded) {
+        clearInterval(ticker);
+        setMessages([
+          ...next,
+          {
+            role: 'assistant',
+            content: target.trimEnd(),
+            verses: tail?.verses || [],
+            sources: tail?.sources || [],
+          },
+        ]);
+        setLoading(false);
+      }
+    }, 16);
+
     try {
       const res = await fetch('/api/ask', {
         method: 'POST',
@@ -95,39 +127,28 @@ export default function AskClient({ recent = [] }) {
       const decoder = new TextDecoder();
       const DONE = '###DONE###';
       let buffer = '';
-      let finished = false;
 
-      while (!finished) {
+      while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const idx = buffer.indexOf(DONE);
         if (idx !== -1) {
           // Final tail: { verses, sources }
-          const answerText = buffer.slice(0, idx).trimEnd();
-          let tail = { verses: [], sources: [] };
+          target = buffer.slice(0, idx).trimEnd();
           try {
             tail = JSON.parse(buffer.slice(idx + DONE.length));
           } catch {}
-          setMessages([
-            ...next,
-            { role: 'assistant', content: answerText, verses: tail.verses, sources: tail.sources },
-          ]);
-          finished = true;
-        } else {
-          // Stream the growing answer live
-          const partial = buffer;
-          setMessages([...next, { role: 'assistant', content: partial, streaming: true }]);
+          break;
         }
+        target = buffer;
       }
-      if (!finished) {
-        setMessages([...next, { role: 'assistant', content: buffer.trimEnd() }]);
-      }
+      streamEnded = true;
     } catch {
+      clearInterval(ticker);
       setError('Something went wrong. Try again.');
       setMessages(next);
       setInput(q);
-    } finally {
       setLoading(false);
     }
   };
@@ -184,47 +205,56 @@ export default function AskClient({ recent = [] }) {
       </div>
 
       {started && (
-        <div className="chat-log ac-log">
+        <div className="ac-log">
           {messages.map((m, i) =>
             m.role === 'user' ? (
-              <div key={i} className="chat-user">
-                {m.content}
+              <div key={i} className="ra-ask">
+                <div className="ra-eyebrow">You asked</div>
+                <h2 className="ra-q">{m.content}</h2>
               </div>
             ) : (
-              <div key={i} className="chat-answer panel-box">
+              <div key={i} className="ra-body">
                 {m.content.split('\n').filter(Boolean).map((p, j, arr) => (
-                  <p key={j} className="panel-text" style={{ marginBottom: 10 }}>
+                  <p key={j}>
                     {p}
                     {m.streaming && j === arr.length - 1 && <span className="chat-cursor" />}
                   </p>
                 ))}
                 {m.streaming && !m.content && (
-                  <p className="panel-text">
+                  <p>
                     <span className="chat-cursor" />
                   </p>
                 )}
-                {m.streaming && <p className="chat-status">Writing from Scripture…</p>}
+                {m.streaming && (
+                  <div className="ra-status">
+                    <span className="ra-dot" />
+                    Writing from Scripture
+                  </div>
+                )}
                 {(m.verses || []).length > 0 && (
-                  <div style={{ marginTop: 14 }}>
+                  <div className="ra-pulls">
                     {m.verses.map((v, k) => (
                       <VerseCard key={v} reference={v} delay={k * 80} />
                     ))}
                   </div>
                 )}
                 {(m.sources || []).length > 0 && (
-                  <>
-                    <h4 className="mt">Way Church has preached on this</h4>
-                    {m.sources.map((s, k) => (
-                      <SourceCard key={s.id} s={s} delay={k * 80} />
-                    ))}
-                  </>
+                  <div className="ra-srcs">
+                    <h4>Way Church has preached on this</h4>
+                    <div className="ra-row2">
+                      {m.sources.map((s, k) => (
+                        <SourceCard key={s.id} s={s} delay={k * 80} />
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )
           )}
           {loading && !messages.some((m) => m.streaming) && (
-            <div className="chat-answer panel-box panel-text chat-thinking">
-              Searching the archive<span className="dots" />
+            <div className="ra-status">
+              <span className="ra-dot" />
+              Searching the archive
             </div>
           )}
           <div ref={endRef} />
