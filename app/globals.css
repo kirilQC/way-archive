@@ -166,6 +166,31 @@ select.chip { appearance: none; }
 
 .empty { max-width: 1340px; margin: 60px auto; padding: 0 24px; color: var(--muted); text-align: center; }
 
+/* Speakers: portrait marquee */
+.speaker-card {
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 1px solid var(--line); aspect-ratio: 16/11;
+  transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s;
+}
+.speaker-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(140, 174, 242, 0.5);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.speaker-card img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.speaker-card:hover img { transform: scale(1.04); }
+.speaker-card .speaker-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(11, 16, 30, 0.05) 30%, rgba(11, 16, 30, 0.68) 68%, rgba(11, 16, 30, 0.96) 100%);
+}
+.speaker-card .speaker-info { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 22px; }
+.speaker-card .speaker-count { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+.speaker-card h3 { font-family: var(--font-serif), serif; font-size: 27px; font-weight: 500; transition: color 0.2s; }
+.speaker-card:hover h3 { color: var(--amber); }
+
 /* Search snippet with highlighted matches */
 .snippet mark { background: var(--amber-dim); color: var(--amber); border-radius: 3px; padding: 0 2px; }
 

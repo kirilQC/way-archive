@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Series Redesigns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b101e; --panel: #111830; --panel-2: #172038; --line: #232d4c;
+    --text: #eef1f7; --muted: #8d96b0; --navy: #1c3061;
+    --amber: #8caef2; --amber-dim: rgba(140,174,242,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
+  a { color: inherit; text-decoration: none; display: block; }
+  img { display: block; }
+
+  .fake-header {
+    padding: 18px 44px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(11,16,30,0.9);
+    backdrop-filter: blur(10px); z-index: 50;
+  }
+  .logo-mark { background: var(--navy); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 0.06em; padding: 8px 14px 9px; border-radius: 7px; }
+  .fake-tabs { display: flex; gap: 6px; }
+  .fake-tabs span { color: var(--muted); font-size: 13px; font-weight: 500; padding: 7px 13px; border-radius: 10px; }
+  .fake-tabs span.on { color: var(--amber); background: var(--amber-dim); }
+
+  .variant { display: none; padding-bottom: 150px; }
+  .variant.show { display: block; }
+  .vtag {
+    max-width: 1340px; margin: 26px auto 0; padding: 0 24px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700;
+  }
+  .wrap { max-width: 1340px; margin: 0 auto; padding: 0 24px; }
+  .page-h1 { font-family: Fraunces, serif; font-size: 52px; font-weight: 500; margin: 30px 0 36px; }
+  .page-h1 em { color: var(--amber); font-style: italic; }
+
+  .switch {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; background: rgba(13,18,34,0.95); border: 1px solid var(--line);
+    padding: 7px; border-radius: 14px; z-index: 99; backdrop-filter: blur(12px); flex-wrap: wrap; justify-content: center;
+    max-width: 96vw;
+  }
+  .switch button {
+    background: none; border: 0; color: var(--muted); font: 600 12px Inter, sans-serif;
+    padding: 8px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+  }
+  .switch button.on { background: var(--amber); color: #0b101e; }
+
+  .caps { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; }
+  .caps-line { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .caps-line i { font-style: normal; color: #3d4a70; margin: 0 6px; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 1000px) { .g3, .g2 { grid-template-columns: 1fr; } }
+
+  /* ===== S1 Marquee: same language as the new speakers tab ===== */
+  .mq { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/11; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
+  .mq:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .mq img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .mq:hover img { transform: scale(1.04); }
+  .mq .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0.05) 30%, rgba(11,16,30,0.68) 68%, rgba(11,16,30,0.96) 100%); }
+  .mq .in { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 22px; }
+  .mq .n { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+  .mq h3 { font-family: Fraunces, serif; font-size: 27px; font-weight: 500; margin-bottom: 6px; }
+  .mq:hover h3 { color: var(--amber); }
+
+  /* ===== S2 Stacked Deck: card stack implies "a set" ===== */
+  .dk { position: relative; padding-top: 16px; transition: transform 0.25s; }
+  .dk:hover { transform: translateY(-6px); }
+  .dk .layer { position: absolute; left: 22px; right: 22px; top: 0; height: 40px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--line); }
+  .dk .layer.l2 { left: 11px; right: 11px; top: 8px; background: #1a2340; }
+  .dk .cardo { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.25s; }
+  .dk:hover .cardo { border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .dk .th { position: relative; aspect-ratio: 16/9; }
+  .dk .th img { width: 100%; height: 100%; object-fit: cover; -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 78%, transparent 100%); }
+  .dk .badge { position: absolute; top: 10px; right: 10px; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; }
+  .dk .body { padding: 12px 22px 22px; }
+  .dk h3 { font-family: Fraunces, serif; font-size: 24px; font-weight: 500; margin: 7px 0 8px; }
+  .dk:hover h3 { color: var(--amber); }
+
+  /* ===== S3 Filmstrip: episode thumbnails peek under each series ===== */
+  .fs { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-bottom: 18px; transition: transform 0.25s, border-color 0.2s; }
+  .fs:hover { transform: translateY(-4px); border-color: rgba(140,174,242,0.5); }
+  .fs .top { display: flex; justify-content: space-between; align-items: flex-end; padding: 24px 26px 16px; gap: 20px; }
+  .fs h3 { font-family: Fraunces, serif; font-size: 30px; font-weight: 500; margin-top: 7px; }
+  .fs:hover h3 { color: var(--amber); }
+  .fs .n { font-family: Fraunces, serif; font-style: italic; font-size: 16px; color: var(--amber); white-space: nowrap; padding-bottom: 4px; }
+  .fs .strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 0 4px 4px; }
+  .fs .strip > div { position: relative; aspect-ratio: 16/9; overflow: hidden; border-radius: 6px; }
+  .fs .strip img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75); transition: filter 0.25s, transform 0.35s; }
+  .fs:hover .strip img { filter: brightness(1); }
+  .fs .strip > div:hover img { transform: scale(1.06); }
+  .fs .strip .more { display: grid; place-items: center; background: var(--panel-2); border: 1px dashed var(--line); border-radius: 6px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; color: var(--amber); }
+  @media (max-width: 800px) { .fs .strip { grid-template-columns: repeat(3, 1fr); } .fs .strip > div:nth-child(n+4) { display: none; } }
+
+  /* ===== S4 Split Feature: newest series huge, the rest in marquee grid ===== */
+  .sf-hero { position: relative; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 18px; aspect-ratio: 21/8; transition: border-color 0.2s; }
+  .sf-hero:hover { border-color: rgba(140,174,242,0.5); }
+  .sf-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+  .sf-hero:hover img { transform: scale(1.03); }
+  .sf-hero .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11,16,30,0.94) 24%, rgba(11,16,30,0.45) 55%, rgba(11,16,30,0.05) 100%); }
+  .sf-hero .in { position: absolute; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 44px; max-width: 55%; }
+  .sf-hero .lbl { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); font-weight: 800; margin-bottom: 10px; }
+  .sf-hero h3 { font-family: Fraunces, serif; font-size: 46px; font-weight: 500; line-height: 1.05; margin-bottom: 12px; }
+  .sf-hero:hover h3 { color: var(--amber); }
+  @media (max-width: 800px) { .sf-hero { aspect-ratio: 16/10; } .sf-hero .in { max-width: 100%; padding: 0 26px; } .sf-hero h3 { font-size: 30px; } }
+
+  /* ===== S5 Spine Shelf: books on a shelf, vertical spines that expand on hover ===== */
+  .sp-row { display: flex; gap: 10px; height: 460px; }
+  .sp { position: relative; flex: 1; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); cursor: pointer; transition: flex 0.45s cubic-bezier(0.2, 0.7, 0.3, 1), border-color 0.2s; }
+  .sp:hover { flex: 4.2; border-color: rgba(140,174,242,0.55); }
+  .sp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.55); transition: filter 0.4s; }
+  .sp:hover img { filter: brightness(0.85); }
+  .sp .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0) 45%, rgba(11,16,30,0.92) 100%); }
+  .sp .vert {
+    position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%) rotate(180deg);
+    writing-mode: vertical-rl; white-space: nowrap;
+    font-family: Fraunces, serif; font-size: 21px; font-weight: 500; letter-spacing: 0.01em;
+    transition: opacity 0.25s;
+  }
+  .sp .open { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 24px; opacity: 0; transform: translateY(10px); transition: opacity 0.3s 0.12s, transform 0.3s 0.12s; }
+  .sp:hover .vert { opacity: 0; }
+  .sp:hover .open { opacity: 1; transform: none; }
+  .sp .open h3 { font-family: Fraunces, serif; font-size: 28px; font-weight: 500; margin: 6px 0; white-space: nowrap; }
+  .sp .open .n { font-size: 12px; color: var(--amber); font-weight: 700; }
+  .sp-row + .sp-row { margin-top: 12px; }
+  @media (max-width: 900px) { .sp-row { flex-direction: column; height: auto; } .sp { min-height: 72px; } .sp:hover { flex: 1; } .sp .vert { display: none; } .sp .open { opacity: 1; transform: none; position: relative; } }
+
+  /* ===== S6 Backdrop Rows: alternating wide rows, blurred art bleeding behind text ===== */
+  .br { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 16px; display: grid; grid-template-columns: 1fr 420px; min-height: 200px; transition: transform 0.25s, border-color 0.2s; }
+  .br.flip { grid-template-columns: 420px 1fr; }
+  .br:hover { transform: translateY(-4px); border-color: rgba(140,174,242,0.5); }
+  .br .blur { position: absolute; inset: 0; }
+  .br .blur img { width: 100%; height: 100%; object-fit: cover; filter: blur(48px) brightness(0.3) saturate(1.25); transform: scale(1.4); }
+  .br .txt { position: relative; padding: 30px 36px; display: flex; flex-direction: column; justify-content: center; }
+  .br h3 { font-family: Fraunces, serif; font-size: 32px; font-weight: 500; margin: 8px 0 10px; }
+  .br:hover h3 { color: var(--amber); }
+  .br .n { font-family: Fraunces, serif; font-style: italic; font-size: 15px; color: var(--amber); margin-bottom: 8px; }
+  .br .art { position: relative; }
+  .br .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .br:hover .art img { transform: scale(1.04); }
+  .br:not(.flip) .art img { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%); mask-image: linear-gradient(90deg, transparent 0, #000 26%); }
+  .br.flip .art img { -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 26%); mask-image: linear-gradient(270deg, transparent 0, #000 26%); }
+  @media (max-width: 900px) { .br, .br.flip { grid-template-columns: 1fr; } .br .art { aspect-ratio: 16/9; order: -1; } .br .art img { mask-image: none !important; -webkit-mask-image: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="fake-header">
+  <span class="logo-mark">WAY</span>
+  <div class="fake-tabs">
+    <span>Sermons</span><span class="on">Series</span><span>Speakers</span><span>Topics</span><span>Books</span><span>Ask</span>
+  </div>
+</div>
+
+<section class="variant" id="v1"><div class="vtag">1 · Marquee (matches new Speakers)</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div class="g3" id="g1"></div></div></section>
+<section class="variant" id="v2"><div class="vtag">2 · Stacked Deck</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div class="g3" id="g2"></div></div></section>
+<section class="variant" id="v3"><div class="vtag">3 · Filmstrip</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div id="g3"></div></div></section>
+<section class="variant" id="v4"><div class="vtag">4 · Split Feature</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div id="g4"></div></div></section>
+<section class="variant" id="v5"><div class="vtag">5 · Spine Shelf</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div id="g5"></div></div></section>
+<section class="variant" id="v6"><div class="vtag">6 · Backdrop Rows</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div id="g6"></div></div></section>
+
+<div class="switch" id="switch"></div>
+
+<script>
+  // Real data from Supabase (Sep 2026)
+  const SERIES = [
+    { name: 'Money Moves', parts: 4, th: '46zVMFuXMsU', from: 'Aug 2026', to: 'Aug 2026', sp: ['Noah Herrin'], eps: ['46zVMFuXMsU', 'b42BkFdMkgg', 'leCtfp9lRRo', 'doFs4_gvkqg'] },
+    { name: 'Gospel of John', parts: 19, th: 'n3knhPEZyPs', from: 'Jan 2026', to: 'Jun 2026', sp: ['Noah Herrin', 'Grant Troutt', 'Maddy Herrin'], eps: ['n3knhPEZyPs', 'd_TUBDc5cqg', 'p7BGDma7rvk', 'F9qQSCNpFIQ'] },
+    { name: 'Sexuality', parts: 6, th: 'L-CPu68EBLY', from: 'Sep 2025', to: 'Oct 2025', sp: ['Noah Herrin'], eps: ['L-CPu68EBLY', '4qmrI9UDHI8', 'FVakwWMbdVg', 'OTngLMPGWPY'] },
+    { name: 'Win the Fight', parts: 3, th: 'UT_tVxhRIGw', from: 'Aug 2025', to: 'Aug 2025', sp: ['Noah Herrin'], eps: ['UT_tVxhRIGw', 'nSpCUCnFCus', '7hblEZtMX1w'] },
+    { name: 'Almost True', parts: 3, th: 'cY3S1HqtBrY', from: 'May 2025', to: 'May 2025', sp: ['Connor Crumpton', 'Noah Herrin'], eps: ['cY3S1HqtBrY', 'iIsOE_bbaTE', 'lWRZGR6sYYk'] },
+    { name: 'The Sermon on the Mount', parts: 12, th: 'TKpcnQfT2FU', from: 'Jan 2025', to: 'Mar 2025', sp: ['Noah Herrin', 'Harrison Conley', 'Grant Troutt'], eps: ['TKpcnQfT2FU', 'pMJq1abak9M', 'dSPKHAn2bHI', 'ngwO5mesIGw'] },
+    { name: 'Only God', parts: 7, th: 'OLXtE2Spi8g', from: 'Oct 2023', to: 'Nov 2024', sp: ['Noah Herrin'], eps: ['OLXtE2Spi8g', '5K7OqfVUYzA', '4KCJtpY59Z4', 'o0eBlFks1bU'] },
+    { name: 'Holy Habits', parts: 7, th: 'QpGMjFQSPvE', from: 'Apr 2024', to: 'Jul 2024', sp: ['Noah Herrin', 'Maddy Herrin'], eps: ['QpGMjFQSPvE', 'NZcJIA4QHiI', '2cD4lemYDyo', '01dVSVBi49c'] },
+    { name: 'From Talk To Walk', parts: 10, th: 'eUSw_aJHu8I', from: 'Jan 2024', to: 'Mar 2024', sp: ['Noah Herrin', 'Grant Skeldon', 'Maddy Herrin'], eps: ['eUSw_aJHu8I', 'SjShYYwHmUw', 'YQjbbM3EVlQ', '6ScHapqB8Nk'] },
+    { name: 'If Jesus Had A Bio', parts: 5, th: 'KNZb8j73p-k', from: 'Sep 2023', to: 'Oct 2023', sp: ['Noah Herrin'], eps: ['KNZb8j73p-k', 'GsglpMuRjic', 'CfpvQ4IuWdQ', 'leCtfp9lRRo'] },
+  ];
+  const img = (id) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+  const range = (s) => s.from === s.to ? s.from : `${s.from} - ${s.to}`;
+  const dots = (arr) => arr.map((x) => `<span>${x}</span>`).join('<i>·</i>');
+
+  // 1 Marquee
+  document.getElementById('g1').innerHTML = SERIES.map((s) => `
+    <a class="mq">
+      <img src="${img(s.th)}" /><div class="shade"></div>
+      <div class="in">
+        <div class="n">${s.parts} parts · ${range(s)}</div>
+        <h3>${s.name}</h3>
+        <div class="caps-line">${dots(s.sp)}</div>
+      </div>
+    </a>`).join('');
+
+  // 2 Stacked Deck
+  document.getElementById('g2').innerHTML = SERIES.map((s) => `
+    <a class="dk">
+      <span class="layer l2"></span><span class="layer"></span>
+      <div class="cardo">
+        <div class="th"><img src="${img(s.th)}" /><span class="badge">${s.parts} parts</span></div>
+        <div class="body">
+          <div class="caps">${range(s)}</div>
+          <h3>${s.name}</h3>
+          <div class="caps-line">${dots(s.sp)}</div>
+        </div>
+      </div>
+    </a>`).join('');
+
+  // 3 Filmstrip
+  document.getElementById('g3').innerHTML = SERIES.map((s) => {
+    const shown = s.eps.slice(0, s.parts > 4 ? 4 : s.parts);
+    const rest = s.parts - shown.length;
+    return `
+    <a class="fs">
+      <div class="top">
+        <div>
+          <div class="caps">${range(s)} · ${dots(s.sp)}</div>
+          <h3>${s.name}</h3>
+        </div>
+        <div class="n">${s.parts} parts</div>
+      </div>
+      <div class="strip">
+        ${shown.map((e) => `<div><img src="${img(e)}" /></div>`).join('')}
+        ${rest > 0 ? `<div class="more">+${rest} more</div>` : '<div class="more">watch</div>'}
+      </div>
+    </a>`;
+  }).join('');
+
+  // 4 Split Feature
+  const first = SERIES[0], others = SERIES.slice(1);
+  document.getElementById('g4').innerHTML = `
+    <a class="sf-hero">
+      <img src="${img(first.th)}" /><div class="shade"></div>
+      <div class="in">
+        <div class="lbl">Latest series</div>
+        <h3>${first.name}</h3>
+        <div class="n" style="font-size:12.5px;color:var(--amber);font-weight:700;margin-bottom:8px;">${first.parts} parts · ${range(first)}</div>
+        <div class="caps-line">${dots(first.sp)}</div>
+      </div>
+    </a>
+    <div class="g3">${others.map((s) => `
+      <a class="mq">
+        <img src="${img(s.th)}" /><div class="shade"></div>
+        <div class="in">
+          <div class="n">${s.parts} parts · ${range(s)}</div>
+          <h3 style="font-size:23px;">${s.name}</h3>
+        </div>
+      </a>`).join('')}</div>`;
+
+  // 5 Spine Shelf
+  const half = Math.ceil(SERIES.length / 2);
+  const shelf = (list) => `<div class="sp-row">${list.map((s) => `
+    <a class="sp">
+      <img src="${img(s.th)}" /><div class="shade"></div>
+      <span class="vert">${s.name}</span>
+      <div class="open">
+        <div class="n">${s.parts} parts · ${range(s)}</div>
+        <h3>${s.name}</h3>
+        <div class="caps-line">${dots(s.sp)}</div>
+      </div>
+    </a>`).join('')}</div>`;
+  document.getElementById('g5').innerHTML = shelf(SERIES.slice(0, half)) + shelf(SERIES.slice(half));
+
+  // 6 Backdrop Rows
+  document.getElementById('g6').innerHTML = SERIES.map((s, i) => `
+    <a class="br${i % 2 ? ' flip' : ''}">
+      <div class="blur"><img src="${img(s.th)}" /></div>
+      ${i % 2 ? `<div class="art"><img src="${img(s.th)}" /></div>` : ''}
+      <div class="txt">
+        <div class="caps">${range(s)}</div>
+        <h3>${s.name}</h3>
+        <div class="n">${s.parts} parts</div>
+        <div class="caps-line">${dots(s.sp)}</div>
+      </div>
+      ${i % 2 ? '' : `<div class="art"><img src="${img(s.th)}" /></div>`}
+    </a>`).join('');
+
+  const NAMES = ['Marquee', 'Stacked Deck', 'Filmstrip', 'Split Feature', 'Spine Shelf', 'Backdrop Rows'];
+  const sw = document.getElementById('switch');
+  NAMES.forEach((n, i) => {
+    const b = document.createElement('button');
+    b.textContent = (i + 1) + ' ' + n;
+    b.onclick = () => show(i + 1);
+    sw.appendChild(b);
+  });
+  function show(n) {
+    document.querySelectorAll('.variant').forEach((v) => v.classList.remove('show'));
+    document.getElementById('v' + n).classList.add('show');
+    sw.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === n - 1));
+    window.scrollTo(0, 0);
+  }
+  show(1);
+</script>
+</body>
+</html>
