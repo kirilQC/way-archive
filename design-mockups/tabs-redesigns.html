@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Series + Speakers Redesigns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b101e; --panel: #111830; --panel-2: #172038; --line: #232d4c;
+    --text: #eef1f7; --muted: #8d96b0; --navy: #1c3061;
+    --amber: #8caef2; --amber-dim: rgba(140,174,242,0.14);
+    --violet: #8f7df0; --violet-dim: rgba(143,125,240,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
+  a { color: inherit; text-decoration: none; display: block; }
+  img { display: block; }
+
+  .fake-header {
+    padding: 18px 44px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(11,16,30,0.9);
+    backdrop-filter: blur(10px); z-index: 50;
+  }
+  .logo-mark { background: var(--navy); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 0.06em; padding: 8px 14px 9px; border-radius: 7px; }
+  .fake-tabs { display: flex; gap: 6px; }
+  .fake-tabs span { color: var(--muted); font-size: 13px; font-weight: 500; padding: 7px 13px; border-radius: 10px; }
+  .fake-tabs span.on { color: var(--amber); background: var(--amber-dim); }
+
+  .variant { display: none; padding-bottom: 150px; }
+  .variant.show { display: block; }
+  .vtag {
+    max-width: 1340px; margin: 26px auto 0; padding: 0 24px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700;
+  }
+  .wrap { max-width: 1340px; margin: 0 auto; padding: 0 24px; }
+  .page-h1 { font-family: Fraunces, serif; font-size: 52px; font-weight: 500; margin: 30px 0 36px; }
+  .page-h1 em { color: var(--amber); font-style: italic; }
+
+  .switch {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; background: rgba(13,18,34,0.95); border: 1px solid var(--line);
+    padding: 7px; border-radius: 14px; z-index: 99; backdrop-filter: blur(12px); flex-wrap: wrap; justify-content: center;
+    max-width: 96vw;
+  }
+  .switch button {
+    background: none; border: 0; color: var(--muted); font: 600 12px Inter, sans-serif;
+    padding: 8px 12px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+  }
+  .switch button.on { background: var(--amber); color: #0b101e; }
+  .switch .grp { align-self: center; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #3d4a70; font-weight: 800; padding: 0 6px; }
+
+  /* Shared type */
+  .caps { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #c3c9dd; font-weight: 700; }
+  .caps-line { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .caps-line i { font-style: normal; color: #3d4a70; margin: 0 6px; }
+  .count-badge { position: absolute; top: 10px; right: 10px; z-index: 3; background: rgba(11,16,30,0.8); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; color: #d2d7e4; }
+  .fadeimg { -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 78%, transparent 100%); }
+
+  /* ============ SERIES 1: Cinematic Shelf (full-width banners) ============ */
+  .sh { position: relative; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; margin-bottom: 16px; min-height: 210px; display: flex; align-items: center; transition: transform 0.25s, border-color 0.2s; }
+  .sh:hover { transform: translateY(-4px); border-color: rgba(140,174,242,0.5); }
+  .sh .bg { position: absolute; inset: 0; }
+  .sh .bg img { width: 100%; height: 100%; object-fit: cover; object-position: right center;
+    -webkit-mask-image: linear-gradient(90deg, transparent 22%, #000 62%); mask-image: linear-gradient(90deg, transparent 22%, #000 62%); }
+  .sh .bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--panel) 30%, rgba(17,24,48,0.25) 60%, rgba(17,24,48,0) 100%); }
+  .sh .in { position: relative; padding: 34px 40px; max-width: 55%; }
+  .sh h3 { font-family: Fraunces, serif; font-size: 34px; font-weight: 500; line-height: 1.1; margin: 9px 0 12px; }
+  .sh:hover h3 { color: var(--amber); }
+  .sh .parts { font-size: 12.5px; color: var(--amber); font-weight: 700; margin-bottom: 8px; }
+  @media (max-width: 800px) { .sh .in { max-width: 100%; } .sh .bg img { mask-image: none; -webkit-mask-image: none; opacity: 0.25; } }
+
+  /* ============ SERIES 2: Fade Grid (matches new sermon cards) ============ */
+  .sg2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 1000px) { .sg2 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .sg2 { grid-template-columns: 1fr; } }
+  .f2 { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
+  .f2:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .f2 .th { position: relative; aspect-ratio: 16/9; }
+  .f2 .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .f2:hover .th img { transform: scale(1.03); }
+  .f2 .body { padding: 18px 22px 22px; flex: 1; display: flex; flex-direction: column; }
+  .f2 h3 { font-family: Fraunces, serif; font-size: 24px; font-weight: 500; line-height: 1.16; margin: 7px 0 10px; }
+  .f2:hover h3 { color: var(--amber); }
+  .f2 .meta { margin-top: auto; }
+  .f2 .parts-line { font-family: Fraunces, serif; font-style: italic; font-size: 15px; color: var(--amber); margin-bottom: 7px; }
+
+  /* ============ SERIES 3: Timeline ============ */
+  .tl { position: relative; padding-left: 150px; }
+  .tl::before { content: ''; position: absolute; left: 104px; top: 8px; bottom: 8px; width: 1px; background: var(--line); }
+  .tl-item { position: relative; margin-bottom: 22px; }
+  .tl-item .yr { position: absolute; left: -150px; top: 4px; width: 80px; text-align: right; font-family: Fraunces, serif; font-size: 20px; color: var(--muted); }
+  .tl-item .dot { position: absolute; left: -50px; top: 12px; width: 9px; height: 9px; border-radius: 999px; background: var(--amber); box-shadow: 0 0 0 4px rgba(140,174,242,0.15); }
+  .tl-card { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); transition: transform 0.25s, border-color 0.2s; }
+  .tl-card:hover { transform: translateX(6px); border-color: rgba(140,174,242,0.5); }
+  .tl-card .th { position: relative; }
+  .tl-card .th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent 100%); mask-image: linear-gradient(90deg, #000 70%, transparent 100%); }
+  .tl-card .in { padding: 22px 26px; }
+  .tl-card h3 { font-family: Fraunces, serif; font-size: 25px; font-weight: 500; margin: 7px 0 9px; }
+  .tl-card:hover h3 { color: var(--amber); }
+  .tl-card .parts-line { font-family: Fraunces, serif; font-style: italic; font-size: 14.5px; color: var(--amber); margin-bottom: 7px; }
+  @media (max-width: 800px) { .tl { padding-left: 0; } .tl::before, .tl-item .yr, .tl-item .dot { display: none; } .tl-card { grid-template-columns: 1fr; } .tl-card .th { aspect-ratio: 16/9; } }
+
+  /* ============ SERIES 4: Editorial Index ============ */
+  .ei { border-top: 1px solid var(--line); }
+  .ei-row { position: relative; display: grid; grid-template-columns: 90px 1fr 260px 190px; gap: 26px; align-items: center; padding: 26px 10px; border-bottom: 1px solid var(--line); transition: background 0.2s, padding-left 0.25s; }
+  .ei-row:hover { background: rgba(23,32,56,0.5); padding-left: 22px; }
+  .ei-row .num { font-family: Fraunces, serif; font-size: 40px; color: #3d4a70; font-style: italic; }
+  .ei-row:hover .num { color: var(--amber); }
+  .ei-row h3 { font-family: Fraunces, serif; font-size: 30px; font-weight: 500; line-height: 1.1; margin-bottom: 6px; }
+  .ei-row:hover h3 { color: var(--amber); }
+  .ei-row .th { aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .ei-row .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .ei-row:hover .th img { transform: scale(1.05); }
+  .ei-row .right { text-align: right; }
+  .ei-row .parts-line { font-family: Fraunces, serif; font-style: italic; font-size: 16px; color: var(--amber); margin-bottom: 6px; }
+  @media (max-width: 900px) { .ei-row { grid-template-columns: 1fr; } .ei-row .right { text-align: left; } .ei-row .num { display: none; } }
+
+  /* ============ SPEAKERS 1: Portrait Marquee ============ */
+  .pg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 1000px) { .pg { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .pg { grid-template-columns: 1fr; } }
+  .pm { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16/11; transition: transform 0.25s, border-color 0.2s; }
+  .pm:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); }
+  .pm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .pm:hover img { transform: scale(1.04); }
+  .pm .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,16,30,0.05) 30%, rgba(11,16,30,0.68) 68%, rgba(11,16,30,0.96) 100%); }
+  .pm .in { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 22px; }
+  .pm h3 { font-family: Fraunces, serif; font-size: 27px; font-weight: 500; margin-bottom: 6px; }
+  .pm:hover h3 { color: var(--amber); }
+  .pm .n { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+
+  /* ============ SPEAKERS 2: Roster Rows ============ */
+  .ro { display: flex; flex-direction: column; gap: 14px; }
+  .ro-row { display: grid; grid-template-columns: 240px 1fr auto; gap: 26px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; transition: transform 0.25s, border-color 0.2s; }
+  .ro-row:hover { transform: translateX(6px); border-color: rgba(140,174,242,0.5); }
+  .ro-row .th { aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; }
+  .ro-row .th img { width: 100%; height: 100%; object-fit: cover; }
+  .ro-row h3 { font-family: Fraunces, serif; font-size: 26px; font-weight: 500; margin-bottom: 6px; }
+  .ro-row:hover h3 { color: var(--amber); }
+  .ro-row .latest { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .ro-row .latest b { color: #c3c9dd; font-weight: 600; }
+  .ro-row .cnt { text-align: right; padding-right: 18px; }
+  .ro-row .cnt b { display: block; font-family: Fraunces, serif; font-size: 38px; color: var(--amber); line-height: 1; }
+  .ro-row .cnt span { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  @media (max-width: 800px) { .ro-row { grid-template-columns: 1fr; } .ro-row .cnt { text-align: left; } }
+
+  /* ============ SPEAKERS 3: Fade Grid (matches new sermon cards) ============ */
+  .sf { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.25s, border-color 0.2s, box-shadow 0.25s; }
+  .sf:hover { transform: translateY(-6px); border-color: rgba(140,174,242,0.5); box-shadow: 0 24px 60px rgba(0,0,0,0.45); }
+  .sf .th { position: relative; aspect-ratio: 16/9; }
+  .sf .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .sf:hover .th img { transform: scale(1.03); }
+  .sf .body { padding: 18px 22px 22px; flex: 1; display: flex; flex-direction: column; }
+  .sf h3 { font-family: Fraunces, serif; font-size: 25px; font-weight: 500; margin-bottom: 8px; }
+  .sf:hover h3 { color: var(--amber); }
+  .sf .n { font-family: Fraunces, serif; font-style: italic; font-size: 15px; color: var(--amber); margin-bottom: 8px; }
+  .sf .meta { margin-top: auto; }
+
+  /* ============ SPEAKERS 4: Featured + Collage ============ */
+  .feat { position: relative; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; margin-bottom: 18px; display: grid; grid-template-columns: 1.1fr 1fr; min-height: 320px; background: var(--panel); transition: border-color 0.2s; }
+  .feat:hover { border-color: rgba(140,174,242,0.5); }
+  .feat .in { padding: 40px 44px; display: flex; flex-direction: column; justify-content: center; }
+  .feat h3 { font-family: Fraunces, serif; font-size: 44px; font-weight: 500; margin: 10px 0 12px; }
+  .feat:hover h3 { color: var(--amber); }
+  .feat .n { font-size: 13px; color: var(--amber); font-weight: 700; }
+  .feat .collage { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+  .feat .collage div { overflow: hidden; }
+  .feat .collage img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .feat .collage div:hover img { transform: scale(1.06); }
+  .feat .latest { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+  .feat .latest b { color: #c3c9dd; font-weight: 600; }
+  .mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .mini { grid-template-columns: 1fr 1fr; } .feat { grid-template-columns: 1fr; } }
+  .mi { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: transform 0.25s, border-color 0.2s; }
+  .mi:hover { transform: translateY(-5px); border-color: rgba(140,174,242,0.5); }
+  .mi .th { position: relative; aspect-ratio: 16/9; }
+  .mi .th img { width: 100%; height: 100%; object-fit: cover; }
+  .mi .body { padding: 12px 16px 16px; }
+  .mi h3 { font-family: Fraunces, serif; font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .mi:hover h3 { color: var(--amber); }
+  .mi .n { font-size: 11px; color: var(--amber); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="fake-header">
+  <span class="logo-mark">WAY</span>
+  <div class="fake-tabs">
+    <span>Sermons</span><span class="on">Series</span><span class="on2">Speakers</span><span>Topics</span><span>Books</span><span>Ask</span>
+  </div>
+</div>
+
+<section class="variant" id="v1"><div class="vtag">Series 1 · Cinematic Shelf</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div id="g1"></div></div></section>
+<section class="variant" id="v2"><div class="vtag">Series 2 · Fade Grid</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div class="sg2" id="g2"></div></div></section>
+<section class="variant" id="v3"><div class="vtag">Series 3 · Timeline</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div class="tl" id="g3"></div></div></section>
+<section class="variant" id="v4"><div class="vtag">Series 4 · Editorial Index</div><div class="wrap"><h1 class="page-h1">Sermon <em>series.</em></h1><div class="ei" id="g4"></div></div></section>
+<section class="variant" id="v5"><div class="vtag">Speakers 1 · Portrait Marquee</div><div class="wrap"><h1 class="page-h1">Who's <em>preaching.</em></h1><div class="pg" id="g5"></div></div></section>
+<section class="variant" id="v6"><div class="vtag">Speakers 2 · Roster Rows</div><div class="wrap"><h1 class="page-h1">Who's <em>preaching.</em></h1><div class="ro" id="g6"></div></div></section>
+<section class="variant" id="v7"><div class="vtag">Speakers 3 · Fade Grid</div><div class="wrap"><h1 class="page-h1">Who's <em>preaching.</em></h1><div class="pg" id="g7"></div></div></section>
+<section class="variant" id="v8"><div class="vtag">Speakers 4 · Featured + Collage</div><div class="wrap"><h1 class="page-h1">Who's <em>preaching.</em></h1><div id="g8"></div></div></section>
+
+<div class="switch" id="switch"></div>
+
+<script>
+  // Real data from Supabase (Sep 2026)
+  const SERIES = [
+    { name: 'Money Moves', parts: 4, th: '46zVMFuXMsU', from: 'Aug 2026', to: 'Aug 2026', sp: ['Noah Herrin'] },
+    { name: 'Gospel of John', parts: 19, th: 'n3knhPEZyPs', from: 'Jan 2026', to: 'Jun 2026', sp: ['Noah Herrin', 'Grant Troutt', 'Maddy Herrin'] },
+    { name: 'Sexuality', parts: 6, th: 'L-CPu68EBLY', from: 'Sep 2025', to: 'Oct 2025', sp: ['Noah Herrin'] },
+    { name: 'Win the Fight', parts: 3, th: 'UT_tVxhRIGw', from: 'Aug 2025', to: 'Aug 2025', sp: ['Noah Herrin'] },
+    { name: 'Almost True', parts: 3, th: 'cY3S1HqtBrY', from: 'May 2025', to: 'May 2025', sp: ['Connor Crumpton', 'Noah Herrin'] },
+    { name: 'The Sermon on the Mount', parts: 12, th: 'TKpcnQfT2FU', from: 'Jan 2025', to: 'Mar 2025', sp: ['Noah Herrin', 'Harrison Conley', 'Grant Troutt'] },
+    { name: 'Only God', parts: 7, th: 'OLXtE2Spi8g', from: 'Oct 2023', to: 'Nov 2024', sp: ['Noah Herrin'] },
+    { name: 'Holy Habits', parts: 7, th: 'QpGMjFQSPvE', from: 'Apr 2024', to: 'Jul 2024', sp: ['Noah Herrin', 'Maddy Herrin'] },
+    { name: 'From Talk To Walk', parts: 10, th: 'eUSw_aJHu8I', from: 'Jan 2024', to: 'Mar 2024', sp: ['Noah Herrin', 'Grant Skeldon', 'Maddy Herrin'] },
+    { name: 'If Jesus Had A Bio', parts: 5, th: 'KNZb8j73p-k', from: 'Sep 2023', to: 'Oct 2023', sp: ['Noah Herrin'] },
+  ];
+  const SPEAKERS = [
+    { name: 'Noah Herrin', count: 107, th: 'CfpvQ4IuWdQ', thumbs: ['CfpvQ4IuWdQ', '46zVMFuXMsU', 'b42BkFdMkgg', 'leCtfp9lRRo'], topics: ['Community', 'Grace', 'Holiness'], latest: 'How to Overcome Anxious Thoughts' },
+    { name: 'Grant Skeldon', count: 12, th: 'd_TUBDc5cqg', thumbs: ['d_TUBDc5cqg', 'F9qQSCNpFIQ', '4qmrI9UDHI8', 'FVakwWMbdVg'], topics: ['Community', 'Identity', 'Holiness'], latest: 'How to Lead People to Christ' },
+    { name: 'Grant Troutt', count: 5, th: 'GsglpMuRjic', thumbs: ['GsglpMuRjic', 'OTngLMPGWPY', 'nSpCUCnFCus', '7hblEZtMX1w'], topics: ['Suffering', 'Fear & Anxiety', 'Hope'], latest: 'I Need Peace' },
+    { name: 'Maddy Herrin', count: 5, th: 'p7BGDma7rvk', thumbs: ['p7BGDma7rvk', 'NZcJIA4QHiI', '2cD4lemYDyo', '01dVSVBi49c'], topics: ['Community', 'Identity', 'Family'], latest: 'Why Am I So Tired?' },
+    { name: 'Madi Prewett Troutt', count: 3, th: 'pMJq1abak9M', thumbs: ['pMJq1abak9M', 'dSPKHAn2bHI', 'ngwO5mesIGw'], topics: ['Sin & Repentance', 'Holiness', 'Grace'], latest: 'Satan\u2019s Strategy & How to Overcome It' },
+    { name: 'Connor Crumpton', count: 3, th: 'iIsOE_bbaTE', thumbs: ['iIsOE_bbaTE', 'lWRZGR6sYYk', 'cY3S1HqtBrY'], topics: ['Salvation', 'Identity', 'Grace'], latest: 'Do You Know the Real Jesus?' },
+    { name: 'Tanner Bezet', count: 1, th: '5K7OqfVUYzA', thumbs: ['5K7OqfVUYzA'], topics: ['Hope', 'Suffering'], latest: 'There\u2019s Still Hope for You' },
+    { name: 'Carl Kuhl', count: 1, th: '4KCJtpY59Z4', thumbs: ['4KCJtpY59Z4'], topics: ['Prayer', 'Evangelism', 'Community'], latest: 'How to Make a Difference' },
+    { name: 'Austin Westlake', count: 1, th: 'o0eBlFks1bU', thumbs: ['o0eBlFks1bU'], topics: ['Prayer', 'Suffering'], latest: 'Is God Calling Me?' },
+  ];
+  const img = (id) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+  const range = (s) => s.from === s.to ? s.from : `${s.from} - ${s.to}`;
+  const dots = (arr) => arr.map((x) => `<span>${x}</span>`).join('<i>·</i>');
+  const scount = (n) => `${n} sermon${n === 1 ? '' : 's'}`;
+
+  // Series 1: Cinematic Shelf
+  document.getElementById('g1').innerHTML = SERIES.map((s) => `
+    <a class="sh">
+      <div class="bg"><img src="${img(s.th)}" /></div>
+      <div class="in">
+        <div class="caps">${range(s)}</div>
+        <h3>${s.name}</h3>
+        <div class="parts">${s.parts} parts</div>
+        <div class="caps-line">${dots(s.sp)}</div>
+      </div>
+    </a>`).join('');
+
+  // Series 2: Fade Grid
+  document.getElementById('g2').innerHTML = SERIES.map((s) => `
+    <a class="f2">
+      <div class="th"><img class="fadeimg" src="${img(s.th)}" /><span class="count-badge">${s.parts} parts</span></div>
+      <div class="body">
+        <div class="caps">${range(s)}</div>
+        <h3>${s.name}</h3>
+        <div class="meta">
+          <div class="caps-line">${dots(s.sp)}</div>
+        </div>
+      </div>
+    </a>`).join('');
+
+  // Series 3: Timeline
+  document.getElementById('g3').innerHTML = SERIES.map((s) => `
+    <div class="tl-item">
+      <span class="yr">${s.to.split(' ')[1]}</span><span class="dot"></span>
+      <a class="tl-card">
+        <div class="th"><img src="${img(s.th)}" /></div>
+        <div class="in">
+          <div class="caps">${range(s)}</div>
+          <h3>${s.name}</h3>
+          <div class="parts-line">${s.parts} parts</div>
+          <div class="caps-line">${dots(s.sp)}</div>
+        </div>
+      </a>
+    </div>`).join('');
+
+  // Series 4: Editorial Index
+  document.getElementById('g4').innerHTML = SERIES.map((s, i) => `
+    <a class="ei-row">
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <div>
+        <h3>${s.name}</h3>
+        <div class="caps-line">${dots(s.sp)}</div>
+      </div>
+      <div class="th"><img src="${img(s.th)}" /></div>
+      <div class="right">
+        <div class="parts-line">${s.parts} parts</div>
+        <div class="caps">${range(s)}</div>
+      </div>
+    </a>`).join('');
+
+  // Speakers 1: Portrait Marquee
+  document.getElementById('g5').innerHTML = SPEAKERS.map((s) => `
+    <a class="pm">
+      <img src="${img(s.th)}" /><div class="shade"></div>
+      <div class="in">
+        <div class="n">${scount(s.count)}</div>
+        <h3>${s.name}</h3>
+        <div class="caps-line">${dots(s.topics)}</div>
+      </div>
+    </a>`).join('');
+
+  // Speakers 2: Roster Rows
+  document.getElementById('g6').innerHTML = SPEAKERS.map((s) => `
+    <a class="ro-row">
+      <div class="th"><img src="${img(s.th)}" /></div>
+      <div>
+        <h3>${s.name}</h3>
+        <div class="latest">Latest: <b>${s.latest}</b></div>
+        <div class="caps-line">${dots(s.topics)}</div>
+      </div>
+      <div class="cnt"><b>${s.count}</b><span>sermon${s.count === 1 ? '' : 's'}</span></div>
+    </a>`).join('');
+
+  // Speakers 3: Fade Grid
+  document.getElementById('g7').innerHTML = SPEAKERS.map((s) => `
+    <a class="sf">
+      <div class="th"><img class="fadeimg" src="${img(s.th)}" /><span class="count-badge">${scount(s.count)}</span></div>
+      <div class="body">
+        <h3>${s.name}</h3>
+        <div class="n">Latest: ${s.latest}</div>
+        <div class="meta"><div class="caps-line">${dots(s.topics)}</div></div>
+      </div>
+    </a>`).join('');
+
+  // Speakers 4: Featured + Collage
+  const lead = SPEAKERS[0], rest = SPEAKERS.slice(1);
+  document.getElementById('g8').innerHTML = `
+    <a class="feat">
+      <div class="in">
+        <div class="n">${scount(lead.count)}</div>
+        <h3>${lead.name}</h3>
+        <div class="caps-line">${dots(lead.topics)}</div>
+        <div class="latest">Latest: <b>${lead.latest}</b></div>
+      </div>
+      <div class="collage">${lead.thumbs.map((t) => `<div><img src="${img(t)}" /></div>`).join('')}</div>
+    </a>
+    <div class="mini">${rest.map((s) => `
+      <a class="mi">
+        <div class="th"><img src="${img(s.th)}" /></div>
+        <div class="body">
+          <h3>${s.name}</h3>
+          <div class="n">${scount(s.count)}</div>
+        </div>
+      </a>`).join('')}</div>`;
+
+  const NAMES = ['1 Cinematic Shelf', '2 Fade Grid', '3 Timeline', '4 Editorial Index', '1 Portrait Marquee', '2 Roster Rows', '3 Fade Grid', '4 Featured + Collage'];
+  const sw = document.getElementById('switch');
+  const grpS = document.createElement('span'); grpS.className = 'grp'; grpS.textContent = 'Series'; sw.appendChild(grpS);
+  NAMES.forEach((n, i) => {
+    if (i === 4) { const g = document.createElement('span'); g.className = 'grp'; g.textContent = 'Speakers'; sw.appendChild(g); }
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.onclick = () => show(i + 1);
+    sw.appendChild(b);
+  });
+  function show(n) {
+    document.querySelectorAll('.variant').forEach((v) => v.classList.remove('show'));
+    document.getElementById('v' + n).classList.add('show');
+    sw.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === n - 1));
+    window.scrollTo(0, 0);
+  }
+  show(1);
+</script>
+</body>
+</html>
