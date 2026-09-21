@@ -9,7 +9,8 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
 - Vercel Hobby; daily cron at 13:00 UTC hits `/api/cron/check` (ingests new uploads)
 - OpenAI (Kiril's key, `OPENAI_MODEL` default `gpt-5-mini`) for sermon analysis, discussion
   questions, and Ask-the-Archive; structured outputs (`json_schema, strict:true`) everywhere
-- Env in `.env.local`: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, YOUTUBE_API_KEY, OPENAI_API_KEY
+- Env in `.env.local`: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, YOUTUBE_API_KEY, OPENAI_API_KEY,
+  YT_TRANSCRIPT_IO_TOKEN (only needed in prod, see Gotchas)
 
 ## Hard rules
 - **NO EM DASHES (or en dashes) may ever appear on the website.** Enforced three ways:
@@ -27,8 +28,9 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   Skips videos under 15 min (`skipped`). Failed captions -> `transcript_failed`, retried on rerun.
   `needsProcessing()` also reprocesses published rows missing `transcript_segments`
   (adds timestamped highlights to old rows).
-- Transcripts fetched via innertube (ANDROID client) in `lib/transcript.js`; raw segments stored
-  in `transcript_segments` (jsonb), plain text in `transcript`.
+- Transcripts fetched in `lib/transcript.js`: innertube (ANDROID client) first, then a
+  youtube-transcript.io fallback (`YT_TRANSCRIPT_IO_TOKEN`, rate limit 5 req / 10s). Raw segments
+  stored in `transcript_segments` (jsonb), plain text in `transcript`.
 - `lib/analyze.js`: one structured OpenAI call -> summary, notes, highlights
   (`{text, start_seconds}`), verses, topics, bible_books, speaker, series, discussion_questions.
 - `scripts/detect-series.mjs`: one OpenAI pass over all published titles/summaries; resets and
@@ -59,6 +61,13 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   (`/api/questions`, persisted to `discussion_questions` after first generation)
 
 ## Gotchas
+- YouTube's innertube player API now returns LOGIN_REQUIRED from datacenter IPs, so transcript
+  fetching only works locally (residential IP). Production depends on the youtube-transcript.io
+  fallback, so `YT_TRANSCRIPT_IO_TOKEN` must be set in Vercel or the daily cron silently stops
+  ingesting new sermons.
+- Vercel Hobby blocks deployments whose git commit author is not a project contributor. Commits
+  must be authored as `262213075+kirilQC@users.noreply.github.com`; a commit authored
+  `kiril@qcgrowth.com` was blocked and never deployed. Check the author before pushing.
 - Selecting a column that doesn't exist yet 400s the whole Supabase query. Pattern used in
   `app/sermon/[id]/page.js` and `/api/questions`: catch the error and retry without the column.
 - ~28 of the channel's uploads are <15 min shorts/promos, intentionally skipped, so published
