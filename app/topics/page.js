@@ -12,14 +12,24 @@ export default async function TopicsPage() {
     .eq('status', 'published')
     .order('date', { ascending: false });
 
-  const groups = new Map(); // topic -> { count, thumbnail }
+  const groups = new Map(); // topic -> sermons (newest first)
   for (const s of data || []) {
     for (const t of s.topics || []) {
-      if (!groups.has(t)) groups.set(t, { count: 0, thumbnail: s.thumbnail });
-      groups.get(t).count++;
+      if (!groups.has(t)) groups.set(t, []);
+      groups.get(t).push(s);
     }
   }
-  const topics = [...groups.entries()].sort((a, b) => b[1].count - a[1].count);
+  // Give every tile a different image: prefer sermons where the topic is the
+  // first (primary) tag, newest first, skipping thumbnails already used.
+  const used = new Set();
+  const topics = [...groups.entries()]
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([name, list]) => {
+      const ranked = [...list].sort((a, b) => a.topics.indexOf(name) - b.topics.indexOf(name));
+      const pick = ranked.find((s) => s.thumbnail && !used.has(s.thumbnail)) || ranked[0];
+      used.add(pick?.thumbnail);
+      return [name, { count: list.length, thumbnail: pick?.thumbnail }];
+    });
 
   return (
     <main>
@@ -32,7 +42,7 @@ export default async function TopicsPage() {
 
       <div className="topic-bento">
         {topics.map(([name, { count, thumbnail }], i) => {
-          const size = i === 0 ? ' big' : i === 3 || i === 6 ? ' wide' : '';
+          const size = i === 0 ? ' big' : '';
           return (
             <Link
               key={name}

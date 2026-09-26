@@ -80,6 +80,8 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   light-blue accent (the CSS var is still named --amber for historical reasons).
 - `bible_books` must hold exact canonical names from `lib/books.js`; ingest normalizes via
   `canonicalBooks()` (aliases like "Psalm"/"Song of Songs" mapped, junk like "Corinthians" dropped).
+- Speaker names: lead pastor is Noah Herrin. The model has produced "Noah" / "Noah Haron"; ingest maps
+  these via `canonicalSpeaker()` in `lib/ingest.js` (add new aliases there).
 - Footer shows "last synced @ ..." from newest `created_at` (America/Chicago).
 
 ## State / recurring tasks
