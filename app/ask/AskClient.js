@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 const EXAMPLES = [
-  'What has Way Church taught about money?',
+  'Show me sermons about money',
   'What does the Bible say about forgiveness?',
   'How do I pray when I don\u2019t know what to say?',
   'What has been preached on anxiety?',
@@ -107,6 +107,8 @@ export default function AskClient({ recent = [] }) {
             content: target.trimEnd(),
             verses: tail?.verses || [],
             sources: tail?.sources || [],
+            mode: tail?.mode,
+            topic: tail?.topic,
           },
         ]);
         setLoading(false);
@@ -118,7 +120,14 @@ export default function AskClient({ recent = [] }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: next.map(({ role, content }) => ({ role, content })),
+          // List replies have no text; give the model their titles so follow-ups make sense.
+          messages: next.map(({ role, content, mode, sources }) => ({
+            role,
+            content:
+              mode === 'list'
+                ? `Listed sermons: ${(sources || []).map((s) => s.title).join('; ') || 'none found'}`
+                : content,
+          })),
         }),
       });
       if (!res.ok || !res.body) throw new Error('failed');
@@ -211,6 +220,23 @@ export default function AskClient({ recent = [] }) {
               <div key={i} className="ra-ask">
                 <div className="ra-eyebrow">You asked</div>
                 <h2 className="ra-q">{m.content}</h2>
+              </div>
+            ) : m.mode === 'list' ? (
+              <div key={i} className="ra-body">
+                <div className="ra-srcs ra-list">
+                  <h4>
+                    {m.sources.length
+                      ? `${m.sources.length} sermon${m.sources.length === 1 ? '' : 's'} on ${m.topic}`
+                      : `No sermons found on ${m.topic}`}
+                  </h4>
+                  {m.sources.length > 0 && (
+                    <div className="ra-row2">
+                      {m.sources.map((s, k) => (
+                        <SourceCard key={s.id} s={s} delay={k * 50} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div key={i} className="ra-body">

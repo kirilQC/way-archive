@@ -65,6 +65,85 @@ async function sermonsByIds(ids, cols) {
   return ids.map((id) => (data || []).find((s) => s.id === id)).filter(Boolean);
 }
 
+// "Show me sermons about money" style requests skip the written answer and just
+// return the matching sermons. Returns the topic, or null for a normal question.
+const LIST_INTENT = [
+  /\b(show|find|list|give|pull up|get|see)\b.*\b(sermons?|messages?|talks?|teachings?)\b/i,
+  /^\s*(any|which|what|all)\s+(sermons?|messages?|talks?)\b/i,
+  /^\s*(sermons?|messages?|talks?)\s+(about|on|regarding|covering)\b/i,
+];
+function listTopic(text) {
+  if (!LIST_INTENT.some((re) => re.test(text))) return null;
+  const m = text.match(
+    /\b(?:about|on|regarding|covering|mentioning|re|that (?:talk|touch|deal|speak)s? (?:about|on|with))\s+(.+)$/i
+  );
+  if (!m) return null;
+  const topic = m[1]
+    .replace(/\b(from|in|at)\s+(the\s+)?(way|way church|archive|way archive)\b.*$/i, '')
+    .replace(/[?.!]+$/, '')
+    .trim();
+  return topic.length >= 2 && topic.length <= 60 ? topic : null;
+}
+
+async function listSermons(topic) {
+  const cols = 'id,title,date,speaker,thumbnail,topics,summary';
+  const word = topic.toLowerCase();
+  const [{ data: all }, ftsIds] = await Promise.all([
+    db().from('sermons').select(cols).eq('status', 'published'),
+    searchSermons(topic, 25),
+  ]);
+  const byId = new Map((all || []).map((s) => [String(s.id), s]));
+  const tagged = (all || []).filter(
+    (s) =>
+      (s.topics || []).some((t) => t.toLowerCase().includes(word)) ||
+      (s.title || '').toLowerCase().includes(word)
+  );
+  const candidates = [...new Map([...tagged, ...ftsIds.map((id) => byId.get(String(id)))].filter(Boolean).map((s) => [s.id, s])).values()].slice(0, 45);
+  if (!candidates.length) return [];
+
+  // One fast pass to keep only sermons where the topic is a main theme, not a passing mention.
+  let ids = null;
+  try {
+    const res = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+      reasoning_effort: 'minimal',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You filter a church sermon archive. Given a topic and candidate sermons, return the ids of sermons where the topic is a central theme (not a passing mention), most relevant first. Return an empty list if none fit.',
+        },
+        {
+          role: 'user',
+          content:
+            `Topic: ${topic}\n\n` +
+            candidates
+              .map((s) => `${s.id} | ${s.title} | tags: ${(s.topics || []).join(', ')} | ${String(s.summary || '').slice(0, 280)}`)
+              .join('\n'),
+        },
+      ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'sermon_ids',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: { ids: { type: 'array', items: { type: 'string' } } },
+            required: ['ids'],
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+    ids = JSON.parse(res.choices[0].message.content).ids;
+  } catch {
+    // Filter failed: fall back to tag/title matches, then full-text order.
+  }
+  const picked = ids ? ids.map((id) => byId.get(String(id))).filter(Boolean) : candidates;
+  return picked.slice(0, 12).map(({ id, title, date, speaker, thumbnail }) => ({ id, title, date, speaker, thumbnail }));
+}
+
 export async function POST(request) {
   const { messages } = await request.json();
   if (!Array.isArray(messages) || !messages.length) {
@@ -75,8 +154,19 @@ export async function POST(request) {
     content: String(m.content || '').slice(0, 2000),
   }));
 
-  // Retrieval before the model runs: give it real sermon summaries as context.
   const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
+  if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  // List mode: no written answer, just the matching sermons.
+  const topic = listTopic(lastUser);
+  if (topic) {
+    const sources = await listSermons(topic);
+    return new Response(DONE + JSON.stringify({ mode: 'list', topic: noDashes(topic), verses: [], sources }), {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
+    });
+  }
+
+  // Retrieval before the model runs: give it real sermon summaries as context.
   const contextIds = await searchSermons(lastUser, 4);
   const contextSermons = await sermonsByIds(contextIds, 'id,title,date,speaker,summary');
   const contextMsg = contextSermons.length
@@ -95,8 +185,7 @@ export async function POST(request) {
       ]
     : [];
 
-  if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const stream = await openai.chat.completions.create({
+  const stream =await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-5-mini',
     messages: [{ role: 'system', content: SYSTEM }, ...contextMsg, ...history],
     stream: true,

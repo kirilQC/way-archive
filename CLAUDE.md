@@ -54,6 +54,9 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   verse text; it streams answer text, then `###META###` + JSON (verse_references,
   sermon_search_query). Server appends `###DONE###` + {verses, sources (with thumbnails)};
   client renders real NLT text via `/api/passage` (no hallucinated quotes possible).
+  **List mode:** "show me / find / any sermons about X" (regex `listTopic()` in the route) skips the
+  answer entirely: candidates from topic tags + titles + FTS go through one `minimal`-reasoning
+  filter call, and the reply is just `###DONE###{mode:'list', topic, sources}` (up to 12 cards).
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript

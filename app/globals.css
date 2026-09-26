@@ -202,7 +202,9 @@ select.chip { appearance: none; }
 .series-row.flip { grid-template-columns: 420px 1fr; }
 .series-row.flip .series-art { order: -1; }
 .series-row:hover { transform: translateY(-4px); border-color: rgba(140, 174, 242, 0.5); }
-.series-row .series-blur { position: absolute; inset: 0; }
+.series-row .series-blur { position: absolute; inset: 0; z-index: 0; }
+/* Explicit layering: `order: -1` on flipped/mobile art would otherwise paint it under the blur */
+.series-row .series-txt, .series-row .series-art { z-index: 1; }
 .series-row .series-blur img {
   width: 100%; height: 100%; object-fit: cover;
   filter: blur(48px) brightness(0.3) saturate(1.25); transform: scale(1.4);
