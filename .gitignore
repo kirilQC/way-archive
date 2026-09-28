@@ -9,3 +9,4 @@ out/
 *.tsbuildinfo
 scripts/retag-backup-*.json
 scripts/eval-results/
+public/dev-test.mp4

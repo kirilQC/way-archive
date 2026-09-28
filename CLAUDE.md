@@ -85,6 +85,33 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   "church-name" (a one-sentence mention diluted inside a 2 min passage).
   **Ask log:** every request is logged to `sermon_ask_logs` (`lib/asklog.js`, never throws);
   private view at `/admin/asks?key=ADMIN_KEY` (env var, set in Vercel too).
+- `/clips`: Clips tab for the Way content team (no login by design). This week's auto pack,
+  type filter (hook/story/quote/scripture/practical/gospel), every sermon's pack, and an evergreen
+  search box that deep-links to Ask's clip finder. Auto packs: `lib/clips.js` `generateClipPack`
+  (one low-reasoning pass over the whole `[m:ss]` transcript, 8-10 clips across types) snapped with
+  `snapSpan(..., { sentences: true })` (word-level timing, edges on sentence boundaries when
+  captions are punctuated). Stored in `sermon_clips` (kind auto|custom). Generated in
+  `ingestVideo` for new sermons; backfill `node scripts/generate-clips.mjs [--all]`.
+- `/clips/[id]`: Clip Studio. Video + clickable transcript (click a line, click another = range),
+  +-0.5s nudges, preview, AI hook/caption (`PATCH /api/clips`), save custom clips (`POST`),
+  SRT export, and MP4 export rendered IN THE BROWSER by ffmpeg.wasm (`app/clips/render.js`):
+  16:9 and/or 9:16 (crop with position slider, or whole frame on blurred background), optional
+  burned-in word-by-word subtitles (Anton font, from the captions), 1080p/720p, bitrate capped.
+  The ffmpeg worker is served raw from `public/ffmpeg/` (copied from @ffmpeg/ffmpeg 0.12.15) because
+  Next's bundler breaks its dynamic import of the core; recopy if the package is upgraded.
+  Video source: Oxylabs YouTube Downloader (`lib/oxylabs.js`, `/api/clips/source`) fetches just the
+  clip range (+2s pad) into the private Supabase bucket `sermon-clip-sources` over S3 (bucket cap
+  50 MB per file, so ranges over 80s download at 720p); the browser downloads it via signed URL and
+  renders with `sourceOffset`. Env: OXYLABS_USERNAME, OXYLABS_PASSWORD, SUPABASE_S3_ACCESS_KEY_ID,
+  SUPABASE_S3_SECRET_ACCESS_KEY. Staff can also load a local sermon file instead (faster).
+  The daily cron deletes sources older than 7 days.
+- Visitor analytics: `middleware.js` records every page view server-side into `sermon_site_events`
+  (IP, Vercel geo headers, parsed UA, referrer, visitor/session cookies `way_vid` 400d /
+  `way_sid` rolling 30 min, skips prefetch, assets, /api, /admin; repeats within 2s ignored);
+  `app/components/Tracker.js` posts one `client_info` row per session to `/api/track` (screen,
+  window, tz, languages, touch, cores, memory, connection). Ask logs carry visitor/session/ip/geo.
+  Private views (no links anywhere, noindex, robots disallow): `/admin/visitors?key=ADMIN_KEY` and
+  `/admin/asks?key=ADMIN_KEY`. Location is IP-based: city-level, not exact; VPNs skew it.
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript

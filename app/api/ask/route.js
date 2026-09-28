@@ -22,6 +22,7 @@ import { planSearch, deepSearch, findClips, SHAPES } from '../../../lib/deepsear
 import { verseSearch } from '../../../lib/verseindex.js';
 import { formatRef } from '../../../lib/verses.js';
 import { logAsk } from '../../../lib/asklog.js';
+import { requestInfo, VISITOR_COOKIE, SESSION_COOKIE } from '../../../lib/track.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -134,7 +135,17 @@ export async function POST(request) {
   const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
   if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const log = (entry) => after(() => logAsk({ question: lastUser, latencyMs: Date.now() - started, ...entry }));
+  const info = requestInfo(request);
+  const who = {
+    visitor_id: request.cookies.get(VISITOR_COOKIE)?.value || null,
+    session_id: request.cookies.get(SESSION_COOKIE)?.value || null,
+    ip: info.ip,
+    city: info.city,
+    region: info.region,
+    country: info.country,
+    device: [info.device_vendor, info.device_model, info.os, info.browser].filter(Boolean).join(' · ') || null,
+  };
+  const log = (entry) => after(() => logAsk({ question: lastUser, latencyMs: Date.now() - started, who, ...entry }));
 
   let plan = null;
   try {
@@ -281,10 +292,10 @@ export async function POST(request) {
         };
         controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify(tail)));
         // Client already has everything; log before closing (after() is not reliable in here)
-        await logAsk({ question: lastUser, latencyMs: Date.now() - started, mode, plan, resultCount: sources.length, topIds: sources.map((s) => s.id) });
+        await logAsk({ question: lastUser, latencyMs: Date.now() - started, who, mode, plan, resultCount: sources.length, topIds: sources.map((s) => s.id) });
       } catch (err) {
         controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ mode, verses: [], citations: [], sources: [] })));
-        await logAsk({ question: lastUser, latencyMs: Date.now() - started, mode, plan, resultCount: 0, error: err.message });
+        await logAsk({ question: lastUser, latencyMs: Date.now() - started, who, mode, plan, resultCount: 0, error: err.message });
       }
       controller.close();
     },
