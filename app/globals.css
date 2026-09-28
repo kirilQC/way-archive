@@ -432,6 +432,27 @@ body:has(.ask-cinema) .tab.active { color: #fff; background: rgba(255, 255, 255,
 }
 .transcript-block .hl-time:hover { background: rgba(140, 174, 242, 0.28); }
 .transcript-block p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+/* Transcript find bar: pinned under the nav while scrolling the transcript */
+.tr-find {
+  position: sticky; top: 72px; z-index: 5; display: flex; align-items: center; gap: 8px;
+  background: rgba(11, 16, 30, 0.92); backdrop-filter: blur(10px);
+  border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 14px; margin-top: 16px;
+}
+.tr-find input {
+  flex: 1; min-width: 0; background: transparent; border: 0; outline: 0;
+  color: var(--text); font: inherit; font-size: 14px; padding: 6px 0;
+}
+.tr-find:focus-within { border-color: rgba(140, 174, 242, 0.5); }
+.tr-find-count { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tr-find button {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel-2); color: var(--text); cursor: pointer; flex-shrink: 0;
+}
+.tr-find button:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+.tr-find button:disabled { opacity: 0.35; cursor: default; }
+.transcript-block mark { background: var(--amber-dim); color: var(--text); border-radius: 3px; padding: 0 2px; }
+.transcript-block mark.on { background: var(--amber); color: #0b101e; }
+.transcript-block.dim p { opacity: 0.45; }
 
 .site-footer .synced { margin-top: 6px; font-size: 11px; opacity: 0.7; }
 .footer-link { color: var(--amber); font-size: 12.5px; font-weight: 500; }

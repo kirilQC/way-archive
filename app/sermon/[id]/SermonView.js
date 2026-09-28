@@ -93,6 +93,98 @@ function DiscussionQuestions({ sermonId }) {
   );
 }
 
+// Splits text around case-insensitive matches of `re`, numbering each match from `offset`
+function markMatches(text, re, offset) {
+  if (!re) return { parts: [text], count: 0 };
+  const parts = [];
+  let last = 0;
+  let count = 0;
+  for (const m of text.matchAll(re)) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    parts.push({ i: offset + count++, text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return { parts, count };
+}
+
+function TranscriptBlocks({ blocks, onSeek }) {
+  const [query, setQuery] = useState('');
+  const [current, setCurrent] = useState(0);
+  const listRef = useRef(null);
+
+  const q = query.trim();
+  const re = q.length >= 2 ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi') : null;
+  let total = 0;
+  const rendered = blocks.map((b) => {
+    const { parts, count } = markMatches(b.text, re, total);
+    total += count;
+    return { ...b, parts, count };
+  });
+  const passages = rendered.filter((b) => b.count).length;
+  const active = total ? Math.min(current, total - 1) : -1;
+
+  useEffect(() => setCurrent(0), [q]);
+  useEffect(() => {
+    if (active < 0) return;
+    listRef.current
+      ?.querySelector(`[data-m="${active}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [active, q]);
+
+  const step = (d) => total && setCurrent((c) => (Math.min(c, total - 1) + d + total) % total);
+
+  return (
+    <>
+      <div className="tr-find">
+        <input
+          type="search"
+          placeholder="Search this transcript"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              step(e.shiftKey ? -1 : 1);
+            }
+          }}
+        />
+        {re && (
+          <span className="tr-find-count">
+            {total ? `${active + 1} of ${total} · ${passages} passage${passages === 1 ? '' : 's'}` : 'No matches'}
+          </span>
+        )}
+        <button onClick={() => step(-1)} disabled={!total} aria-label="Previous match">
+          ↑
+        </button>
+        <button onClick={() => step(1)} disabled={!total} aria-label="Next match">
+          ↓
+        </button>
+      </div>
+      <div className="transcript sd-transcript" ref={listRef}>
+        {rendered.map((b, i) => (
+          <div key={i} className={`transcript-block${re && !b.count ? ' dim' : ''}`}>
+            <button className="hl-time" onClick={() => onSeek(b.start)}>
+              {formatTime(b.start)}
+            </button>
+            <p>
+              {b.parts.map((p, j) =>
+                typeof p === 'string' ? (
+                  p
+                ) : (
+                  <mark key={j} data-m={p.i} className={p.i === active ? 'on' : ''}>
+                    {p.text}
+                  </mark>
+                )
+              )}
+            </p>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 function Transcript({ sermonId, onSeek }) {
   const [data, setData] = useState(null); // { segments } | { text } | { error }
 
@@ -111,16 +203,10 @@ function Transcript({ sermonId, onSeek }) {
   if (data.error) return <p className="panel-text">Transcript unavailable.</p>;
   if (data.segments)
     return (
-      <div className="transcript sd-transcript">
-        {groupSegments(data.segments).map((b, i) => (
-          <div key={i} className="transcript-block">
-            <button className="hl-time" onClick={() => onSeek(b.start)}>
-              {formatTime(b.start)}
-            </button>
-            <p>{noDashes(b.text)}</p>
-          </div>
-        ))}
-      </div>
+      <TranscriptBlocks
+        blocks={groupSegments(data.segments).map((b) => ({ ...b, text: noDashes(b.text) }))}
+        onSeek={onSeek}
+      />
     );
   return (
     <div className="transcript sd-transcript">
