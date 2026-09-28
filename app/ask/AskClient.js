@@ -48,7 +48,33 @@ function VerseCard({ reference, delay = 0 }) {
   );
 }
 
+function clock(seconds) {
+  const m = Math.floor(seconds / 60);
+  return `${m}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+}
+
 function SourceCard({ s, delay = 0 }) {
+  if ((s.moments || []).length) {
+    return (
+      <div className="ask-source has-moments pop-in" style={{ animationDelay: `${delay}ms` }}>
+        <Link href={`/sermon/${s.id}`} className="ask-source-head">
+          {s.thumbnail && <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />}
+          <span className="ask-source-body">
+            <b>{(s.title || '').split('|')[0].trim()}</b>
+            <span>{[s.speaker, formatDate(s.date)].filter(Boolean).join(' · ')}</span>
+          </span>
+        </Link>
+        <div className="ask-moments">
+          {s.moments.map((m) => (
+            <Link key={m.start_seconds} href={`/sermon/${s.id}?t=${m.start_seconds}`} className="ask-moment">
+              <span className="ask-moment-t">{clock(m.start_seconds)}</span>
+              <span>{m.note || 'Jump to this moment'}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <Link href={`/sermon/${s.id}`} className="ask-source pop-in" style={{ animationDelay: `${delay}ms` }}>
       {s.thumbnail && <img className="ask-source-thumb" src={s.thumbnail} alt="" loading="lazy" />}
@@ -125,7 +151,11 @@ export default function AskClient({ recent = [] }) {
             role,
             content:
               mode === 'list'
-                ? `Listed sermons: ${(sources || []).map((s) => s.title).join('; ') || 'none found'}`
+                ? `Listed sermons: ${
+                    (sources || [])
+                      .map((s, i) => `${i + 1}. ${s.title}${(s.moments || []).length ? ` (${s.moments.map((m) => `${clock(m.start_seconds)} ${m.note}`).join('; ')})` : ''}`)
+                      .join(' | ') || 'none found'
+                  }`
                 : content,
           })),
         }),
@@ -280,7 +310,7 @@ export default function AskClient({ recent = [] }) {
           {loading && !messages.some((m) => m.streaming) && (
             <div className="ra-status">
               <span className="ra-dot" />
-              Searching the archive
+              Searching every transcript
             </div>
           )}
           <div ref={endRef} />

@@ -58,9 +58,17 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   verse text; it streams answer text, then `###META###` + JSON (verse_references,
   sermon_search_query). Server appends `###DONE###` + {verses, sources (with thumbnails)};
   client renders real NLT text via `/api/passage` (no hallucinated quotes possible).
-  **List mode:** "show me / find / any sermons about X" (regex `listTopic()` in the route) skips the
-  answer entirely: candidates from topic tags + titles + FTS go through one `minimal`-reasoning
-  filter call, and the reply is just `###DONE###{mode:'list', topic, sources}` (up to 12 cards).
+  **Deep search (primary retrieval, `lib/deepsearch.js`):** every transcript is split into ~2 min
+  passages with 20s overlap (`lib/chunks.js`, ~3,300 rows in `sermon_chunks`, pgvector 1536 +
+  tsvector, `text-embedding-3-small`, title prefixed into the embedded text). Per question:
+  plan (minimal-reasoning call: find vs answer, rewritten query, keywords, strict book/speaker/date
+  filters) -> `match_sermon_chunks` RPC (vector + keyword, reciprocal rank fusion, filters; retried
+  unfiltered if empty) -> rerank top 40 at `low` reasoning (`minimal` was tested and was too loose)
+  -> sermons with up to 3 timestamped moments. "find" returns `###DONE###{mode:'list', topic,
+  sources}` with moments, no prose; "answer" feeds the passages to the answer model. ~6-10s.
+  Moment links go to `/sermon/[id]?t=seconds`, which starts the embed there.
+  New sermons are indexed in `ingestVideo`; `node scripts/index-transcripts.mjs [--all]` backfills.
+  The older regex list mode + sermon-level FTS path remains only as a fallback if deep search throws.
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript

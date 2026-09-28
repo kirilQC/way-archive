@@ -7,9 +7,16 @@
 // as it arrives, then appends a ###DONE### JSON tail with verses + related sermons.
 // Verse text itself is rendered client-side from /api/passage (real NLT text),
 // so the model only supplies references and is told never to fabricate quotes.
+//
+// Retrieval is lib/deepsearch.js: every transcript passage is searched (meaning +
+// keywords + book/speaker/date filters, then reranked). "find" requests return just the
+// sermons with timestamped moments; "answer" requests get the passages as context.
+// If deep search fails (e.g. sermon_chunks missing), the older sermon-level
+// full-text path below still works.
 import OpenAI from 'openai';
 import { db } from '../../../lib/supabase.js';
 import { noDashes } from '../../../lib/text.js';
+import { deepSearch } from '../../../lib/deepsearch.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -33,7 +40,7 @@ Theology:
 - On genuinely disputed secondary matters, briefly note that faithful Christians differ.
 
 Way Church sermons:
-- You may be given summaries of possibly relevant Way Church sermons. When they genuinely address the question, weave in what was preached and mention sermon titles naturally ("In 'The god of Money', Noah Herrin argues..."). Never invent sermon content; if the provided sermons don't address the question, answer from Scripture alone.
+- You may be given real transcript passages (auto-captions, so expect typos) or summaries from Way Church sermons. When they genuinely address the question, weave in what was actually said and mention sermon titles naturally ("In 'The god of Money', Noah Herrin argues..."). Never invent sermon content or attribute something a passage does not say; if the provided sermons don't address the question, answer from Scripture alone.
 
 Scripture rules:
 - NEVER invent, misattribute, or paraphrase-as-quote a Bible verse. Do not write out verse quotations in your answer text at all: the site displays the real NLT text for every reference you list.
@@ -157,35 +164,72 @@ export async function POST(request) {
   const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
   if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  // List mode: no written answer, just the matching sermons.
-  const topic = listTopic(lastUser);
-  if (topic) {
-    const sources = await listSermons(topic);
-    return new Response(DONE + JSON.stringify({ mode: 'list', topic: noDashes(topic), verses: [], sources }), {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
-    });
+  const textHeaders = { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' };
+  const cardOf = ({ id, title, date, speaker, thumbnail, moments }) => ({
+    id, title, date, speaker, thumbnail,
+    moments: (moments || []).map(({ start_seconds, note }) => ({ start_seconds, note })),
+  });
+
+  let deep = null;
+  try {
+    deep = await deepSearch(history);
+  } catch (err) {
+    console.error('deep search failed, using legacy retrieval:', err.message);
   }
 
-  // Retrieval before the model runs: give it real sermon summaries as context.
-  const contextIds = await searchSermons(lastUser, 4);
-  const contextSermons = await sermonsByIds(contextIds, 'id,title,date,speaker,summary');
-  const contextMsg = contextSermons.length
-    ? [
+  // Find mode: no written answer, just the matching sermons and moments.
+  if (deep?.plan.mode === 'find') {
+    const body = { mode: 'list', topic: noDashes(deep.plan.label), verses: [], sources: deep.sermons.map(cardOf) };
+    return new Response(DONE + JSON.stringify(body), { headers: textHeaders });
+  }
+  if (!deep) {
+    const topic = listTopic(lastUser);
+    if (topic) {
+      const sources = await listSermons(topic);
+      return new Response(DONE + JSON.stringify({ mode: 'list', topic: noDashes(topic), verses: [], sources }), {
+        headers: textHeaders,
+      });
+    }
+  }
+
+  // Answer mode: the model writes from real transcript passages (deep) or summaries (legacy).
+  let contextIds = [];
+  let contextMsg = [];
+  if (deep?.sermons.length) {
+    contextIds = deep.sermons.map((s) => s.id);
+    contextMsg = [
+      {
+        role: 'system',
+        content:
+          'Transcript passages from Way Church sermons that match this question (auto-captions):\n\n' +
+          deep.sermons
+            .slice(0, 5)
+            .map(
+              (s) =>
+                `"${s.title}" (${s.speaker || 'unknown'}, ${s.date})\n` +
+                s.moments.slice(0, 2).map((m) => `  [${Math.floor(m.start_seconds / 60)} min] ${m.text.slice(0, 1400)}`).join('\n')
+            )
+            .join('\n\n'),
+      },
+    ];
+  } else if (!deep) {
+    contextIds = await searchSermons(lastUser, 4);
+    const contextSermons = await sermonsByIds(contextIds, 'id,title,date,speaker,summary');
+    if (contextSermons.length) {
+      contextMsg = [
         {
           role: 'system',
           content:
             'Possibly relevant Way Church sermons:\n\n' +
             contextSermons
-              .map(
-                (s) =>
-                  `"${s.title}" (${s.speaker || 'unknown'}, ${s.date}): ${String(s.summary || '').slice(0, 400)}`
-              )
+              .map((s) => `"${s.title}" (${s.speaker || 'unknown'}, ${s.date}): ${String(s.summary || '').slice(0, 400)}`)
               .join('\n\n'),
         },
-      ]
-    : [];
+      ];
+    }
+  }
 
-  const stream =await openai.chat.completions.create({
+  const stream = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-5-mini',
     messages: [{ role: 'system', content: SYSTEM }, ...contextMsg, ...history],
     stream: true,
@@ -234,10 +278,16 @@ export async function POST(request) {
             // meta malformed: answer already streamed, just skip extras
           }
         }
-        // Related sermons: model's query first, retrieval context as backup
-        let ids = await searchSermons(query, 3);
-        if (!ids.length) ids = contextIds.slice(0, 3);
-        const sources = await sermonsByIds(ids, 'id,title,date,speaker,thumbnail');
+        let sources;
+        if (deep?.sermons.length) {
+          // Deep results already carry the exact moments that informed the answer
+          sources = deep.sermons.slice(0, 4).map(cardOf);
+        } else {
+          // Legacy: model's query first, retrieval context as backup
+          let ids = await searchSermons(query, 3);
+          if (!ids.length) ids = contextIds.slice(0, 3);
+          sources = await sermonsByIds(ids, 'id,title,date,speaker,thumbnail');
+        }
         controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses, sources })));
       } catch {
         controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses: [], sources: [] })));

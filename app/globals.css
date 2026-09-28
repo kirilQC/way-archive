@@ -624,6 +624,21 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
   transition: border-color 0.2s, background 0.2s;
 }
 .ra-row2 .ask-source:hover { border-color: var(--amber); background: rgba(23, 32, 56, 0.8); }
+/* Deep-search cards: sermon header plus timestamped moments that jump the video */
+.ask-source.has-moments { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px; align-self: start; }
+.ask-source.has-moments:hover { background: rgba(17, 24, 48, 0.7); }
+.ask-source-head { display: flex; align-items: center; gap: 12px; }
+.ask-source-head:hover b { color: var(--amber); }
+.ask-moments { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--line); padding-top: 8px; }
+.ask-moment {
+  display: flex; gap: 10px; align-items: baseline; padding: 6px 8px; border-radius: 8px;
+  font-size: 12.5px; line-height: 1.4; color: #c3c9dd;
+}
+.ask-moment:hover { background: rgba(140, 174, 242, 0.1); color: var(--text); }
+.ask-moment-t {
+  font-variant-numeric: tabular-nums; font-weight: 700; font-size: 11.5px; color: var(--amber);
+  background: var(--amber-dim); border-radius: 6px; padding: 1px 7px; flex-shrink: 0;
+}
 
 @media (max-width: 900px) {
   .ac-hero h1 { font-size: 36px; }

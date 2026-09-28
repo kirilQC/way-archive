@@ -50,8 +50,10 @@ async function getRelated(sermon) {
     .map((e) => e.row);
 }
 
-export default async function SermonPage({ params }) {
+export default async function SermonPage({ params, searchParams }) {
   const { id } = await params;
+  const t = Number((await searchParams)?.t);
+  const startAt = Number.isFinite(t) && t > 0 ? Math.floor(t) : 0;
   const cols = 'id,youtube_id,title,date,thumbnail,duration_seconds,summary,highlights,notes,bible_books,verses,topics,speaker';
   let { data: sermon, error } = await db()
     .from('sermons')
@@ -66,5 +68,5 @@ export default async function SermonPage({ params }) {
 
   const related = await getRelated(sermon);
 
-  return <SermonView sermon={sermon} related={related} />;
+  return <SermonView sermon={sermon} related={related} startAt={startAt} />;
 }

@@ -131,7 +131,7 @@ function Transcript({ sermonId, onSeek }) {
 
 const TABS = ['Overview', 'Timeline', 'Scriptures', 'Discussion', 'Transcript'];
 
-export default function SermonView({ sermon: s, related = [] }) {
+export default function SermonView({ sermon: s, related = [], startAt = 0 }) {
   const iframeRef = useRef(null);
   const [tab, setTab] = useState(0);
   const [openedTabs, setOpenedTabs] = useState([true, false, false, false, false]);
@@ -187,7 +187,7 @@ export default function SermonView({ sermon: s, related = [] }) {
         <div className="video-wrap sd-video">
           <iframe
             ref={iframeRef}
-            src={`https://www.youtube.com/embed/${s.youtube_id}?enablejsapi=1`}
+            src={`https://www.youtube.com/embed/${s.youtube_id}?enablejsapi=1${startAt ? `&start=${startAt}` : ''}`}
             title={s.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
