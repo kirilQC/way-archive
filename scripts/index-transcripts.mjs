@@ -1,7 +1,8 @@
 // Rerunnable: split every published sermon's transcript into timestamped passages,
 // embed them, and store them in sermon_chunks for deep search. Skips sermons that
-// already have passages unless --all is passed.
-// Run: node scripts/index-transcripts.mjs [--all]
+// already have passages unless --all is passed. --verses rebuilds the spoken-verse index
+// (sermon_verse_mentions) for every sermon instead; it is cheap and needs no API calls.
+// Run: node scripts/index-transcripts.mjs [--all | --verses]
 
 import { readFileSync } from 'node:fs';
 
@@ -19,6 +20,16 @@ const { db } = await import('../lib/supabase.js');
 const { indexSermon } = await import('../lib/chunks.js');
 
 const ALL = process.argv.includes('--all');
+
+if (process.argv.includes('--verses')) {
+  const { indexVerses } = await import('../lib/verseindex.js');
+  const { data: rows, error: e } = await db().from('sermons').select('id,title,transcript_segments').eq('status', 'published');
+  if (e) throw e;
+  let n = 0;
+  for (const s of rows) n += await indexVerses(s);
+  console.log(`Indexed ${n} spoken verse references across ${rows.length} sermons.`);
+  process.exit(0);
+}
 
 const { data: sermons, error } = await db()
   .from('sermons')

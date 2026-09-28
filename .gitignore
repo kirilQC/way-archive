@@ -8,3 +8,4 @@ out/
 .DS_Store
 *.tsbuildinfo
 scripts/retag-backup-*.json
+scripts/eval-results/

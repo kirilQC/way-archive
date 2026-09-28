@@ -1,22 +1,27 @@
-// Unified Ask: multi-turn chat answering both scripture questions and
-// "what has Way Church taught about X" questions, streamed.
+// Unified Ask: multi-turn chat over the Bible and everything Way Church has preached.
 // System prompt guardrails adapted from Cameron Pak's open-sourced Bible Bot prompt
 // (MIT No Attribution, https://gist.github.com/cameronapak/5f6353542c9683cb4967fe12a435db99).
-// The model streams plain answer text, then a ###META### line with JSON
-// { verse_references, sermon_search_query }. The server forwards the answer text
-// as it arrives, then appends a ###DONE### JSON tail with verses + related sermons.
-// Verse text itself is rendered client-side from /api/passage (real NLT text),
-// so the model only supplies references and is told never to fabricate quotes.
 //
-// Retrieval is lib/deepsearch.js: every transcript passage is searched (meaning +
-// keywords + book/speaker/date filters, then reranked). "find" requests return just the
-// sermons with timestamped moments; "answer" requests get the passages as context.
-// If deep search fails (e.g. sermon_chunks missing), the older sermon-level
-// full-text path below still works.
+// Every request is planned first (lib/deepsearch.js planSearch), then handled by mode:
+//   find     sermons + exact timestamped moments with verbatim quotes, no prose
+//   clips    ready-to-post clips (start/end, verbatim transcript, hook, caption)
+//   verse    every sermon where a reference was said aloud (lib/verseindex.js), no AI ranking
+//   answer   prose written from numbered transcript citations [n]
+//   compare  like answer, wider retrieval, chronological, laid out side by side / as a timeline
+//   guide    builds a resource (small group guide, study plan) from the citations
+//
+// Wire format: prose modes stream answer text, then the server appends ###DONE### + JSON tail
+// { mode, verses, citations, sources }. Non-prose modes return ###DONE### + JSON immediately.
+// The model streams text, then ###META### + { verse_references }; verse text itself is rendered
+// client-side from /api/passage, so the model never writes Bible quotations.
 import OpenAI from 'openai';
+import { after } from 'next/server';
 import { db } from '../../../lib/supabase.js';
 import { noDashes } from '../../../lib/text.js';
-import { deepSearch } from '../../../lib/deepsearch.js';
+import { planSearch, deepSearch, findClips, SHAPES } from '../../../lib/deepsearch.js';
+import { verseSearch } from '../../../lib/verseindex.js';
+import { formatRef } from '../../../lib/verses.js';
+import { logAsk } from '../../../lib/asklog.js';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -39,22 +44,33 @@ Theology:
 - Hold grace and truth together: be kind, and be biblically clear about sin and repentance. Reject prosperity gospel, cheap grace, and legalism.
 - On genuinely disputed secondary matters, briefly note that faithful Christians differ.
 
-Way Church sermons:
-- You may be given real transcript passages (auto-captions, so expect typos) or summaries from Way Church sermons. When they genuinely address the question, weave in what was actually said and mention sermon titles naturally ("In 'The god of Money', Noah Herrin argues..."). Never invent sermon content or attribute something a passage does not say; if the provided sermons don't address the question, answer from Scripture alone.
+Way Church sermons and citations:
+- You may be given numbered sources [1], [2], ... : exact quotes from Way Church sermon transcripts (auto-captions, so expect typos), each with sermon title, preacher, date, and timestamp.
+- Every statement about what Way Church or a preacher taught MUST be supported by a source and cite it right after the claim, like "Noah Herrin calls worry a trust issue [2]." Cite multiple as [1][3]. Never cite a source for something it does not say. Never invent sermon content.
+- Mention sermon titles naturally when helpful. If no source addresses the question, answer from Scripture alone and do not cite.
 
 Scripture rules:
 - NEVER invent, misattribute, or paraphrase-as-quote a Bible verse. Do not write out verse quotations in your answer text at all: the site displays the real NLT text for every reference you list.
 - Refer to passages naturally in prose ("Paul addresses this in Romans 8...").
 
 Style:
-- Concise: 1-3 short paragraphs. Warm, patient, non-quarrelsome, plain language.
+- Warm, patient, non-quarrelsome, plain language.
 - Never use em dashes or en dashes; use commas, periods, or colons instead.
+- Formatting: plain paragraphs. You may use "## " headings and "- " bullet lines when the MODE asks for structure. No other markdown except **bold**.
 - Stay on topic: Scripture, faith, theology, Christian living, this church's teaching. Politely redirect unrelated questions.
 
 OUTPUT FORMAT (exactly):
 1. Your answer as plain text.
 2. Then a new line containing exactly ${META}
-3. Then one line of JSON: {"verse_references": ["Book C:V" or "Book C:V-V", 1-4 items], "sermon_search_query": "1-3 lowercase keywords for finding related sermons in this church's archive, or empty string"}`;
+3. Then one line of JSON: {"verse_references": ["Book C:V" or "Book C:V-V", 0-4 items]}`;
+
+const MODE_BRIEF = {
+  answer: 'MODE: answer. Concise: 1-3 short paragraphs, no headings.',
+  compare:
+    'MODE: compare. The sources are in chronological order. Lay out the comparison with "## " headings: one per preacher when comparing preachers, or one per period when tracing change over time. Under each, 2-4 "- " bullets with citations. End with a short "## Takeaway" paragraph naming what is consistent and what shifted. Be honest when the sources show no real change.',
+  guide:
+    'MODE: guide. Build the resource the user asked for (default: a 4-week small group guide). For each part use a "## Week N: Title" heading (or the unit they asked for), then bullets for: Big idea, Scripture (references only), Watch (cite the source whose clip to play, with its sermon title), Discuss (3 questions), and Practice (one action). Ground every part in the sources and cite them. Open with one sentence naming the sermons used.',
+};
 
 async function searchSermons(q, limit) {
   if (!q?.trim()) return [];
@@ -72,86 +88,41 @@ async function sermonsByIds(ids, cols) {
   return ids.map((id) => (data || []).find((s) => s.id === id)).filter(Boolean);
 }
 
-// "Show me sermons about money" style requests skip the written answer and just
-// return the matching sermons. Returns the topic, or null for a normal question.
-const LIST_INTENT = [
-  /\b(show|find|list|give|pull up|get|see)\b.*\b(sermons?|messages?|talks?|teachings?)\b/i,
-  /^\s*(any|which|what|all)\s+(sermons?|messages?|talks?)\b/i,
-  /^\s*(sermons?|messages?|talks?)\s+(about|on|regarding|covering)\b/i,
-];
-function listTopic(text) {
-  if (!LIST_INTENT.some((re) => re.test(text))) return null;
-  const m = text.match(
-    /\b(?:about|on|regarding|covering|mentioning|re|that (?:talk|touch|deal|speak)s? (?:about|on|with))\s+(.+)$/i
-  );
-  if (!m) return null;
-  const topic = m[1]
-    .replace(/\b(from|in|at)\s+(the\s+)?(way|way church|archive|way archive)\b.*$/i, '')
-    .replace(/[?.!]+$/, '')
-    .trim();
-  return topic.length >= 2 && topic.length <= 60 ? topic : null;
-}
+const textHeaders = { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' };
+const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+const cardOf = ({ id, title, date, speaker, thumbnail, moments }) => ({
+  id,
+  title,
+  date,
+  speaker,
+  thumbnail,
+  moments: (moments || []).map(({ start_seconds, note, quote }) => ({ start_seconds, note, quote })),
+});
 
-async function listSermons(topic) {
-  const cols = 'id,title,date,speaker,thumbnail,topics,summary';
-  const word = topic.toLowerCase();
-  const [{ data: all }, ftsIds] = await Promise.all([
-    db().from('sermons').select(cols).eq('status', 'published'),
-    searchSermons(topic, 25),
-  ]);
-  const byId = new Map((all || []).map((s) => [String(s.id), s]));
-  const tagged = (all || []).filter(
-    (s) =>
-      (s.topics || []).some((t) => t.toLowerCase().includes(word)) ||
-      (s.title || '').toLowerCase().includes(word)
-  );
-  const candidates = [...new Map([...tagged, ...ftsIds.map((id) => byId.get(String(id)))].filter(Boolean).map((s) => [s.id, s])).values()].slice(0, 45);
-  if (!candidates.length) return [];
-
-  // One fast pass to keep only sermons where the topic is a main theme, not a passing mention.
-  let ids = null;
-  try {
-    const res = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-5-mini',
-      reasoning_effort: 'minimal',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You filter a church sermon archive. Given a topic and candidate sermons, return the ids of sermons where the topic is a central theme (not a passing mention), most relevant first. Return an empty list if none fit.',
-        },
-        {
-          role: 'user',
-          content:
-            `Topic: ${topic}\n\n` +
-            candidates
-              .map((s) => `${s.id} | ${s.title} | tags: ${(s.topics || []).join(', ')} | ${String(s.summary || '').slice(0, 280)}`)
-              .join('\n'),
-        },
-      ],
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'sermon_ids',
-          strict: true,
-          schema: {
-            type: 'object',
-            properties: { ids: { type: 'array', items: { type: 'string' } } },
-            required: ['ids'],
-            additionalProperties: false,
-          },
-        },
-      },
-    });
-    ids = JSON.parse(res.choices[0].message.content).ids;
-  } catch {
-    // Filter failed: fall back to tag/title matches, then full-text order.
+// Numbered citations from deep results: one per moment, in sermon order
+function buildCitations(sermons, max) {
+  const out = [];
+  for (const s of sermons) {
+    for (const m of s.moments) {
+      if (out.length >= max) break;
+      out.push({
+        n: out.length + 1,
+        sermon_id: s.id,
+        title: s.title,
+        speaker: s.speaker,
+        date: s.date,
+        thumbnail: s.thumbnail,
+        start_seconds: m.start_seconds,
+        quote: m.quote,
+        context: m.text,
+      });
+    }
   }
-  const picked = ids ? ids.map((id) => byId.get(String(id))).filter(Boolean) : candidates;
-  return picked.slice(0, 12).map(({ id, title, date, speaker, thumbnail }) => ({ id, title, date, speaker, thumbnail }));
+  return out;
 }
 
 export async function POST(request) {
+  const started = Date.now();
   const { messages } = await request.json();
   if (!Array.isArray(messages) || !messages.length) {
     return Response.json({ error: 'messages required' }, { status: 400 });
@@ -160,67 +131,91 @@ export async function POST(request) {
     role: m.role === 'assistant' ? 'assistant' : 'user',
     content: String(m.content || '').slice(0, 2000),
   }));
-
   const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
   if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const textHeaders = { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' };
-  const cardOf = ({ id, title, date, speaker, thumbnail, moments }) => ({
-    id, title, date, speaker, thumbnail,
-    moments: (moments || []).map(({ start_seconds, note }) => ({ start_seconds, note })),
-  });
+  const log = (entry) => after(() => logAsk({ question: lastUser, latencyMs: Date.now() - started, ...entry }));
 
-  let deep = null;
+  let plan = null;
   try {
-    deep = await deepSearch(history);
+    plan = await planSearch(history);
   } catch (err) {
-    console.error('deep search failed, using legacy retrieval:', err.message);
+    console.error('plan failed:', err.message);
   }
 
-  // Find mode: no written answer, just the matching sermons and moments.
-  if (deep?.plan.mode === 'find') {
-    const body = { mode: 'list', topic: noDashes(deep.plan.label), verses: [], sources: deep.sermons.map(cardOf) };
-    return new Response(DONE + JSON.stringify(body), { headers: textHeaders });
-  }
-  if (!deep) {
-    const topic = listTopic(lastUser);
-    if (topic) {
-      const sources = await listSermons(topic);
-      return new Response(DONE + JSON.stringify({ mode: 'list', topic: noDashes(topic), verses: [], sources }), {
-        headers: textHeaders,
-      });
+  // Verse index: exact list of every sermon where the reference was said aloud
+  if (plan?.mode === 'verse' && plan.verse) {
+    try {
+      const sermons = await verseSearch(plan.verse);
+      const label = `${formatRef(plan.verse)}`;
+      log({ mode: 'verse', plan, resultCount: sermons.length, topIds: sermons.map((s) => s.id) });
+      return new Response(
+        DONE + JSON.stringify({ mode: 'list', kind: 'verse', topic: label, verses: [label], sources: sermons.map(cardOf) }),
+        { headers: textHeaders }
+      );
+    } catch (err) {
+      console.error('verse search failed, using deep search:', err.message);
+      plan = { ...plan, mode: 'find', books: [plan.verse.book] };
     }
   }
 
-  // Answer mode: the model writes from real transcript passages (deep) or summaries (legacy).
-  let contextIds = [];
+  if (plan?.mode === 'clips') {
+    try {
+      const { clips } = await findClips(history, { plan });
+      log({ mode: 'clips', plan, resultCount: clips.length, topIds: clips.map((c) => c.sermon_id) });
+      return new Response(DONE + JSON.stringify({ mode: 'clips', topic: noDashes(plan.label), clips }), { headers: textHeaders });
+    } catch (err) {
+      console.error('clip search failed:', err.message);
+      plan = { ...plan, mode: 'find' };
+    }
+  }
+
+  const mode = plan ? (plan.mode === 'verse' ? 'find' : plan.mode) : 'answer';
+  const shape = SHAPES[mode];
+
+  let deep = null;
+  if (plan) {
+    try {
+      deep = await deepSearch(history, { plan, ...shape });
+    } catch (err) {
+      console.error('deep search failed, using legacy retrieval:', err.message);
+    }
+  }
+
+  // Find mode: no written answer, just the matching sermons and moments
+  if (deep && mode === 'find') {
+    log({ mode, plan, resultCount: deep.sermons.length, topIds: deep.sermons.map((s) => s.id) });
+    const body = { mode: 'list', topic: noDashes(plan.label), verses: [], sources: deep.sermons.map(cardOf) };
+    return new Response(DONE + JSON.stringify(body), { headers: textHeaders });
+  }
+
+  // Prose modes: the model writes from numbered transcript citations
+  const citations = deep ? buildCitations(deep.sermons, { answer: 8, compare: 16, guide: 18 }[mode] || 8) : [];
   let contextMsg = [];
-  if (deep?.sermons.length) {
-    contextIds = deep.sermons.map((s) => s.id);
+  let legacyIds = [];
+  if (citations.length) {
     contextMsg = [
       {
         role: 'system',
         content:
-          'Transcript passages from Way Church sermons that match this question (auto-captions):\n\n' +
-          deep.sermons
-            .slice(0, 5)
+          'Sources (exact transcript quotes, with surrounding context):\n\n' +
+          citations
             .map(
-              (s) =>
-                `"${s.title}" (${s.speaker || 'unknown'}, ${s.date})\n` +
-                s.moments.slice(0, 2).map((m) => `  [${Math.floor(m.start_seconds / 60)} min] ${m.text.slice(0, 1400)}`).join('\n')
+              (c) =>
+                `[${c.n}] "${c.title}" (${c.speaker || 'unknown'}, ${c.date}, at ${clock(c.start_seconds)})\nQuote: "${c.quote}"\nContext: ${String(c.context || '').slice(0, 900)}`
             )
             .join('\n\n'),
       },
     ];
   } else if (!deep) {
-    contextIds = await searchSermons(lastUser, 4);
-    const contextSermons = await sermonsByIds(contextIds, 'id,title,date,speaker,summary');
+    legacyIds = await searchSermons(lastUser, 4);
+    const contextSermons = await sermonsByIds(legacyIds, 'id,title,date,speaker,summary');
     if (contextSermons.length) {
       contextMsg = [
         {
           role: 'system',
           content:
-            'Possibly relevant Way Church sermons:\n\n' +
+            'Possibly relevant Way Church sermons (summaries only, do not use [n] citations):\n\n' +
             contextSermons
               .map((s) => `"${s.title}" (${s.speaker || 'unknown'}, ${s.date}): ${String(s.summary || '').slice(0, 400)}`)
               .join('\n\n'),
@@ -231,7 +226,7 @@ export async function POST(request) {
 
   const stream = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-5-mini',
-    messages: [{ role: 'system', content: SYSTEM }, ...contextMsg, ...history],
+    messages: [{ role: 'system', content: `${SYSTEM}\n\n${MODE_BRIEF[mode] || MODE_BRIEF.answer}` }, ...contextMsg, ...history],
     stream: true,
     reasoning_effort: 'low', // chat UX: fast first token matters more than deep reasoning
   });
@@ -265,38 +260,35 @@ export async function POST(request) {
         }
         if (!metaSeen && pending) controller.enqueue(encoder.encode(noDashes(pending)));
 
-        // Parse the meta tail
         let verses = [];
-        let query = '';
         const mIdx = full.indexOf(META);
         if (mIdx !== -1) {
           try {
             const meta = JSON.parse(full.slice(mIdx + META.length).trim());
             verses = [...new Set((meta.verse_references || []).map((v) => noDashes(String(v).trim())))].slice(0, 4);
-            query = String(meta.sermon_search_query || '');
           } catch {
             // meta malformed: answer already streamed, just skip extras
           }
         }
-        let sources;
-        if (deep?.sermons.length) {
-          // Deep results already carry the exact moments that informed the answer
-          sources = deep.sermons.slice(0, 4).map(cardOf);
-        } else {
-          // Legacy: model's query first, retrieval context as backup
-          let ids = await searchSermons(query, 3);
-          if (!ids.length) ids = contextIds.slice(0, 3);
-          sources = await sermonsByIds(ids, 'id,title,date,speaker,thumbnail');
-        }
-        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses, sources })));
-      } catch {
-        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ verses: [], sources: [] })));
+        const sources = deep
+          ? deep.sermons.slice(0, 6).map(cardOf)
+          : await sermonsByIds(legacyIds.slice(0, 3), 'id,title,date,speaker,thumbnail');
+        const tail = {
+          mode,
+          verses,
+          citations: citations.map(({ context, ...c }) => c),
+          sources,
+        };
+        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify(tail)));
+        // Client already has everything; log before closing (after() is not reliable in here)
+        await logAsk({ question: lastUser, latencyMs: Date.now() - started, mode, plan, resultCount: sources.length, topIds: sources.map((s) => s.id) });
+      } catch (err) {
+        controller.enqueue(encoder.encode('\n' + DONE + JSON.stringify({ mode, verses: [], citations: [], sources: [] })));
+        await logAsk({ question: lastUser, latencyMs: Date.now() - started, mode, plan, resultCount: 0, error: err.message });
       }
       controller.close();
     },
   });
 
-  return new Response(readable, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
-  });
+  return new Response(readable, { headers: textHeaders });
 }

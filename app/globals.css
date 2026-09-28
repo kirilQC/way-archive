@@ -605,8 +605,8 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
   font-family: var(--font-serif), serif;
   font-size: 40px; font-weight: 500; line-height: 1.12; margin: 10px 0 26px;
 }
-.ra-body p { font-size: 17.5px; line-height: 1.85; color: #d9deeb; margin-bottom: 22px; }
-.ra-body p:first-of-type::first-letter {
+.ra-body > p { font-size: 17.5px; line-height: 1.85; color: #d9deeb; margin-bottom: 22px; }
+.ra-body:not(.structured) > p:first-of-type::first-letter {
   font-family: var(--font-serif), serif;
   font-size: 58px; float: left; line-height: 0.85;
   padding: 6px 12px 0 0; color: var(--amber);
@@ -660,12 +660,121 @@ a.book-cell:hover { transform: translateY(-2px); border-color: rgba(140, 174, 24
   font-variant-numeric: tabular-nums; font-weight: 700; font-size: 11.5px; color: var(--amber);
   background: var(--amber-dim); border-radius: 6px; padding: 1px 7px; flex-shrink: 0;
 }
+.ask-moment-q {
+  display: block; margin-top: 4px; font-family: var(--font-serif), serif; font-style: italic;
+  font-size: 13px; color: var(--muted); quotes: '\201C' '\201D';
+}
+
+/* Structured answers (compare / guide) */
+.ra-h { font-family: var(--font-serif), serif; font-size: 24px; font-weight: 500; margin: 30px 0 12px; }
+.ra-h:first-child { margin-top: 0; }
+.ra-ul { margin: 0 0 22px; padding-left: 20px; }
+.ra-ul li { font-size: 16.5px; line-height: 1.75; color: #d9deeb; margin-bottom: 8px; }
+.ra-ul li::marker { color: var(--amber); }
+
+/* Citation markers and the numbered source list */
+.cite {
+  display: inline-block; min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px;
+  margin: 0 1px 0 2px; border-radius: 9px; vertical-align: 3px;
+  font-size: 11px; font-weight: 700; font-style: normal; text-align: center;
+  background: var(--amber-dim); color: var(--amber); transition: background 0.15s, color 0.15s;
+}
+a.cite:hover { background: var(--amber); color: #0b101e; }
+.cite.pending { opacity: 0.6; }
+.cite-list { list-style: none; display: grid; gap: 8px; }
+.cite-item {
+  display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 12px;
+  border: 1px solid var(--line); background: rgba(17, 24, 48, 0.7); transition: border-color 0.2s;
+}
+.cite-item:hover { border-color: var(--amber); }
+.cite-item img { width: 92px; height: 52px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.cite-n {
+  width: 22px; height: 22px; border-radius: 11px; flex-shrink: 0; margin-top: 2px;
+  display: grid; place-items: center; font-size: 11.5px; font-weight: 700;
+  background: var(--amber-dim); color: var(--amber);
+}
+.cite-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.cite-body b { font-size: 13.5px; }
+.cite-meta { font-size: 12px; color: var(--muted); }
+.cite-body q { font-family: var(--font-serif), serif; font-style: italic; font-size: 14px; color: #c3c9dd; line-height: 1.5; }
+
+/* Clip finder */
+.clips-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.clips-head h4 { margin-bottom: 0; }
+.clip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.clip-card {
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  background: rgba(17, 24, 48, 0.7); display: flex; flex-direction: column;
+}
+.clip-thumb { position: relative; display: block; aspect-ratio: 16 / 9; background: #0e1426; }
+.clip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.clip-time {
+  position: absolute; left: 10px; bottom: 10px; padding: 3px 9px; border-radius: 7px;
+  background: rgba(8, 12, 26, 0.85); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.clip-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.clip-hook { font-family: var(--font-serif), serif; font-size: 20px; line-height: 1.25; }
+.clip-src { font-size: 12px; color: var(--muted); }
+.clip-caption { font-size: 13.5px; line-height: 1.55; color: #c3c9dd; }
+.clip-tx summary { cursor: pointer; font-size: 12px; font-weight: 700; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+.clip-tx p { font-size: 13px; line-height: 1.6; color: var(--muted); margin-top: 8px; }
+.clip-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+.clip-btn {
+  font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 12px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+}
+.clip-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* Book detail: most-preached chapters, each opens the verse index in Ask */
+.chapter-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; }
+.chapter-chips > span {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+  color: var(--muted); margin-right: 6px;
+}
+.chapter-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(17, 24, 48, 0.6); font-size: 13px; transition: border-color 0.2s;
+}
+.chapter-chip:hover { border-color: var(--amber); color: var(--amber); }
+.chapter-chip i {
+  font-style: normal; font-size: 11px; font-weight: 700; min-width: 20px; text-align: center;
+  padding: 1px 6px; border-radius: 999px; background: var(--amber-dim); color: var(--amber);
+}
+
+/* Private Ask log */
+.admin { max-width: 1140px; margin: 40px auto 60px; padding: 0 24px; }
+.admin h1 { font-family: var(--font-serif), serif; font-size: 40px; font-weight: 500; }
+.admin h2 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 34px 0 12px; }
+.admin-note { color: var(--muted); margin-top: 12px; }
+.admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+.admin-stats div { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: rgba(17, 24, 48, 0.6); }
+.admin-stats b { font-size: 26px; display: block; }
+.admin-stats span { font-size: 12px; color: var(--muted); }
+.admin-modes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.admin-modes span { font-size: 12.5px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+.admin-modes i { font-style: normal; color: var(--amber); font-weight: 700; margin-left: 4px; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.admin-table th { text-align: left; color: var(--muted); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.admin-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin-table td:first-child { white-space: nowrap; color: var(--muted); }
+.admin-table tr.miss td:nth-child(2) { color: var(--amber); }
+
+/* Refine chips under results */
+.refine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 6px; }
+.refine span { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-right: 4px; }
+.refine button {
+  font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: #c3c9dd;
+}
+.refine button:hover { border-color: var(--amber); color: var(--amber); }
 
 @media (max-width: 900px) {
   .ac-hero h1 { font-size: 36px; }
   .ac-strip { grid-template-columns: 1fr; max-width: 480px; }
   .ra-q { font-size: 28px; }
   .ra-row2 { grid-template-columns: 1fr; }
+  .clip-grid { grid-template-columns: 1fr; }
+  .cite-item img { display: none; }
 }
 
 /* Bible chat */

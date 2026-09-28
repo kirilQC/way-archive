@@ -18,6 +18,25 @@ export default async function BookDetail({ params }) {
 
   if (!sermons?.length) notFound();
 
+  // Most-preached chapters, from references said aloud (spoken-verse index)
+  let chapters = [];
+  const { data: mentions, error: mErr } = await db()
+    .from('sermon_verse_mentions')
+    .select('sermon_id,chapter')
+    .eq('book', name)
+    .range(0, 4999);
+  if (!mErr && mentions?.length) {
+    const bySermon = new Map(); // chapter -> Set(sermon ids)
+    for (const m of mentions) {
+      if (!bySermon.has(m.chapter)) bySermon.set(m.chapter, new Set());
+      bySermon.get(m.chapter).add(m.sermon_id);
+    }
+    chapters = [...bySermon.entries()]
+      .map(([chapter, ids]) => ({ chapter, count: ids.size }))
+      .sort((a, b) => b.count - a.count || a.chapter - b.chapter)
+      .slice(0, 12);
+  }
+
   // Passages preached from this book (deduped)
   const refs = [];
   const seen = new Set();
@@ -44,7 +63,22 @@ export default async function BookDetail({ params }) {
         <h1>
           <em>{name}</em>
         </h1>
-        {refs.length > 0 && (
+        {chapters.length > 0 && (
+          <div className="chapter-chips">
+            <span>Most preached chapters</span>
+            {chapters.map((c) => (
+              <Link
+                key={c.chapter}
+                href={`/ask?q=${encodeURIComponent(`Every time ${name} ${c.chapter} was preached`)}`}
+                className="chapter-chip"
+              >
+                {name} {c.chapter}
+                <i>{c.count}</i>
+              </Link>
+            ))}
+          </div>
+        )}
+        {refs.length > 0 && chapters.length === 0 && (
           <div className="tags" style={{ marginTop: 18 }}>
             {refs.slice(0, 8).map((r) => (
               <span key={r} className="tag book">

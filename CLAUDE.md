@@ -53,22 +53,38 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   `lib/books.js`) with per-book sermon counters from `bible_books`; unpreached books dimmed
 - `/ask`: unified multi-turn chat (`/api/ask`, streamed) answering both scripture questions and
   "what has Way taught about X". System prompt adapted from Cameron Pak's open-sourced Bible
-  Bot prompt (MIT-0). Before the model runs, the last user message is FTS-searched and up to 4
-  sermon summaries injected as context so it can cite what was preached. The model NEVER writes
-  verse text; it streams answer text, then `###META###` + JSON (verse_references,
-  sermon_search_query). Server appends `###DONE###` + {verses, sources (with thumbnails)};
-  client renders real NLT text via `/api/passage` (no hallucinated quotes possible).
+  Bot prompt (MIT-0). The model NEVER writes verse text; prose modes stream answer text, then
+  `###META###` + JSON (verse_references). Server appends `###DONE###` + {mode, verses,
+  citations, sources}; client renders real NLT text via `/api/passage`.
   **Deep search (primary retrieval, `lib/deepsearch.js`):** every transcript is split into ~2 min
-  passages with 20s overlap (`lib/chunks.js`, ~3,300 rows in `sermon_chunks`, pgvector 1536 +
-  tsvector, `text-embedding-3-small`, title prefixed into the embedded text). Per question:
-  plan (minimal-reasoning call: find vs answer, rewritten query, keywords, strict book/speaker/date
-  filters) -> `match_sermon_chunks` RPC (vector + keyword, reciprocal rank fusion, filters; retried
-  unfiltered if empty) -> rerank top 40 at `low` reasoning (`minimal` was tested and was too loose)
-  -> sermons with up to 3 timestamped moments. "find" returns `###DONE###{mode:'list', topic,
-  sources}` with moments, no prose; "answer" feeds the passages to the answer model. ~6-10s.
+  passages with 20s overlap (`lib/chunks.js`, ~3,300 rows in `sermon_chunks`: pgvector 1536 +
+  tsvector + raw caption `segments`, `text-embedding-3-small`, title prefixed into the embedded
+  text). 75s passages were tested via the eval and were no better (and hit statement timeouts).
+  Per question: `planSearch` (minimal reasoning) picks one of 6 modes plus rewritten query,
+  keywords, strict book/speaker/date filters, verse ref, count -> `match_sermon_chunks` RPC
+  (vector + keyword, RRF; retried unfiltered if empty, retried once on statement timeout) ->
+  rerank top 40 at `low` reasoning (`minimal` tested, too loose). The reranker sees passages as
+  `[m:ss]` lines labelled P1..Pn (it must answer with P numbers, not chunk ids) and picks exact
+  spans; `snapSpan` snaps them to real caption segments and cuts the quote VERBATIM from the
+  transcript, so quotes/timestamps never come from the model. Modes (route dispatch, `SHAPES`):
+  - find: `###DONE###{mode:'list', topic, sources}`: sermons + up to 3 moments {start, note, quote}
+  - clips: `findClips`, 20-100s spans snapped against the full sermon, hook + caption, CSV export
+  - verse: `lib/verses.js` regex extracts spoken references ("Romans chapter 8 verse 28", "1st
+    John 4") into `sermon_verse_mentions`; `lib/verseindex.js` `verseSearch` (no AI, ~3s) also
+    folds in the analyzed `verses` jsonb. Book pages show most-preached chapters from it.
+  - answer / compare / guide: prose from numbered citations `[n]` (MODE_BRIEF per mode;
+    compare is chronological with headings, guide is week by week). Tail carries `citations`.
+  Client (`AskClient.js`) renders `## ` headings, `- ` bullets, `**bold**`, `[n]` cite links,
+  refine chips (speaker/year), and `/ask?q=...` auto-runs a question.
   Moment links go to `/sermon/[id]?t=seconds`, which starts the embed there.
-  New sermons are indexed in `ingestVideo`; `node scripts/index-transcripts.mjs [--all]` backfills.
-  The older regex list mode + sermon-level FTS path remains only as a fallback if deep search throws.
+  New sermons: `ingestVideo` indexes passages + verses. Backfill: `node scripts/index-transcripts.mjs
+  [--all | --verses]`. If deep search throws, answers fall back to sermon-summary FTS.
+  **Eval:** `node scripts/eval-ask.mjs [--only ids] [--save name]` runs `scripts/eval-cases.json`
+  (30 cases: mode, hit, rank, moment window, filters, clips) through the same plan/retrieval.
+  Run it before and after any search change. 2026-09-28: 29/30, p50 ~11s. Known miss:
+  "church-name" (a one-sentence mention diluted inside a 2 min passage).
+  **Ask log:** every request is logged to `sermon_ask_logs` (`lib/asklog.js`, never throws);
+  private view at `/admin/asks?key=ADMIN_KEY` (env var, set in Vercel too).
 - `/sermon/[id]`: YouTube embed (`enablejsapi=1`, postMessage seekTo for click-to-jump
   highlights + transcript timestamps), NLT verse text auto-loaded via `/api/passage`
   (bolls.life NLT, fallback bible-api.com WEB), collapsible full transcript
