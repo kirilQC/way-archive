@@ -10,6 +10,8 @@ const clockTenths = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart
 const cleanTitle = (t) => (t || '').split('|')[0].replace(/\s+-\s+[A-Z][\w'.]+(?:\s+[A-Z][\w'.]+){0,2}\s*$/, '').trim();
 const slug = (t) => cleanTitle(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 const CROP_W = 9 / 16 / (16 / 9); // share of a 16:9 frame's width that a 9:16 crop covers
+const MIN_LEN = 10; // every clip is 10-60 seconds, no exceptions
+const MAX_LEN = 60;
 
 // ~6 second transcript lines to click on when building a clip
 function lines(segments) {
@@ -54,12 +56,14 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
   const tLines = useMemo(() => lines(segments), [segments]);
   const [clips, setClips] = useState(initialClips);
   const first = initialClips.find((c) => c.id === initialClipId) || initialClips[0] || null;
-  const [sel, setSel] = useState(first ? { ...first } : { id: null, start_seconds: 60, end_seconds: 105, hook: '', caption: '', clip_type: null });
+  const [sel, setSel] = useState(first ? { ...first } : { id: null, start_seconds: 60, end_seconds: 85, hook: '', caption: '', clip_type: null });
   const [anchor, setAnchor] = useState(null); // first click when picking a range in the transcript
   const [tab, setTab] = useState(first ? 'clips' : 'transcript');
   const [find, setFind] = useState('');
 
-  const [source, setSource] = useState(null); // { file, url }
+  // The loaded video: an MP4 of one sermon range from Oxylabs. from/to are sermon seconds.
+  const [source, setSource] = useState(null); // { file, url, from, to }
+  const [loading, setLoading] = useState('');
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
   const stopAt = useRef(null);
@@ -78,7 +82,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
     const v = videoRef.current;
     if (!v) return;
     const onTime = () => {
-      if (stopAt.current != null && v.currentTime >= stopAt.current) {
+      if (stopAt.current != null && v.currentTime + (source?.from || 0) >= stopAt.current) {
         v.pause();
         stopAt.current = null;
       }
@@ -88,6 +92,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
   }, [source]);
 
   const dur = Math.max(0, sel.end_seconds - sel.start_seconds);
+  const lenOk = dur >= MIN_LEN - 0.05 && dur <= MAX_LEN + 0.05;
   const selText = useMemo(
     () =>
       tLines
@@ -97,10 +102,14 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
     [tLines, sel.start_seconds, sel.end_seconds]
   );
 
+  // The loaded MP4 plays when the clip sits inside it; otherwise the YouTube embed does
+  const covers = (c) => Boolean(source) && c.start_seconds >= source.from && c.end_seconds <= source.to;
+  const useLocal = covers(sel);
+
   const seek = (t, play = true, until = null) => {
-    if (source && videoRef.current) {
+    if (useLocal && videoRef.current) {
       const v = videoRef.current;
-      v.currentTime = t;
+      v.currentTime = Math.max(0, t - source.from);
       stopAt.current = until;
       if (play) v.play();
       return;
@@ -134,7 +143,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
       const first = tLines.find((x) => x.start === anchor) || l;
       const a = Math.min(first.start, l.start);
       const b = Math.max(first.end, l.end);
-      setSel((s) => ({ ...s, start_seconds: a, end_seconds: Math.max(b, a + 3) }));
+      setSel((s) => ({ ...s, start_seconds: a, end_seconds: Math.min(Math.max(b, a + MIN_LEN), a + MAX_LEN) }));
       setAnchor(null);
     }
   };
@@ -143,20 +152,33 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
     setSel((s) => {
       // Adjusting an existing clip makes a new, unsaved custom clip
       const next = { ...s, id: null, kind: 'custom', [edge]: Math.max(0, Math.round((s[edge] + d) * 10) / 10) };
-      if (next.end_seconds - next.start_seconds < 3) return s;
+      const len = next.end_seconds - next.start_seconds;
+      if (len < MIN_LEN || len > MAX_LEN) return s;
       return next;
     });
 
   const setEdgeToNow = (edge) => {
-    const t = source && videoRef.current ? videoRef.current.currentTime : null;
+    const t = useLocal && videoRef.current ? videoRef.current.currentTime + source.from : null;
     if (t == null) return;
-    setSel((s) => ({ ...s, id: null, kind: 'custom', [edge]: Math.round(t * 10) / 10 }));
+    setSel((s) => {
+      const next = { ...s, id: null, kind: 'custom', [edge]: Math.round(t * 10) / 10 };
+      const len = next.end_seconds - next.start_seconds;
+      return len < MIN_LEN || len > MAX_LEN ? s : next;
+    });
   };
 
-  const loadSource = (file) => {
-    if (!file) return;
-    if (source?.url) URL.revokeObjectURL(source.url);
-    setSource({ file, url: URL.createObjectURL(file) });
+  // One click: Oxylabs fetches this clip's range (with room to adjust) and it plays right here
+  const loadVideo = async () => {
+    setLoading('Requesting video…');
+    setMsg('');
+    try {
+      const got = await fetchRange(sel, (note) => setLoading(note));
+      if (source?.url) URL.revokeObjectURL(source.url);
+      setSource({ ...got, url: URL.createObjectURL(got.file) });
+    } catch (e) {
+      setMsg(e.message);
+    }
+    setLoading('');
   };
 
   const api = async (method, body, query = '') => {
@@ -227,7 +249,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
         if (st.status !== 'done') throw new Error(st.error || 'Download failed');
         onStatus?.('Receiving video…');
         const blob = await (await fetch(st.url)).blob();
-        return { file: new File([blob], `${sermon.youtube_id}-${st.from}-${st.to}.mp4`, { type: 'video/mp4' }), from: st.from };
+        return { file: new File([blob], `${sermon.youtube_id}-${st.from}-${st.to}.mp4`, { type: 'video/mp4' }), from: st.from, to: st.to };
       })();
       fetched.current.set(key, p);
       p.catch(() => fetched.current.delete(key));
@@ -237,7 +259,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
 
   // Export: every picked clip (or the current selection) x every chosen format, one at a time
   const exportClips = async () => {
-    if (!source && !downloadsEnabled) return;
+    if (!downloadsEnabled) return;
     const list = exportTargets;
     const formats = [opts.landscape && 'landscape', opts.vertical && 'vertical'].filter(Boolean);
     const queue = list.flatMap((c) =>
@@ -254,7 +276,8 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
     setJobs((j) => [...queue, ...j]);
     for (const job of queue) {
       try {
-        let input = source ? { file: source.file, from: 0 } : null;
+        // Reuse the loaded video when it covers this clip; otherwise fetch the clip's own range
+        let input = covers(job.clip) ? source : null;
         if (!input) {
           update(job.key, { status: 'fetching', note: 'Requesting video…' });
           input = await fetchRange(job.clip, (note) => update(job.key, { status: 'fetching', note }));
@@ -307,7 +330,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
       <div className="studio-grid">
         <div className="studio-left">
           <div className="studio-player">
-            {source ? (
+            {useLocal ? (
               <div className="studio-frame">
                 <video ref={videoRef} src={source.url} controls playsInline />
                 {opts.vertical && opts.fit === 'crop' && (
@@ -327,22 +350,23 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
             )}
           </div>
 
-          <label className={`source-pick${source ? ' loaded' : ''}`}>
-            <input type="file" accept="video/mp4,video/quicktime,video/*" onChange={(e) => loadSource(e.target.files?.[0])} />
-            {source ? (
+          <div className={`source-bar${useLocal ? ' loaded' : ''}`}>
+            {useLocal ? (
               <span>
-                <b>Using local file</b> {source.file.name} · {(source.file.size / 1e9).toFixed(2)} GB · change
-              </span>
-            ) : downloadsEnabled ? (
-              <span>
-                <b>Video downloads automatically on export.</b> Have the sermon file? Load it for faster exports and a frame-accurate preview.
+                <b>Video loaded</b> {clock(source.from)} to {clock(source.to)} · adjust within this range, or load again after moving the clip
               </span>
             ) : (
               <span>
-                <b>Load the sermon video</b> to export MP4s
+                <b>{source ? 'Clip moved outside the loaded video' : 'Preview is the YouTube player'}</b>
+                {downloadsEnabled ? ' · load the MP4 for a frame-accurate preview and crop guide' : ' · video downloads are not configured yet'}
               </span>
             )}
-          </label>
+            {downloadsEnabled && !useLocal && (
+              <button className="clip-btn primary" onClick={loadVideo} disabled={!!loading || !lenOk}>
+                {loading || 'Load video'}
+              </button>
+            )}
+          </div>
 
           <div className="editor">
             <div className="editor-range">
@@ -351,7 +375,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
                 <button onClick={() => nudge('start_seconds', -0.5)}>−</button>
                 <b>{clockTenths(sel.start_seconds)}</b>
                 <button onClick={() => nudge('start_seconds', 0.5)}>+</button>
-                {source && (
+                {useLocal && (
                   <button className="now" onClick={() => setEdgeToNow('start_seconds')} title="Set to the video's current time">
                     now
                   </button>
@@ -362,7 +386,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
                 <button onClick={() => nudge('end_seconds', -0.5)}>−</button>
                 <b>{clockTenths(sel.end_seconds)}</b>
                 <button onClick={() => nudge('end_seconds', 0.5)}>+</button>
-                {source && (
+                {useLocal && (
                   <button className="now" onClick={() => setEdgeToNow('end_seconds')} title="Set to the video's current time">
                     now
                   </button>
@@ -370,7 +394,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
               </div>
               <div className="edge len">
                 <span>Length</span>
-                <b className={dur > 90 ? 'warn' : ''}>{Math.round(dur)}s</b>
+                <b className={lenOk ? '' : 'warn'} title="Clips are 10 to 60 seconds">{Math.round(dur)}s</b>
               </div>
               <button className="clip-btn primary" onClick={() => seek(sel.start_seconds, true, sel.end_seconds)}>
                 ▶ Preview
@@ -392,7 +416,7 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
                 {busy === 'suggest' ? 'Writing…' : 'Suggest hook + caption'}
               </button>
               {!sel.id && (
-                <button className="clip-btn primary" onClick={save} disabled={!!busy}>
+                <button className="clip-btn primary" onClick={save} disabled={!!busy || !lenOk}>
                   {busy === 'save' ? 'Saving…' : 'Save clip'}
                 </button>
               )}
@@ -433,12 +457,12 @@ export default function ClipStudio({ sermon, initialClips, initialClipId, downlo
                 )}
               </div>
             )}
-            <button className="clip-btn primary export-go" onClick={exportClips} disabled={(!source && !downloadsEnabled) || running || !nFormats || !exportTargets.length}>
+            <button className="clip-btn primary export-go" onClick={exportClips} disabled={!downloadsEnabled || running || !nFormats || !exportTargets.length || exportTargets.some((c) => c.end_seconds - c.start_seconds > MAX_LEN + 0.05 || c.end_seconds - c.start_seconds < MIN_LEN - 0.05)}>
               {running
                 ? 'Rendering…'
                 : `Export ${exportTargets.length} clip${exportTargets.length === 1 ? '' : 's'} × ${nFormats} format${nFormats === 1 ? '' : 's'}`}
             </button>
-            {!source && !downloadsEnabled && <div className="export-hint">Load the sermon video above to enable export.</div>}
+            {!downloadsEnabled && <div className="export-hint">MP4 export turns on once the Oxylabs credentials are set.</div>}
             {jobs.length > 0 && (
               <div className="jobs">
                 {jobs.map((j) => (

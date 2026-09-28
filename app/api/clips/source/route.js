@@ -11,7 +11,7 @@ export async function POST(request) {
   const { sermon_id, start_seconds, end_seconds } = await request.json();
   const start = Number(start_seconds);
   const end = Number(end_seconds);
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end - start < 3 || end - start > 600) {
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end - start < 9.95 || end - start > 60.05) {
     return Response.json({ error: 'Invalid clip range' }, { status: 400 });
   }
   const { data: s } = await db().from('sermons').select('youtube_id').eq('id', sermon_id).single();

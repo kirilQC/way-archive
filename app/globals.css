@@ -894,11 +894,10 @@ button.hl-jump {
 .studio-frame { position: relative; border-radius: 14px; overflow: hidden; background: #000; }
 .studio-frame video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
 .crop-guide { position: absolute; top: 0; bottom: 44px; border: 2px solid var(--amber); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); pointer-events: none; border-radius: 4px; }
-.source-pick { display: block; border: 1px dashed rgba(140, 174, 242, 0.45); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #c3c9dd; cursor: pointer; }
-.source-pick:hover { border-color: var(--amber); }
-.source-pick.loaded { border-style: solid; border-color: rgba(120, 205, 170, 0.5); }
-.source-pick input { display: none; }
-.source-pick b { color: var(--text); margin-right: 6px; }
+.source-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px dashed rgba(140, 174, 242, 0.45); border-radius: 12px; padding: 10px 12px 10px 14px; font-size: 13px; color: #c3c9dd; }
+.source-bar.loaded { border-style: solid; border-color: rgba(120, 205, 170, 0.5); }
+.source-bar b { color: var(--text); }
+.source-bar .clip-btn { flex-shrink: 0; }
 .editor, .export { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: rgba(17, 24, 48, 0.55); display: flex; flex-direction: column; gap: 10px; }
 .editor-range { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
 .edge { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }

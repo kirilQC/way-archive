@@ -89,6 +89,9 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   type filter (hook/story/quote/scripture/practical/gospel), every sermon's pack, and an evergreen
   search box that deep-links to Ask's clip finder. Auto packs: `lib/clips.js` `generateClipPack`
   (one low-reasoning pass over the whole `[m:ss]` transcript, 8-10 clips across types) snapped with
+  **HARD RULE: every clip (auto, custom, Ask) is 10-60 seconds, never longer.** Pack mix leans short:
+  2 x 10-15s, 4 x 15-30s, 2 x 30-45s, 1 x 45-60s; no intros/housekeeping. Enforced in code too.
+ 
   `snapSpan(..., { sentences: true })` (word-level timing, edges on sentence boundaries when
   captions are punctuated). Stored in `sermon_clips` (kind auto|custom). Generated in
   `ingestVideo` for new sermons; backfill `node scripts/generate-clips.mjs [--all]`.
@@ -99,11 +102,12 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   burned-in word-by-word subtitles (Anton font, from the captions), 1080p/720p, bitrate capped.
   The ffmpeg worker is served raw from `public/ffmpeg/` (copied from @ffmpeg/ffmpeg 0.12.15) because
   Next's bundler breaks its dynamic import of the core; recopy if the package is upgraded.
-  Video source: Oxylabs YouTube Downloader (`lib/oxylabs.js`, `/api/clips/source`) fetches just the
-  clip range (+2s pad) into the private Supabase bucket `sermon-clip-sources` over S3 (bucket cap
-  50 MB per file, so ranges over 80s download at 720p); the browser downloads it via signed URL and
-  renders with `sourceOffset`. Env: OXYLABS_USERNAME, OXYLABS_PASSWORD, SUPABASE_S3_ACCESS_KEY_ID,
-  SUPABASE_S3_SECRET_ACCESS_KEY. Staff can also load a local sermon file instead (faster).
+  Video source: staff NEVER upload files. "Load video" (and export) call Oxylabs YouTube Downloader
+  (`lib/oxylabs.js`, `/api/clips/source`), which fetches just the clip range (+10s pad each side, so
+  edges can be adjusted in the studio) into the private Supabase bucket `sermon-clip-sources` over
+  S3 (bucket cap 50 MB per file; a padded 60s clip is ~80s at 1080p). The browser downloads it via
+  signed URL, previews it with sermon-time mapping (`source.from`), and renders with `sourceOffset`.
+  Env: OXYLABS_USERNAME, OXYLABS_PASSWORD, SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY.
   The daily cron deletes sources older than 7 days.
 - Visitor analytics: `middleware.js` records every page view server-side into `sermon_site_events`
   (IP, Vercel geo headers, parsed UA, referrer, visitor/session cookies `way_vid` 400d /

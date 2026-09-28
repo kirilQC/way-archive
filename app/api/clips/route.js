@@ -23,7 +23,7 @@ async function spanText(sermonId, start, end) {
 function span(body) {
   const start = Number(body.start_seconds);
   const end = Number(body.end_seconds);
-  if (!body.sermon_id || !Number.isFinite(start) || !Number.isFinite(end) || end - start < 3 || end - start > 600) return null;
+  if (!body.sermon_id || !Number.isFinite(start) || !Number.isFinite(end) || end - start < 9.95 || end - start > 60.05) return null; // clips are 10-60s
   return { start: Math.round(start * 10) / 10, end: Math.round(end * 10) / 10 };
 }
 
