@@ -85,30 +85,9 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   "church-name" (a one-sentence mention diluted inside a 2 min passage).
   **Ask log:** every request is logged to `sermon_ask_logs` (`lib/asklog.js`, never throws);
   private view at `/admin/asks?key=ADMIN_KEY` (env var, set in Vercel too).
-- `/clips`: Clips tab for the Way content team (no login by design). This week's auto pack,
-  type filter (hook/story/quote/scripture/practical/gospel), every sermon's pack, and an evergreen
-  search box that deep-links to Ask's clip finder. Auto packs: `lib/clips.js` `generateClipPack`
-  (one low-reasoning pass over the whole `[m:ss]` transcript, 8-10 clips across types) snapped with
-  **HARD RULE: every clip (auto, custom, Ask) is 10-60 seconds, never longer.** Pack mix leans short:
-  2 x 10-15s, 4 x 15-30s, 2 x 30-45s, 1 x 45-60s; no intros/housekeeping. Enforced in code too.
- 
-  `snapSpan(..., { sentences: true })` (word-level timing, edges on sentence boundaries when
-  captions are punctuated). Stored in `sermon_clips` (kind auto|custom). Generated in
-  `ingestVideo` for new sermons; backfill `node scripts/generate-clips.mjs [--all]`.
-- `/clips/[id]`: Clip Studio. Video + clickable transcript (click a line, click another = range),
-  +-0.5s nudges, preview, AI hook/caption (`PATCH /api/clips`), save custom clips (`POST`),
-  SRT export, and MP4 export rendered IN THE BROWSER by ffmpeg.wasm (`app/clips/render.js`):
-  16:9 and/or 9:16 (crop with position slider, or whole frame on blurred background), optional
-  burned-in word-by-word subtitles (Anton font, from the captions), 1080p/720p, bitrate capped.
-  The ffmpeg worker is served raw from `public/ffmpeg/` (copied from @ffmpeg/ffmpeg 0.12.15) because
-  Next's bundler breaks its dynamic import of the core; recopy if the package is upgraded.
-  Video source: staff NEVER upload files. "Load video" (and export) call Oxylabs YouTube Downloader
-  (`lib/oxylabs.js`, `/api/clips/source`), which fetches just the clip range (+10s pad each side, so
-  edges can be adjusted in the studio) into the private Supabase bucket `sermon-clip-sources` over
-  S3 (bucket cap 50 MB per file; a padded 60s clip is ~80s at 1080p). The browser downloads it via
-  signed URL, previews it with sermon-time mapping (`source.from`), and renders with `sourceOffset`.
-  Env: OXYLABS_USERNAME, OXYLABS_PASSWORD, SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY.
-  The daily cron deletes sources older than 7 days.
+- (A Clips tab with auto clip packs and in-browser MP4 export was built and then removed on
+  2026-09-28 as too complex; see git history before commit that removed it. Ask's clip finder mode
+  remains, with clips capped at 10-60s.)
 - Visitor analytics: `middleware.js` records every page view server-side into `sermon_site_events`
   (IP, Vercel geo headers, parsed UA, referrer, visitor/session cookies `way_vid` 400d /
   `way_sid` rolling 30 min, skips prefetch, assets, /api, /admin; repeats within 2s ignored);

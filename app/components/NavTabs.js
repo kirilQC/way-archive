@@ -10,7 +10,6 @@ const TABS = [
   { href: '/topics', label: 'Topics' },
   { href: '/books', label: 'Books' },
   { href: '/ask', label: 'Ask' },
-  { href: '/clips', label: 'Clips' },
 ];
 
 export default function NavTabs() {

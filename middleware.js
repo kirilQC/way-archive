@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { requestInfo, insertEvent, VISITOR_COOKIE, SESSION_COOKIE } from './lib/track.js';
 
 export const config = {
-  matcher: ['/((?!_next/|api/|admin|ffmpeg/|favicon|robots|sitemap|.*\\.[a-zA-Z0-9]+$).*)'],
+  matcher: ['/((?!_next/|api/|admin|favicon|robots|sitemap|.*\\.[a-zA-Z0-9]+$).*)'],
 };
 
 export function middleware(req, event) {
