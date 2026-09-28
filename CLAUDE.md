@@ -35,6 +35,10 @@ Built by Kiril Ivlev. Repo: kirilQC/way-archive (private). Live: way-ecru.vercel
   (`{text, start_seconds}`), verses, topics, bible_books, speaker, series, discussion_questions.
 - `scripts/detect-series.mjs`: one OpenAI pass over all published titles/summaries; resets and
   reassigns the `series` column (kept only when >= 2 sermons). Rerun after big backfills.
+- Topic tags: fixed list `TOPICS` (enum) + `TOPIC_RULES` in `lib/analyze.js`, 1-3 tags, primary
+  first; `tidyTopics()` drops "Community" unless it is primary (the model over-applies it).
+  `scripts/retag-topics.mjs` (dry run; `--write` applies, backing old tags up to a gitignored JSON)
+  re-derives tags from stored summary/notes/highlights. Full retag done 2026-09-28.
 - Full-text search: generated tsvector `fts` column + `search_sermons(q)` RPC returning
   `ts_headline` snippets with `<mark>`.
 
